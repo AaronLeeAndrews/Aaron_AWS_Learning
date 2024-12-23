@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My S3 Static Web Page</title>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <h2>I am the <strong>CRIT CRAB</strong> Overlord!</h2>
+    <img src="data-pic.jpg" alt="">
+</body>
+
+<div id="tofetch"/>
+
+<script>
+	var tofetch = document.getElementById("tofetch");
+
+	fetch('http://aaron-stephane-demo-my-data-bucket.s3-website-us-west-2.amazonaws.com/other-page.html')
+	.then((response) => {
+		return response.text();
+	})
+	.then((html) => {
+		tofetch.innerHTML = html
+	});
+</script>
+
+</html>                                                                      

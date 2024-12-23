@@ -1,0 +1,11 @@
+https://www.youtube.com/watch?v=hiE0El3zs1Y
+
+1. Building a daily task scheduler using PartyRock
+
+2. Build an image labels generator using Amazon Rekognition
+
+3. Develop a text narrator using Amazon Polly
+
+4. Language translation bot
+
+5. Deploy a bucket list tracker app on AWS Amplify

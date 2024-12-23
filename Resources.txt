@@ -1,0 +1,37 @@
+Basic Info:
+
+Can log into root user at:
+https://signin.aws.amazon.com/signin?redirect_uri=https%3A%2F%2Fus-east-1.console.aws.amazon.com%2Fbilling%2Fhome%3Fref_%3Dpe_1679150_412520350%26region%3Dus-east-1%26state%3DhashArgs%2523%252Fbills%253Fyear%253D2024%2526month%253D8%26isauthcode%3Dtrue&client_id=arn%3Aaws%3Aiam%3A%3A934814114565%3Auser%2Fportal-aws-auth&forceMobileApp=0&code_challenge=Xl7iea-Pr4T31Kb2CWb6F6d25fmx8yQd4lk26_TWOdw&code_challenge_method=SHA-256
+
+Root user has basic Kep password
+
+/////////////////
+
+Other User Accounts log in at:
+https://us-west-2.signin.aws.amazon.com/oauth?client_id=arn%3Aaws%3Asignin%3A%3A%3Aconsole%2Fvpcconsole&code_challenge=paWbrbK1jhkNCRz9gh651_xVkSMbVazzW9AyzrWROVs&code_challenge_method=SHA-256&response_type=code&redirect_uri=https%3A%2F%2Fus-west-2.console.aws.amazon.com%2Fvpcconsole%2Fhome%3FhashArgs%3D%2523vpcs%253A%26isauthcode%3Dtrue%26oauthStart%3D1726468635991%26region%3Dus-west-2%26state%3DhashArgsFromTB_us-west-2_997a278172782098
+
+Other users have some other password
+
+
+////////////////////////////////////////////////////////////////////////////
+
+
+https://www.twitch.tv/awstraininglive/videos
+
+https://aws.amazon.com/certification/certification-prep/?ch=cta&cta=header&p=2
+
+
+launch-wizard script:
+/////////////////////////////////////////////////////////////////////
+
+#!/bin/bash
+# Use this for your user data (script from top to bottom)
+# install httpd (Linux 2 version)
+yum update -y
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+echo "<h1>Hello World from $(hostname -f)</h1>" > /var/www/html/index.html
+
+
+//////////////////////////////////////////////////////////////////////

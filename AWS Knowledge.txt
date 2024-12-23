@@ -1,0 +1,4359 @@
+#!/bin/bash
+# Use this for your user data (script top to bottom)
+# install httpd (Linux 2 version)
+yum update -y
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+echo "<h1>Hello World from $(hostname -f)</h1>" > /var/www/html/index.html
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 4
+  __                 
+ /  \ |  |  |  | 
+ |    |__|  |__| 
+ |    |  |     |   
+ \__/ |  |.    |
+
+IAM and AWS CLI
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+IAM Intro: User, Groups, Policies
+//////////////////////////////////////////////////////////////////////////
+IAM = Identity and Access Management
+Root Account created by default, rarely used, NEVER shared
+Users: people within org, can be grouped
+Groups: contain users, NOT other groups
+Users don't have to belong to a group, and can be in several groups
+
+
+Group: Devs____                      Group: Ops______
+|              |                     |              |        Fred
+|   Alice      |                     |              |
+|              |                     |  Edward      |
+|   Bob        |                     |              |
+|   ___________|____Group: Audits____|__________    |
+|  |           |                     |  David   |   |
+|  |Charles    |                     |__________|___|
+|  |___________|________________________________|
+|______________|
+
+IAM Permissions:
+//////////////////////
+Users or Groups can be assigned JSON docs called policies
+These policies define the permissions of users
+In AWS always apply the LEAST PRIVILEGE PRINCIPLE (give least amount of privileges required for the user to complete their tasks)
+
+Policy Ex.
+//////////
+{
+  "Version": "2012-10-17",
+  "Statement": 
+  [
+    {
+      "Effect": "Allow",
+      "Action": "ec2:Describe*",
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "elasticloadbalancing:Describe*",
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+                  "cloudwatch:ListMetrics",
+                  "cloudwatch:GetMetricStatistics",
+                  "cloudwatch:Describe*",
+                ]
+      "Resource": "*"
+    }
+  ]
+}
+//////////
+//////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+IAM Users and Groups Hands On
+//////////////////////////////////////////////////////////////////////////
+
+Creating a User
+//////////////////////
+Go to IAM > Users > Create User
+	Set a name
+	Click Next
+	Set a password
+		Can be custom or auto-generated
+		Can be required for User to change on first login
+	Click Next
+	Add the User to a Group
+		Create Group
+		Set a name
+		Give permissions (Ex. Admin)
+	Set Key-Value Tags (Ex. Department-Engineering)
+	Click Create User
+
+Now in IAM > User Groups > admin
+	The new user can be seen
+//////////////////////
+
+Creating an Account Alias
+//////////////////////
+In IAM > Dashboard
+	Users and Groups can be seen
+	An alias can be created for the AWS account
+		This account is THE account for all users/groups and AWS resources
+		Users can enter this alias when logging in instead of a 12-digit id
+//////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+IAM Policies Inheritance
+//////////////////////////////////////////////////////////////////////////
+
+  Devs Policy                          Ops Policy
+      |                                    |             Inline Policy (Specific to Fred)
+Group: Devs____                      Group: Ops______         |
+|              |                     |              |        Fred
+|   Alice      |                     |              |
+|              |     Audits Policy   |  Edward      |
+|   Bob        |          |          |              |
+|   ___________|____Group: Audits____|__________    |
+|  |           |                     |  David   |   |
+|  |Charles    |                     |__________|___|
+|  |___________|________________________________|
+|______________|
+
+In the example of groups from before, each Group has a policy attached to it
+	These policies give the Users in these Groups permissions
+	Charles and David are getting their permissions from Devs and Ops respectively
+		They are also both getting the permissions from the Audit Group
+	Fred is using a User Policy specific to him (this is called an Inline Policy)
+
+Policy Structure Ex.
+//////////
+{
+  "Version": "2012-10-17",                          // Policy language version
+  "Id": "S3-Account-Permissions",                   // Policy Id (optional)
+  "Statement":                                      // One or more statements
+  [
+    {
+      "Sid": "1",                                   // Statement id
+      "Effect": "Allow",                            // If it is Allow or Deny
+      "Principle": {                                // Account/User/Role this applies to
+                  "AWS": ["arn:aws:iam:123456789012:root"]
+      },
+      "Action": [                                   // List of actions this applies to
+                  "s3:GetObject",
+                  "s3:PutObject"
+                ]
+      "Resource": ["arn:aws:s3:::mybucket/*"]       // List of resources this applies to
+                             // optional conditions for when this policy is in effect
+      "Condition" : { "StringEquals" : { "aws:username" : "aquin" }}
+    }
+  ]
+}
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+IAM Policies Hands On
+//////////////////////////////////////////////////////////////////////////
+
+Applying Policies Directly
+//////////
+Have the User stephane logging into a separate private window
+	In the stephane window, go to IAM Users, and pull the Users information
+As the root User, go to IAM > ... > admin
+	Under Users, remove the user stephane from the Admin Group
+	Refreshing the stephane window, the Users information is now Access Denied
+
+	Under: Add Permissions
+		Select: Attach Policies Directly
+		Add: IAMReadOnlyAccess
+		Next -> Add Permissions
+	Now, stephane will be able to see the Users information, and not make any changes
+		In the stpahane window, clicking on Create User Group gives an error
+//////////
+
+Applying Policies to Users through Groups
+//////////
+Create a Group called admins, and give it AdministratorAccess permissions
+Create a Group called devs, and give it AlexaForBusinessDevelopment permissions
+For both Groups, add the stephane User
+Selecting the staphane User, under Permissions
+	The Permissions from all sources are listed
+		AdministratorAccess from the admin Group
+		AlexaForBusinessDevelopment from the devs Group
+		IAMReadOnlyAccess from the Direct (Inline) Policy
+//////////
+
+Policies Details
+//////////
+IAM > Policies
+
+AdministratorAccess
+//////////
+	Select: AdministratorAccess
+		Under: Permissions, is a detailed list of each policy that this gives
+			Which is all of them (384 of 384 Services)
+
+JSON:
+////
+{
+  "Version": "2012-10-17",
+  "Id": "S3-Account-Permissions",                   
+  "Statement":                 
+  [
+    {                                
+      "Effect": "Allow",
+      "Action": "*",
+      "Resource": "*"
+    }
+  ]
+}
+////
+//////////
+
+IAMReadAccessOnly
+//////////
+	Select: IAMReadOnlyAccess
+		Under: Permissions, is a detailed list of each policy that this gives
+			Which is all reads for Users info (1 of 384 Services)
+				Select: IAM
+					This breaks down the Permissions even further
+					Shows each specific action the Permission allows
+JSON:
+////
+{
+  "Version": "2012-10-17",
+  "Id": "S3-Account-Permissions",                   
+  "Statement":                 
+  [
+    {                                
+      "Effect": "Allow",
+      "Action": [
+		  "iam:GenerateCredentialReport",
+		  "iam:GenerateServceLastAccssDetails",
+		  "iam:Get*",                         // This means for all Get actions
+		  "iam:List*",                        // This means for all List actions
+		  "iam:SimulateCustomPolicy",
+		  "iam:SimulatePrincipalPolicy"
+		]
+      "Resource": "*"
+    }
+  ]
+}
+////
+//////////
+
+Custom
+//////////
+IAM > Policies > Create Policy
+
+Custom policies can also be created
+	This can be done with either a Visual builder or pure JSON
+	In either case there are helper windows with the names of the parameters
+	
+
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+IAM - Password Policy
+//////////////////////////////////////////////////////////////////////////
+
+Require Strong Passwords
+//////////
+Strong passwords == higher security for account
+In AWS, a password policy can be created
+	Set min length
+	Require specific chars
+		lowercase letters
+		uppercase letters
+		numbers
+		non-alphanumeric chars
+	Allow all IAM Users to change their own passwords
+	Expire passwords after a certain time
+	Prevent password re-use
+//////////
+
+Multi Factor Authentication - MFA
+//////////
+Any Users with Access to an Account can possibly make bad changes
+The Root Account MUST be protected at the very least
+	Protections on all User accounts is recommended
+MFA requires a password and a device owned by the account User
+	This means that a stolen password is not enough to log in
+
+MFA has multiple device options
+	Virtual MFA device
+		Google Authenticator, Authy // both are phone only
+	Universal 2nd Factor Security Key
+		YubiKey (3rd party)
+			USB device, can be used for multiple root and IAM Users
+	Hardware Key Fob MFA Device
+		Gemalto (3rd party)
+	Hardware Key Fob MFA Device for AWS GovCloud
+		SurePassID (3rd party)
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+IAM - MFA Hands On
+//////////////////////////////////////////////////////////////////////////
+
+IAM > Account Settings > Edit Password Policy
+//////////
+IAM Default or Custom
+	Custom allows for any combination of the password requirements
+	Custom also allows for setting expiration, Users changing their own password, etc
+//////////
+
+IAM > Security Credentials > Assign MFA Device
+//////////
+
+Enter device name
+Select what type of device it is (phone, USB, etc)
+For phone:
+	Select app
+	Scan the QR code
+	Enter the MFA codes
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+AWS Access Keys, CLI, and SDK
+//////////////////////////////////////////////////////////////////////////
+
+AWS Access
+//////////
+How Users can access AWS, Three Options
+	AWS Management Console: (password + MFA)
+	AWS Command Line Interface (CLI): access keys
+	AWS Software Developer Kit (SDK) - for code: access keys
+Access Keys are generated through he AWS Console
+Users manage their own access keys
+Access Keys are secret, just like passwords
+Access Key ID ~= username
+Secret Access Key ~= password
+These keys are generated by a User, and downloaded into the CLI
+	Gives access to AWS API
+	DO NOT SHARE THESE
+//////////
+
+AWS CLI
+//////////
+Tool that enables interacting with AWS services through command-line shell
+	Ex. aws s3 cp file.txt s3://ccp-bucket/file.txt
+	    /*Response:*/ upload: ./file.txt to s3://ccp-bucket/file.txt
+            aws s3 ls s3://ccp-bucket
+	    /*Response:*/ 2021-05-14 03:22:52                0 file.txt
+Direct access to public APIs of AWS services
+Can develop scripts to manage resources
+Open-source: https://github.com/aws/aws-cli
+Alternative to using the management console
+//////////
+
+AWS SDK
+//////////
+AWS Software Development Kit (AWS SDK)
+Language-specific APIs (Set of libraries)
+Enables accessing and managing AWS services programmatically
+Embedded within application
+Supports:
+	SDKs (JavaScript, Python, PHP, .NET, Ruby, Java, Go, Node.js, C++)
+	Mobile SDKs: Android, iOS
+	IoT Device SDKs: Embedded C, Arduino, ...
+Ex. AWS CLI is built on AWS SDK for Python
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+AWS CLI Setup on Windows
+//////////////////////////////////////////////////////////////////////////
+Google "AWS CLI install Windows"
+	Select the AWS link to the docs.aws.amazon.com
+	Go to: Installing on Windows
+	Select the Step 1 link to download the AWS CLI Installer for Windows
+	Install the download
+	Confirm the installation by checking the version
+		aws --version
+//////////////////////////////////////////////////////////////////////////
+
+AWS CLI Hands On
+//////////////////////////////////////////////////////////////////////////
+Go to IAM > Users > *User name* > Create Access Key
+	Choose CLI
+	-> Next
+	-> Create Access Key
+	After creating the key, open the command line window
+In the command-line window
+	Here, begin the configuration and copy over the access key info
+	aws configure
+	AWS Access Key ID [None]: *Access Key ID*
+	AWS Secret Access Key [None]: *Secret Access Key*
+	Default region name [None]: *us-west-2*
+	Default output format [None]: // Just hit enter
+
+	Now using the aws keyword, we can use the AWS API
+		aws iam list-users
+		// Response is the list of Users from AWS
+
+	Removing the User from the Group that gives them Permissions to access the Users will result in the CLI not being able to access the User list from the CLI as well
+	
+//////////////////////////////////////////////////////////////////////////
+
+AWS Cloudshell
+//////////////////////////////////////////////////////////////////////////
+
+From the AWS Management Console, we can use the Cloudshell to access AWS resources
+	Cloudshell is only available in certain AWS Regions
+
+AWS > Documentation > AWS Cloudshell > User Guide
+	This is the docs for CLoudshell
+
+To get into CLoudshell, just type Cloudshell into the AWS search bar
+
+In Cloudshell:
+	Execute AWS API commands
+	Create files
+	Download files
+	Open multiple windows like tabs
+//////////////////////////////////////////////////////////////////////////
+
+IAM Roles for AWS Services
+//////////////////////////////////////////////////////////////////////////
+
+Some AWS services will need to perform actions on other AWS resources
+To do this, these AWS services will need to be assigned Permissions with IAM Roles
+
+Ex. (Giving an EC2 Instance an IAM Role)
+	The IAM ROle is given Permissions for Access AWS
+
+Common Roles
+	EC2 Instance Roles
+	Lambda Function Roles
+	Roles for CloudFormation
+//////////////////////////////////////////////////////////////////////////
+
+IAM Roles Hands On
+//////////////////////////////////////////////////////////////////////////
+Go to IAM > Roles > Create Role
+	Select AWS Service
+	Choose a Service: EC2
+	Choose a Use Case: EC2
+	-> Next
+	Add Permissions: IAMReadOnlyAccess
+	-> Next
+	Set a name: "DemoRoleForEC2"
+		Below, the JSON translation of the Permissions is shown
+	-> Create Role
+This role is now ready to be assigned to an EC2 Instance
+	That EC2 Instance will now be able to read the IAM User information
+//////////////////////////////////////////////////////////////////////////
+
+IAM Security Tools
+//////////////////////////////////////////////////////////////////////////
+
+IAM Credentials Report (account-level)
+	A report that lists all of the account's Users and status of their credentials
+IAM Access Advisor (user-level)
+	Shows service permissions of a User and when the services were last accessed
+	Use this to revise policies when needed
+
+//////////////////////////////////////////////////////////////////////////
+
+IAM Security Tools Hands On
+//////////////////////////////////////////////////////////////////////////
+
+Credentials Report
+//////////
+IAM > Credentials Report
+	-> Download Credentials Report
+	This downloads the Permissions of each User, and when they were last used
+//////////
+
+Access Advisor
+//////////
+IAM > Users > *User name*
+	-> Access Advisor Tab
+	Shows an easier to read list of each Service and when it was last accessed
+//////////
+
+//////////////////////////////////////////////////////////////////////////
+
+IAM Guidelines and Best Practices
+//////////////////////////////////////////////////////////////////////////
+- Don't user the Root account except for AWS account setup
+- One physical User == One AWS User
+- Assign Users to Groups and assign Permissions to Groups
+- Create a strong password policy
+- Use and enforce use of MFA
+- Create and use Roles for giving Permissions to AWS Services
+- Use Access Keys for the CLI and SDK
+- Audit Permissions of accounts using Credentials Report and IAM Access Advisor
+- NEVER share IAM Users and Access Keys
+//////////////////////////////////////////////////////////////////////////
+
+Shared Responsibility Model for IAM
+//////////////////////////////////////////////////////////////////////////
+
+AWS and Developers have separate and defined responsibilities
+
+AWS
+//////////
+- Infrastructure (global network security)
+- Configuration and vulnerability analysis
+- Compliance validation
+//////////
+
+Developers
+//////////
+- Users, Groups, Roles, Policies management and monitoring
+- Enable MFA on all accounts
+- Rotate all keys often
+- Use IAM tools to apply appropriate permissions
+- Analyze access patterns and review permissions
+//////////
+
+//////////////////////////////////////////////////////////////////////////
+
+IAM Section - Summary
+//////////////////////////////////////////////////////////////////////////
+
+- Users: mapped to a physical User, with a password for AWS Console
+- Groups: contains Users only
+- Policies: JSON document that outlines Permissions for Users
+- Roles: for EC2 Instances or AWS Services
+- Security: MFA and Password Policy
+- AWS CLI: Manage AWS Services using command-line
+- AWS SDK: Mage AWS Services using a programming language
+- Access Keys: Access AWS using the CLI or SDK
+- Audit: IAM Credential Reports and IAM Access Advisor
+
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 5
+  __         __        
+ /  \ |  |  |   
+ |    |__|  |__ 
+ |    |  |     \   
+ \__/ |  |. \__/
+
+EC2 Fundamentals
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+AWS Budget Setup
+//////////////////////////////////////////////////////////////////////////
+
+> AWS Billing
+As a default, even Admin Permissions don't allow Users to have access to billing
+
+> AWS Billing > Account
+	Scroll down to IAM User and role access to Billing Information
+	-> Edit
+	Check the Activate IAM Access
+	-> Update
+	Now the User can see the Billing Information, if they are Admins
+
+> AWS Billing > Bills
+	Under Charges by Service, lists the costs being charged to the account and what service is making that charge
+
+> Billing and Cost Management > Free Tier
+	This lists each service and if it will go over the Free Tier limits
+
+> Billing and Cost Management > Budgets > Create Budget
+	// Allows for setting up different budgets
+	Ex. Zero Cost Budget
+		-> Use a Template
+		-> Zero Spend Budget
+		Set the email to be alerted when going over budget
+		-> Create Budget
+	Ex. $10 Cost Budget
+		-> Use a Template
+		-> Monthly Cost Budget
+		Set a name
+		Set the budget amount
+		Set the email to be alerted when going over budget
+		// An email will be sent when the spend reaches 85% of the budget, it reaches 100%, and if it is forecasted to reach 100%
+		-> Create Budget
+
+// Not super important (seemingly), but the path starts with Bills until selecting an item lower in the Service explorer list, at which point the path starts with Billing and Cost Management
+
+//////////////////////////////////////////////////////////////////////////
+
+EC2 Basics
+//////////////////////////////////////////////////////////////////////////
+
+Basics
+//////////
+EC2 is one of the most popular Services
+EC2: Elastic Compute Cloud == Infrastructure as a Service
+Features:
+ - Rent virtual machines (EC2)
+ - Storing data on virtual drives (EBS)
+ - Distributing load across machines (ELB)
+ - Scaling services using an auto-scaling group (ASG)
+
+Knowing EC2 is fundamental to unerstand how the Cloud works
+//////////
+
+EC2 Sizing and Configuring Options
+//////////
+- EC2 Instances can be Mac, Linux, or Windows
+- Choose compute power and cores (CPU)
+- Choose RAM
+- Choose storage space
+	Network-attached (EBS and EFS)
+	hardware (EC2 Instance store) // This only lasts as long as the Instance does, and goes away when the Instance does
+- Network card: speed of card, Public IP address
+- Firewall rules with Security Groups
+- Bootstrap script (configures the Instance on first launch): EC2 User Data
+//////////
+
+EC2 User Data
+//////////
+On the first launch of an EC2 Instance, it can be given a bootstrap script.
+This can install software, create files, or whatever other setup that's desired
+Any commands executed with the script will have root user permissions
+//////////
+
+EC2 Instance Types
+//////////
+There are many combinations of EC2 Instances that can be created by choosing from the different parameters:
+	Instance type: (t2.micro, c5d.4xlarge, m5.8xlarge, ...) // t2 micro is what we use here b/c it is always part of the Free Tier
+	vCPU: (1, 4, ...)
+	Mem(GiB): (1, 16, ...) 
+	Storage: (EBS-Only, 1 x 400 NVMe SSD, ...)
+	Network Performance: (Moderate, Low to Moderate, ...)
+	EBS Bandwidth (Mbps): (-, 4750, 6800, ...)
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+Launching an EC2 Instance Running Linux
+//////////////////////////////////////////////////////////////////////////
+
+Goals:
+	Launch an EC2 Instance using the AWS Management Console
+	Get first high-level approach to parameters
+	See that web server is launched using EC2 user data // Fom our Bootstrap Script
+	How to Start, Stop, and Terminate an Instance
+
+> EC2 > Instnces
+	-> Launch Instances
+	Set the name
+	Choose a base image // We just choose Linux, Amazon Linux 2 AMI
+	Choose Instance Type: t2.micro
+	-> Create a new Key-Pair
+		Set name
+		Set type: RSA
+		Private file format: just use .pem // The other one is for Win 7, 8
+		-> Create Key Pair
+	Under Network Settings: Check Allow SSH and Allow HTTP
+	Under Advanced Details
+		Enter the text of the bash script to set up the web server and index.html
+//////////////////////////////
+#!/bin/bash
+# Use this for your user data (script top to bottom)
+# install httpd (Linux 2 version)
+yum update -y
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+echo "<h1>Hello World from $(hostname -f)</h1>" > /var/www/html/index.html
+//////////////////////////////
+	-> Launch Instance
+
+Once the Instance is running, under Details is the link that can be pasted to a browser
+	B/c it has the webserver and the Allow traffic, it can be accessed from HTTP, but NOT HTTPS
+	It does take a few minutes to be fully up
+
+> EC2 > Instances
+	The Actions dropdown has commands to Start, Stop, and Terminate EC2 Instances
+	Public IPv4 may change
+
+//////////////////////////////////////////////////////////////////////////
+
+EC2 Instance Types - Overview
+//////////////////////////////////////////////////////////////////////////
+
+The EC2 Type names indicate their details
+	Ex: m5.2xlage
+		m: Instance Class
+		5: Version number // Will eventually be replaced with 6
+		2xlarge: size
+There are different types of EC2 Instances for different workloads
+	General Purpose: Wide diversity of workloads, Balanced stats (Compute, Memory, Networking)
+	Compute Optimized: Compute-Intensive tasks that require high performance processors
+		Batch processing, Media transcoding, Dedicated game servers, ...
+	Memory Optimized: Fast performance to process large data sets in memory
+		In-Memory DBs for Business Intelligence, Real-Time data processing, ...
+	Storage Optimized: Intensive read-write on large data sets
+		High frequency online transactions, Relational and NoSQL DBs, ...
+
+ec2instances.info is a website that compares all of the EC2 Instance Types
+
+//////////////////////////////////////////////////////////////////////////
+
+Security Groups and Classic Ports Overview
+//////////////////////////////////////////////////////////////////////////
+
+Security Groups are a fundamental part of network security in AWS
+These control traffic in and out of EC2 Instances
+Security Groups only contain "allow" rules
+Security Group Rules can reference by IP or Security Group
+ _________________
+| Security Group  |
+|                 |
+|                 |
+| EC2 Instance    |
+|      __         |
+|     |__|        |
+|_________________|
+
+
+Deeper Dive
+//////////
+
+Security Groups act as a "firewall" on EC2 Instances
+They regulate:
+	Access to Ports
+	Authorized IP ranges - IPv4 and IPv6
+	Control Inbound network (from other to the Instance)
+	Control Outbound Network (from the Instance to other)
+
+//////////
+
+Security Groups Diagram
+//////////
+ ____________    _________________________                     ___________________
+|           <---------------------------------- Port 22 ------|Authorized Computer|             
+|            |  |   Security Group 1      |                   |___________________|
+|            |  |      Inbound            |                    ________________
+|            |  |Filter IP / Port w/ Rules|*Blocked*<-Port 22-| Other Computer |
+|EC2 Instance|  |_________________________|                   |________________|
+|            |   _________________________                     ____________________
+|            |  |   Security Group 1      |                   |         WWW        |
+|            |  |     Outbound            |                   |  Any IP - Any Port |
+|            |  |Filter IP / Port w/ Rules|                   |                    |
+|           -----------------------------------Any Port------>|____________________|
+|____________|  |_________________________|
+//////////
+
+Security Groups Good to Know
+//////////
+- Can be attached to multiple Instances
+- Locked to one region / VPC combination
+- These are outside of the EC2 Instances, blocking/allowing traffic
+- Good to maintain one Security Group specifically for SSH access
+- If app is not accessible and times out, it is a Security Group issue
+- If app has connection refused, then it is an app error
+- By default:
+	All inbound traffic is blocked
+	All outbound traffic is allowed
+//////////
+
+Referencing other Security Groups
+//////////
+We can reference other Security Groups directly.
+This makes it easy for other EC2 Instances to safely talk to each other.
+Only those Security Groups with authorization will be able to send data with this rule.
+
+ ____________    _________________________                     ________________
+|           <----------------------------------- Port 122 ----|Security Group 1|             
+|            |  |   Security Group 1      |                   |________________|
+|            |  |      Inbound            |               
+|            |  |Security Group 1 is auth |
+|EC2 Instance|  |Security Group 2 is auth |
+|EC2 Instance|  |                         |                    ________________
+|           <----------------------------------- Port 122 ----|Security Group 2| 
+|            |  |                         |                   |________________| 
+|            |  |                         |                    ________________
+|            |  |                     *Blocked*<-Port 122 ----|Security Group 3| 
+|            |  |                         |                   |________________|                    
+|            |  |                         |          
+|            |  |_________________________|         
+|____________|  
+//////////
+
+Classic Ports to Know
+//////////
+There are ports usually used for specific things
+
+22   == SSH   (Secure Shell) log into a Linux instance
+21   == FTP   (File Transfer Protocol) upload files
+22   == SFTP  (Secure File Transfer Protocol) upload files w/ SSH
+80   == HTTP   access unsecured sites
+443  == HTTPS  access secured sites
+3389 == RDP   (Remote Desktop Protocol) Log into a Windows instance
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+Security Groups Hands On
+//////////////////////////////////////////////////////////////////////////
+
+EC2 > Network & Security > Security Groups
+	Default Security Group launch-wizard-1 has two rules
+		SSH,  port 22, all sources		
+		HTTP, port 80, all sources
+
+		If the HTTP port 80 rule is removed, the EC2 Instance can't be accessed anymore
+		
+		Outbound is to everywhere by default, but we can change this
+
+//////////////////////////////////////////////////////////////////////////
+
+SSH Overview
+//////////////////////////////////////////////////////////////////////////
+
+SSH is for Mac, Linux, and <= Windows 10
+Putty is >= Windows 10
+EC2 Instance Connect works for all
+
+//////////////////////////////////////////////////////////////////////////
+
+SSH Hands On Linux/Mac
+//////////////////////////////////////////////////////////////////////////
+
+The Security Group allows port 22 by default, for SSH
+SSH allows us to control the machine using command line
+
+The first step is get the .pem file for the EC2 Instance, created at its launch
+	Place the .pem in a safe location on the personal computer 
+	Get into ssh through the Console
+		ssh ec2-user@<IPv4 Address> // The IPv4 Address is what we got from the EC2 Instance Details page
+		If the command isn't being made in the folder with the .pem file, it will fail
+		ssh -i EC2Tutorial.pem ec2-user@<IPv4 Address>
+			This gives an error about an unprotected Private Key File
+			We fix this by changing the read-write permissions on the file itself
+				chmod 0400 EC2Tutorial.pem
+		Now running the same command runs correctly
+		Commands now run on the EC2 Instance as the ec2-user
+
+If the EC2 Instance doesn't have a keypair from when it was created, a new one must be made
+	This can be done through EC2 > Network & Security > Key Pairs
+//////////////////////////////////////////////////////////////////////////
+
+SSH Troubleshooting
+//////////////////////////////////////////////////////////////////////////
+
+These are just a few possible scenarios and how to fix them
+
+Connection Timeout
+//////////
+This is a Security Group issue, likely due to the Inbound firewall rules
+It may be that the EC2 Instance was not assigned the Security Group
+//////////
+
+Connection Timeout Persists
+//////////
+The Security Group is correctly configured and assigned, but the timeout still happens
+This would be an issue with the network firewall
+Just use the EC2 Connection through the Management Console
+//////////
+
+SSH Doesn't Work
+//////////
+ssh command not found:
+	Have to use Putty
+Make sure everything is installed and configured correctly
+//////////
+
+Connection Refused
+//////////
+This is an application issue
+	Try restarting the EC2 Instance
+	Try terminating the EC2 Instance and creating a new one
+	Make sure that the EC2 Instance has the Amazon Linux OS
+//////////
+
+Permission Denied
+//////////
+This is either from:
+	Using the wrong security key or no security key for the EC2 Instance
+	Make sure that the EC2 Instance has been started
+		Double-check the command uses the ec2-user@<IPv4>
+//////////
+
+Nothing is working
+//////////
+Use the EC2 Instance Connect through the AWS Management Console
+//////////
+
+Able to connect yesterday, but not today
+//////////
+A restart to the EC2 Instance may have changed the public IPv4
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+EC2 Instance Connect
+//////////////////////////////////////////////////////////////////////////
+> EC2 > Instances
+	Select an EC2 Instance and then Connect (button in the upper menu)
+	Leave the defaults as is
+		-> Connect
+	This brings up an interface into the EC2 Instance as user ec2-user
+	Make sure that it works
+		whoami // returns the username: ec2-user
+		ping google.com
+If the Connect does not work, check the Security Group:
+	Does it have the Port 22 SSH rule
+	Is it assigned to the EC2 Instance
+//////////////////////////////////////////////////////////////////////////
+
+EC2 Instance Roles Demo
+//////////////////////////////////////////////////////////////////////////
+
+Make sure calls to the aws API are working
+	aws --version
+	If the Access keys have not been set, this will not work
+	These can be set directly inside of the EC2 Instance, however we shouldn't
+		Doing this would be bad
+
+	The better way is use EC2 Instance Roles
+> EC2 > Instances
+	Select the EC2 Instance
+	In the Actions dropdown, select Security > Modify IAM Role
+		Choose an IAM Role with Users Permissions
+		The Roles are listed at IAM > Roles
+	Run a command to read the Users list
+		aws iam list-users
+
+//////////////////////////////////////////////////////////////////////////
+
+EC2 Instance Purchasing Options
+//////////////////////////////////////////////////////////////////////////
+
+Overview
+//////////
+Overview of the different EC2 Instance types that are available.
+These generally range from reserved for long workloads to flexible for short workloads.
+
+On-Demand - short workloads, immediate results, pay per second of use, flexible, predictable
+Reserved - (1 and 3 years)
+	Reserved for long workloads
+	Convertible Reserve Instances - Long workloads with flexible instances
+Savings Plans - (1 and 3 years) - long workload, commitment to amount of usage
+Spot Instances - short workloads, cheap, can lose instances (less reliable)
+Dedicated Hosts - reserve entire physical server, control instance placement
+Dedicated Instances - no other customers share your hardware
+Capacity Reservations - reserve capacity in specific AZ for any duration
+//////////
+
+EC2 On-Demand
+//////////
+Pay for what is used
+	Linux/Windows: billing per second for first minute
+	All others: billing per hour
+Highest Cost, but nothing upfront
+No long-term commitments
+
+Recommended for short-term un-interrupted workloads, where app behavior is unpredictable
+//////////
+
+EC2 Reserved Instances
+//////////
+Up to 72% discount compare to On-Demand
+	Here, + is amount of discount
+Reserve specific attributes (Instance Type, Region, Tenancy, OS)
+Reservation Period: 1 year (+) or 3 yeas (+++)
+Payment Options: None Upfront (), Partial (++), All (+++)
+Reserved Instance's Scope: Regional or by Zone
+Buy or sell reservations in the marketplace
+Convertible Reserved Instance
+	Can change EC2 Instance type, family, OS, scope, and tenancy
+	Up to 66% discount
+
+Recommended for steady-state usage apps (like a db)
+//////////
+
+EC2 Savings Plan
+//////////
+Up to 72% discount, depending on usage
+Commits to a certain type of usage ($10/hour for 1 to 3 years)
+Usage beyond plan limits is billed at the On-Demand pricing
+
+Locked to a specific instance family and AWS region
+Flexible:
+	Instance Size
+	OS
+	Tenancy
+//////////
+
+EC2 Spot Instances
+//////////
+Most cost-effective at 90% discount compared to On-Demand
+Instances that can be lost at any time, if the set max price of the spot is exceeded
+Useful for resilient workloads
+	Batch jobs
+	Data analysis
+	Image processing
+	Any istribute workloads
+	Workloads w/ a flexible start and end time
+
+NOT useful for critical jobs or DBs // Exam Q!!!!
+//////////
+
+EC2 Dedicated Hosts
+//////////
+Physical Server w/ EC2 Instance capacity
+Allows address compliance requirements and owner's existing server-bound licenses
+	(per-socket, per-core, pe--VM software licenses)
+Purchasing options:
+	On-Demand - pay per second for active dedicated host
+	Reserved - 1 or 3 years (No upfront, partial, full)
+This is the MOST expensive option
+
+Useful for software w/ compliance licensing model (Bring Your Own License)
+	Companies that have strong regulatory or compliance needs
+//////////
+
+EC2 Dedicated Instances
+//////////
+Instances run on owner's hardware
+May share hardware with other instances in same account
+No control over Instance placement
+	So, Instances can be moved after stopped/started
+//////////
+
+EC2 Capacity Reservations
+//////////
+Reserve On-Demand Instances capacity in an AZ for any duration
+Capacity is always available when requested
+No time commitment needed, no billing discounts
+Can be combined w/ Regional Reserved Instances and Savings Plans for billing discounts
+Will be billed at On-Demand rate whether Instances run or not
+
+Useful for short-term, uninterruptable workloads in a dedicated AZ
+//////////
+                                            
+Summary (What should I Use?🤔, Resort Analogy)
+//////////
+On-Demand - Full price when we stay, but we can stay whenever we want
+Reserved - Long-term reservation, can get good discount compared w/ same time On-Demand pricing
+Savings Plan - Reserve amount per hour for long-term (1 to 3 years), can change room type
+Spot Instances - Resort takes bids on empty rooms, high bidder wins, can be kicked at any time
+Dedicated Hosts - Book entire building of resort
+Capacity Reservations - Book a dedicated room, pay whether stay there or not
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+IP Address Charges in AWS
+//////////////////////////////////////////////////////////////////////////
+AWS is trying to migrate everyone to IPv6, so IPv4 public addresses will incur fees
+	Cost per IPv4 is $0.005 per hour
+	The Free Tier for this is 750 hours per month
+	All active Public IPv4 Addresses drain this
+	Once drained, all active Public IPv4 Addresses start to incur costs
+Load Balancers and RDS DBs are not in the Free Tier, so they incur charges from the start
+	Load Balancers have a Public IPv4 Addresses in each of their AZs
+		Each of these Public IPv4 Addresses incur charges
+		Make sure to delete these if not in use
+IPv6 does not get charged, but is more complicated to set up
+
+Tracking IP Charges:
+	IP charges can be tracked at: Billing and Cost Management > Bills
+	> Amazon VPC IP Address Manager > Public IP Insights
+		Here, we an create an IPAM to track our IPv4 Addresses
+
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 6
+  __                 
+ /  \ |  |    /  
+ |    |__|   /_ 
+ |    |  |  /  \   
+ \__/ |  |. \__/
+
+EC2 Instance Storage
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+EBS Overview
+//////////////////////////////////////////////////////////////////////////
+An EBS Volume (Elastic Block Store Volume) is a network drive for an EC2 Instance
+	If non-root, default is to persist after attached EC2 Instance termination
+	Very helpful to think of these as Network USB Sticks
+	An EBS can only be mounted to one EC2 Instance at a time
+		An EC2 Instance can have multiple attached EBSs
+		They can be completely unmounted (no attached EC2 Instances)
+	They are bound to one specific AZ
+		Snapshots of EBSs can be move across AZs
+	Free Tier gives 30GB of EBS per month
+	Can be detached from one EC2 Instance and attached to a different one quickly
+		This makes them good for fail-overs
+	Must be provisioned, specifying GB size and IOPS (In-Out operations per second)
+		Size and IOPS can be changed after creation
+Delete on Termination
+	This is an exam Q!!!!!
+	Default behavior for Root EBS is to be deleted when the attached EC2 Instance is
+		This can be changed through the AWS Console and AWS CLI
+	By default, all other EBSs are not deleted
+		This can also be changed through the AWS Console and AWS CLI
+
+//////////////////////////////////////////////////////////////////////////
+
+EBS Hands On
+//////////////////////////////////////////////////////////////////////////
+Create a new EBS Volume:
+	> EC2 > Volumes
+		The Root Volumes of EC2 Instances are also listed here
+	-> Create Volume
+	Set the GB size and IOPS
+	Set the AZ
+		This has to exactly match the AZ of the desired EC2 Instance(s), not just Region
+	Wait for the Volume to be created and ready
+Mount the Volume to the EC2 Instance
+	-> Actions dropdown
+	Attach Volume
+	Choose the EC2 Instance from the dropdown
+	Choose a Drive Name for the Volume
+		This will be the Volume's name/location in the EC2 Instance's file structure
+
+//////////////////////////////////////////////////////////////////////////
+
+EBS Snapshots
+//////////////////////////////////////////////////////////////////////////
+Snapshots are backups of EBS Volumes at a point in time
+An EBS Volume can be attached to an EC2 Instance when the Snapshot is created
+	However, this is bad practice
+Snapshots can be copied across AZs and Regions
+
+EBS Snapshots Features
+//////////
+Moving a Snapshot to an EBS Snapshot Archive makes them cheaper
+	But, they take 24 to 72 hours to restore from the archive
+
+Snapshots should have a Recycle Bin
+	These protect against accidental deletions
+	These can store Snapshots up to 1 year
+
+Fast Snapshot Restore
+	Force full initialization of Snapshot to have no latency on first use
+	Useful when the Snapshot is very big
+	Doing this is expensive
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+EBS Snapshots Hands On
+//////////////////////////////////////////////////////////////////////////
+
+Create a Snapshot
+//////////
+> EC2 > Volumes
+-> Actions dropdown
+	-> Create Snapshot
+-> Create Snapshot
+//////////
+
+Copy Snapshot to another Region
+//////////
+> EC2 > Snapshots
+-> Actions dropdown
+	-> Copy Snapshot
+Set the Destination Region
+-> Copy Snapshot
+//////////
+
+Create EBS Volume from Snapshot
+//////////
+> EC2 > Snapshots
+-> Actions dropdown
+	-> Create Volume from Snapshot
+Set the size
+Set the AZ
+	Note that the AZ choices are only in the Snapshot's Region
+Set it to be encrypted/not-encrypted
+-> Create Snapshot
+The resulting Volume will have a Detail that says the Snapshot it was created from
+//////////
+
+Set Up Recycle Bin
+//////////
+> EC2 > Snapshots
+-> Recycle Bin // Upper Menu button
+-> Create Retention Rule
+Set Resource Type to EBS Snapshots
+Set the number of days to keep items
+Make sure to leave Rule Lock Settings to Unlock
+	This lets us delete the Rule easily
+-> Create Retention Rule
+//////////
+
+Recover Snapshot from Recycle Bin
+//////////
+> EC2 > Snapshots
+-> Recycle Bin // Upper Menu button
+-> Resources // left-hand side menu
+Select the EBS Snapshot(s)
+-> Recover
+The Snapshots will now be at: EC2 > Snapshots
+//////////
+
+Archive Snapshot
+//////////
+> EC2 > Snapshots
+The Snapshot will have a Detail called: Storage Tier
+	If not archived, it will be: Standard
+-> Actions dropdown
+	-> Archiving
+		->Archive Snapshot
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+AMIs Amazon Machine Image:
+//////////
+We can create an AMI based on an EC2 Instance
+ - These are a way to copy an EC2 instance, allowing us to make other EC2 instances based on one
+ -- The new EC2 instance can be put into a different region
+ - These can be made by ourselves, or others, and there are businesses that just create AMIs to sell
+//////////
+
+EC2 Instance Stores:
+//////////
+These are high-performance hardware disks with advantages over the EBS Volumes.
+They act like cache in a computer, storing fast-access memory while the computer is running, but doesn't store anything on a shutdown.
+ - Better I/O performance
+ - Good for buffer, cache, scratch data, and temporary content
+ - A downside is that they go away when the EC2 instance stops (they're ephemeral)
+ -- Risk of data loss on a hardware failure
+If all we care about is IOPS. then choosing this as a solution is just fine
+Can handle a very high IOPS
+//////////
+
+EBS Volumes:
+//////////
+gp2/gp3 (SSD), General purpose, low cost
+ - gp2, Size of volume and IOPS are linked together
+ - gp3, volume and IOPS can be scaled separately
+io1/io2 Block Express (SSD), High performance for mission-critical, low-latency, or high-throughput
+st1 (HDD), Low cost for frequent access, throughput-intensive
+sc1 (HDD), Lowest cost for less frequent access
+
+Only gp and io boot volumes can have an OS running on them.
+	Seriously, what the hell does this mean?
+	Does the EBS have an installed OS?
+	Does the EBS give access to the OS?
+
+Defined by Size, Throughput, IOPS (I/O Ops per Second)
+
+Use Cases Provisioned IOPS (PIOPS) SSD
+ - Critical business apps w/ sustained IOPS performance
+ - Apps that need more than 16,000 IOPS
+ - Great for DB workloads (sensitive to storage perfs and consistency)
+ - io1 (4GiB - 16 GiB)
+ -- Max PIOPS, 64,000 for Nitro EC2 instances & 32,000 otherwise
+ -- Can scale PIOPS and storage independently
+ - io2 Block Express (4GiB - 64TiB)
+ -- Sub-millisecond latency
+ -- Max PIOPS, 256,000 w/ IOPS:GiB ratio of 1000:1
+ - PIOPS supports EBS Multi-Attach // Meaning we can attach a single io1 or io2 to multiple EC2 instances (in the same Availability zone)
+
+ - st1 & sc1 are HDDs
+ -- Can't be boot volumes
+ -- 125GiB to 16TiB
+ -- (st1) Throughput optimized: Big Data, Data Warehouses, Log Processing
+ --- Max throughput is 500MiBs, max IOPS 500
+ -- (sc1) Cold HDD, lowest cost and least IO
+ --- Max throughput is 250MiBs, max IOPS 250
+
+EBS Multi-Attach (only io1 and io2)
+ - The max of 16 EC2 instances // Exam Q!!!!!!!!!!!
+ - Attach the same EBS volume to multiple (max 16) EC2 instances (in same Availability Zone (AZ))
+ - Each EC2 instance has full read/write permissions
+ - Use Case: Linux clustered apps (like Teradata), and it is on the app to handle concurrency
+ - Must use file system that is cluster-aware (XFS, EXT4, etc...)
+//////////
+
+
+Amazon EFS (Elastic File System)
+
+Overview: a file system that can be accessed from multiple AZs, can automatically move b/t storage/IO optimizing for cost
+This has several tiers optimizing for IO or storage
+This is an NFS (Network File System)
+Can be attached to multiple EC2 instances across AZs, and is expensive (3x gp2), but is pay per use
+Can move b/t the tiers based on a lifecycle policy
+Basics:
+ - Use cases: content management, web serving, data sharing, Wordpress // Sounds like a website that serves multiple places around the globe with one data store
+ - Uses NFSv4 protocol (allows a client to access this like a local file)
+ - Uses Security Group permissions for access
+ - Only compatible w/ Linux AMI (Amazon's Linux image)
+ - Encryption at rest w/ KMS (encrypts stored data, w/ "At Rest" referring to infrequently accessed long-term storage data)
+
+Accessing the EFS from two different EC2 instances is pretty cool.
+
+EBS vs EFS vs Instance Store:
+EBS Volumes:
+ - Attached to one EC2 at a time, except for io1/io2 Multi-Attach
+ - Locked at the AZ level
+ - gp2 IO increases w/ Disk size
+ - gp3 and io1 can increase IO independently
+ - To Migrate to new AZ:
+ -- Take Snapshot
+ -- Restore instance from snapshot inside of a new AZ
+EFS Volumes:
+ - Made to be attached to multiple EC2 instances across AZs
+ - Only available on Linux OSs
+ - Higher price point
+ -- Leverage storage tiers for cost savings
+Instance Store:
+ - Acts as the RAM of an EC2 Instance OS
+ - Is wiped every time it shuts down
+
+
+Scaling In/Out vs Up/Down
+	In/Out refers to adding more of the same infrastructure rather than exchanging what's already there for a more powerful version (Which would be scaling up)
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 7
+  __        ___        
+ /  \ |  |  |  |  
+ |    |__|     |  
+ |    |  |     |  
+ \__/ |  |.    |
+
+AWS Fundamentals: ELB + ASG
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+High Availability and Scalability
+//////////////////////////////////////////////////////////////////////////
+
+Scalability and High Availability
+//////////
+Scalability: An app or system can handle greater loads by adapting to demand
+	Vertical: Replace/increase current instance
+	horizontal: Add more instances of the current resource
+//////////
+
+Vertical Scalability
+//////////
+This means increasing the size of the instance
+	Ex. (changing out a t2.micro instance for a t2.large)
+Vertical scaling is very common for non-distribute systems, like a DB
+RDS and ElastiCache are two services that can scale vertically
+There are usually hardware limits to how much an instance can be scaled vertically
+//////////
+
+Horizontal Scalability
+//////////
+This means adding more instances of the resource.
+Horizontal scaling implies distributed systems
+	Ex. (Web apps and modern apps)
+Amazon EC2 makes horizontal scaling very easy
+//////////
+
+High Availability
+//////////
+This goes w/ horizontal scaling
+High availability means running an app/system in at least 2 AZs
+The goal is to survive data center loss
+This can be passive
+	Ex. (RDS Multi AZ)
+This can also be active
+	Ex. Horizontal scaling
+//////////
+
+High Availability and Scalability for EC2
+//////////
+Vertical Scaling: Increase EC2 Instance size (up or down)
+	Low:  t2.nano - 9.5GB RAM, 1 vCPU
+	High: u-12tb1.metal - 12.3TB RAM, 448 vCPUs
+
+Horizontal Scaling: Increase number of EC2 Instances (in or out)
+	Auto Scaling Groups
+	Load Balancers
+	
+High Availability: Running Instances in at least 2 AZs
+	Auto Scaling Group multi AZ
+	Load Balancer multi AZ
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+Elastic Load Balancing (ELB) Overview
+//////////////////////////////////////////////////////////////////////////
+
+Load Balancers are servers that take traffic and distribute it to resources
+	Ex. (App w/ instances running on multiple EC2 Instances)
+
+Why Use a Load Balancer
+//////////
+Spread load across multiple instances
+Expose single point of access (DNS) for app
+Seamlessly hide resource instance failures
+Do regular health checks on resource instances
+Provide SSL termination (HTTPS) for websites
+Enforce stickiness w/ cookies
+Have high availability across zones
+Have a layer between public and private traffic
+//////////
+
+Why Use an Elastic Load Balancer
+//////////
+All of the benefits of a Load Balancer, and we can scale w/ demand
+An Elastic Load Balancer is a managed Load Balancer
+	AWS guarantees that it will be working
+	AWS takes care of the infrastructure (upgrades, maintenance, high availability)
+	AWS provides only a few configuration parameters
+Costs less to setup a personal Load Balancer, but is much harder
+
+ELBs are integrated w/ many AWS offerings/services
+	EC2, EC2 Auto Scaling Groups, Amazon ECS
+	AWS Certificate Manager (ACM), CloudWatch
+	Route 53, AWS WAF, AWS Global Accelerator
+//////////
+
+Health Checks
+//////////
+These are crucial for Load Balancers
+These enable the Load Balancer to know that the instances are available for traffic
+The Health Check is performed on a port and a route (commonly, /health)
+Response of 200 is healthy, and anything else is unhealthy
+//////////
+
+Types of Load Balancers on AWS
+//////////
+Four Kinds:
+	Classic Load Balancer (Deprecated)
+	Application Load Balancer
+		v2 - new generation - 2016 - ALB
+		HTTP, HTTPS, Websocket
+	Network Load Balancer
+		v2 - new generation - 2016 - ALB
+		TCP, TLS (secure TCP), UDP
+	Gateway Load Balancer
+		2020 - GWLB
+		Operates at layer 3 (Network Layer) - IP Protocol
+
+Overall, recommended to NOT use the Classic Load Balancer
+Some Load Balancers can be setup as internal (private) or external (public) ELBs
+//////////
+
+Load Balancer Security Groups
+//////////
+
+        HTTPS/HTTP from anywhere                  HTTP Restricted to Load Balancer
+Users <-------------------------> Load Balancer <----------------------------------> EC2
+
+Users connect from anywhere on port 80 (HTTP) or 443 (HTTPS)
+The EC2 Instances allow port 80 traffic, ONLY from the Load Balancer's Security Group
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+Application Load Balancer (ALB)
+//////////////////////////////////////////////////////////////////////////
+
+Application Load Balancers (v2)
+//////////
+Application Load Balancers is Layer 7 (HTTP)
+Load balancing to multiple HTTP applications across machines (target groups)
+Load balancing to multiple apps on same machine (Ex. Containers)
+Support for HTTP/2 and WebSocket
+Support redirects (Ex. from HTTP to HTTPS)
+
+Routing tables to different target groups:
+	Routing based on path in URL, Ex. (ex.com/users, ex.com/posts)
+	Routing based on hostname in URL, Ex. (one.ex.com, two.ex.com)
+	Routing based on Query String, Headers, Ex. (ex.com/users?id=123&oder=false)
+ALBs are a great fit for micro services & container-based apps, Ex. (Docker, Amazon ECS)
+ALBs have a port mapping feature to redirect to a dynamic port in ECS
+//////////
+
+HTTP Based Traffic
+//////////
+Diagram shows how one ALB can use URL path to route traffic to different Target Groups
+It also shows that the Health Checks are at the Target Group level
+                                                          ____________________________
+                        _____________        HTTP        |Target Group   EC2 Instances| 
+      Route/user       |             |<----------------->|for Users app               |
+   |<----------------->|  External   |                   |               Health Check |
+WWW|  Route/search     | Application |                   |____________________________|
+   |<----------------->|Load Balancer|       HTTP         ____________________________
+                       |    (v2)     |<----------------->|Target Group   EC2 Instances|
+                       |_____________|                   |for Search app              |
+                                                         |               Health Check |
+                                                         |____________________________|
+//////////
+
+Target Groups
+//////////
+
+These are the resources that the ALB distributes traffic across
+These can be:
+	EC2 Instances on HTTP (can be managed by an Auto Scaling Group)
+	ECS tasks on HTTP (Managed by ECS)
+	Lambda Functions on HTTP (request is translated into a JSON event)
+	IP Addresses (private IPs)
+
+ALB can route to multiple Target Groups
+Health Checks are at the Target Group level
+//////////
+
+Query Strings/Parameters Routing
+//////////
+Diagram shows how an ALB can use URL parameters to route traffic
+                                                          ____________________________
+                        _____________ ?platform=Mobile   |Target Group 1              | 
+      Requests         |             |<----------------->| (EC2 Instances)     Health |
+   |<----------------->|  External   |                   |                     Check  |
+WWW|                   | Application |                   |____________________________|
+   |                   |Load Balancer|?platform=Desktop   ____________________________
+                       |    (v2)     |<----------------->|Target Group 2              |
+                       |_____________|                   |  (On-Premises,       Health|
+                                                         | Private IP Routing)  Check |
+                                                         |____________________________|
+//////////
+
+Good to Know
+//////////
+ALBs have a fixed hostname
+The app servers don't see the IP of the client directly
+	The IP of the client is inserted in the header X-Forwarded-For
+	It is also possible to get the Port (X-Forwarded-Port)
+	And the proto (X-Forwarded-Proto)
+This diagram shows how the ALB does a Connection Termination to protect the EC2 Instance
+	This also means that the client's IP is hidden from the app on the EC2 Instance
+	We can still get this through the Header
+
+                                       Load Balancer IP   ____________________________
+                        _____________     (Private IP)   |                            | 
+      Client IP        |    ALB      |<----------------->|  EC2 Instance              |
+     12.34.56.78<----->| Connection  |                   |                            |
+                       | Termination |                   |____________________________|
+                       |             |
+                       |             |
+                       |_____________|
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+Application Load Balancer - Hands On 1
+//////////////////////////////////////////////////////////////////////////
+
+Launch EC2 Instance:
+	> EC2 > Instances
+	-> Launch Instances
+	Set the number of Instances to 2
+	Select Linux
+	Select t2.micro
+	Proceed w/o a Key Pair
+	Under: Network Settings
+		Select Existing Security Group (launch-wizard-1)
+	Under: Advanced, copy over the standard site creation script
+	-> Launch Instance
+	When those are ready, check their public IP addresses to make sure they're good
+
+Launch ALB:
+	> EC2 > Load Balancers
+	-> Create Load Balancer
+	-> ALB's Create
+	Set a unique name (account level)
+	Keep IPv4 as the Address Type
+	Select all of the AZs
+	-> Create New Security Group
+		Set a name and description
+		-> Add Inbound Rule
+			Type: HTTP
+			Port: 80
+			Source: Anywhere
+		-> Create Security Group
+	Remove the default Security Group
+	Set the Security Group as the one we just created
+	Under Listeners and Routing:
+		Type: HTTP
+		Port: 80
+		-> Create Target Group
+			Select Instances
+			Set a name
+			Protocol: HTTP
+			Port: 80
+			-> Next
+			Select the two EC2 Instances as targets
+			-> Include as Pending Below
+			-> Create Target Group
+		Default Action: *Target Group that was just created*
+			// Might need to refresh that section
+	-> Create Load Balancer
+Now, going to the public IP of the Load Balancer brings up one of the EC2 Instances
+Repeated refreshes of the page switches between the two EC2 Instances
+
+//////////////////////////////////////////////////////////////////////////
+
+Application Load Balancer - Hands On 2
+//////////////////////////////////////////////////////////////////////////
+
+Send traffic to the EC2 Instances from the Load Balancer only
+This will make the EC2 Instances private, only accessed by the ALB
+//////////
+> EC2 > Instances > Security Groups
+	Select launch-wizard-1
+	Select Inbound Rules tab
+	-> Edit Rules
+		Delete the rule for Port 80 traffic from anywhere
+		Add a new Rule
+			Type: HTTP
+			Port: 80
+			Source: *scroll down and select the ALB Security Group*
+
+Now the EC2 Instances can't be accessed directly.
+They can still be accessed through the ALB's public IP
+//////////
+
+Setting Up an ALB Error Page
+//////////
+> EC2 > Load Balancers
+	Select the DemoALB
+	Scroll down to Listeners
+	-> HHTP:80
+	Scroll down to Listener's Rules
+	-> Add Rule
+		Set name
+		-> Next
+		-> Add Condition
+			Type: Path
+			Path: /error
+			-> Confirm
+		-> Next
+		Select Return Fixed Response
+		Response Code: 404
+		Content type: text/plain
+		Response Body: "Page not found"
+	Priority: 5 // Higher number, higher priority
+	-> Next
+	-> Create
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+Network Load Balancer
+//////////////////////////////////////////////////////////////////////////
+
+Overview
+//////////
+Network Load Balancers (NLBs) are Layer 4, and can:
+	Forward TCP and UDP traffic to instances
+	Handle millions of requests per second
+	Have ultra-low latency
+
+An NLB has one static IP per AZ, and supports Elastic IP
+
+NLBs are used for extreme performance, TCP/UDP traffic
+
+NOT included in the AWS Free Tier
+//////////
+
+TCP (Layer 4) Based Traffic
+//////////
+Diagram shows how an NLB routes traffic based on 
+                                                          ____________________________
+                        _____________        TCP         |Target Group (Users)        | 
+   |  TCP + Rules      |             |<----------------->|                     Health |
+WWW|<----------------->|  External   |                   |(EC2 Instances)      Check  |
+   |                   |   Network   |                   |____________________________|
+                       |Load Balancer|      HTTP          ____________________________
+                       |    (v2)     |<----------------->|Target Group (Search)       |
+                       |_____________|                   |                      Health|
+                                                         | (EC2 Instances)      Check |
+                                                         |____________________________|
+//////////
+
+Target Groups
+//////////
+Target Groups can be:
+	EC2 Instances
+	IP Addresses - MUST be private IPs
+	An ALB
+Health Checks support the TCP, HTTP, HTTPS Protocols
+
+EC2 Instances:
+              |-->EC2 Instance 1
+NLB-----------|
+              |-->EC2 Instance 2
+
+IP Addresses:
+              |-->192.168.23.23  (EC2 Instance)
+NLB-----------|
+              |-->10.0.0.21     (on-site server)
+
+ALB:
+NLB-----------> ALB
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+NLB Hands On
+//////////////////////////////////////////////////////////////////////////
+> EC2 > Load Balancers
+	-> Create Load Balancer
+	Select Network Load Balancer
+	Set name
+	Set Internet Facing
+	Select all AZs
+	Remove default Security Group
+	// Create a new Security Group
+		> EC2 > Security Group
+		-> Create Security Group
+		Set name
+		Set Description
+		Under Inbound Rules
+			Type: HTTP
+			Port: 80
+			Source: Anywhere
+	Set the Security Group to what was just created
+	Under Listeners and Routing
+		Protocol: TCP
+		Port: 80
+		Create a Target Group
+			Select Instances
+			Set Target Group Name
+			Protocol: TCP
+			Port: 80
+			VPC: Same as before
+			Under Health Checks
+				Protocol: HTTP
+				Health Check Path: /
+			Under Advanced Health Check Settings
+				Healthy Threshold: 2
+				Timeout: 2
+				Interval: 5
+			-> Next
+			Select the EC2 Instances
+		Default Action: Select the new Target Group
+	-> Create Load Balancer
+
+Going to the Public IP of the NLB gives no result.
+This is b/c the Security Group Rules for the EC2 Instances.
+It still only allows the ALB as per the Inbound Rules.
+In fact, according to the NLB, the EC2 Instances are Unhealthy.
+
+Add the NLB to the EC2 Instances Security Group Rules
+> EC2 > Security Group
+Select the Inbound Rules
+-> Edit
+-> Add Rule
+	Type: HTTP
+	Port: 80
+	Source: *NLB Security Group*
+The EC2 Instances will be Healthy.
+We can now see them by going to the NLB's Public IP
+
+//////////////////////////////////////////////////////////////////////////
+
+
+Load Balancers
+//////////////////////////////////////////////////////////////////////////
+
+Load Balancing
+	Balancing traffic load across multiple machines automatically
+
+Security Groups for Load Balancers
+	We can have public and private load balancers
+		For public, just like with a machine acting as a server, we'll have it accessible from anywhere
+	This does change the Security Group need of the EC2 instances, which then just need a port 80 access point as they will not be accessed directly, and will only be accessible from the Load Balancer
+
+Health Checks
+	Checks to make sure that machine is working properly, and can receive traffic
+
+Routing Tables
+	Tables that route traffic based on paths in URL, hostname in URL, and query string headers
+
+Target Groups
+	EC2 instances/tasks, Lambda Fns, IP Addresses
+	Load Balancers can route to multiple Target Groups
+	Health Checks happen at the Target Group level
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 8
+  __         __        
+ /  \ |  |  /  \  
+ |    |__|  \__/  
+ |    |  |  /  \   
+ \__/ |  |. \__/
+
+AWS Fundamentals: RDS + Aurora + Elasticache
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+RDS - Databases
+//////////////////////////////////////////////////////////////////////////
+
+We can choose a MySQL Database, and then connect to it with MySQL Workbench
+
+Through the MySQL Workbench, we're able to create tables and data entries.
+
+
+
+//////////////////////////////////////////////////////////////////////////
+
+
+Aurora - Databases
+//////////////////////////////////////////////////////////////////////////
+
+The AuroraDB is a specialized DB by Amazon
+
+It works by having a built-in Write-Entry-Point, so every service that writes to the DB goes through the same entry point.
+
+The same is true for reads, and the DB can have up to 15 read-replikas, that it uses to load-balance and back up the master DB if needed
+
+To encrypt a non-encrypted DB, we can make a snapshot, and then restore that snapshot with encryption enabled.
+
+
+//////////////////////////////////////////////////////////////////////////
+
+RDS - Database Proxy
+//////////////////////////////////////////////////////////////////////////
+
+We can create a proxy for the RDS, which will pool connects to the DB.
+
+This minimizes the number of connections and resources for the RDS
+
+Supports RDS(MySQL, PostgreSQL, MariaDB, MS SQL Server) and Aurora (MySQL, PostgreSQL)
+//////////////////////////////////////////////////////////////////////////
+
+Amazon ElastiCache
+//////////////////////////////////////////////////////////////////////////
+
+Caches are in-memory DBs with high performance, low latency
+
+They help reduce DB load for intensive Read workloads
+	They do this by storing previous reads, and then future queries check the cache
+
+Another use case is storing a user session so that the user doesn't have to log in over and over
+
+They help make the app stateless
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 9
+  __         __        
+ /  \ |  |  /  \  
+ |    |__|  \__|  
+ |    |  |     |  
+ \__/ |  |.    |
+
+Route 53
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+
+CName vs Alias
+//////////////////////////////////////////////////////////////////////////
+
+CName can point to something.domain.com // It can't just be a hostname like domain.comhostname like domain.com
+ // Alias can be free on AWS, native health-check
+These map a hostname to an AWS resource
+// Can't be used as the top-node of a DNS namespace, like, example.com
+// An Alias can route to a number of different AWS services, but NOT EC2 instances
+Alias can point to something.domain.com OR domain.com // It can be root OR non-root name, like 
+
+//////////////////////////////////////////////////////////////////////////
+
+Routing Policies
+//////////////////////////////////////////////////////////////////////////
+
+Routing Policies can be different types:
+ - Simple
+ - Weighted
+ - Failover
+ - Latency
+ - Geolocation
+ - Multi-value Answer
+ - Geoproximity
+
+
+//////////////////////////////////////////////////////////////////////////
+
+Routing Policies - Simple
+//////////////////////////////////////////////////////////////////////////
+
+Typically routes traffic to a single resource, but it can give multiple values
+	Of these, one is randomly chosen by the client
+
+Can't be associated with health checks
+
+With Alias: Only specify one resource
+
+Creation:
+In Route 53 > Hosted Zones > domain.com
+	Create a Record
+		Record Type: A - (to IPv4)
+		Value: ip addresses
+		TTL: 20 seconds
+		Routing Policy: Simple
+
+	Going to simple.domain.com will then randomly get one of the ip addresses in Value
+	
+
+////////////////////////////////////////////////////////////////////////////
+
+
+Routing Policies - Weighted
+//////////////////////////////////////////////////////////////////////////
+
+
+Weights don't have to add up to 100 // can they be more than 100???
+
+Can be associated with health checks
+
+DNS Records must have the same name and type //Below ex. Name: Weighted, Type: A - (to IPv4)
+
+Use cases:
+	Load balancing
+	Testing new version (% of traffic goes t new version to test it)
+
+Weight of 0 in one stops traffic to that resource
+Weight of 0 in all is even distribution
+
+Creation:
+In Route 53 > Hosted Zones > domain.com
+	Create a Record
+		Name: Weighted // Very important to keep the same across all weighted records
+		Record Type: A - (to IPv4)
+		Value: 1st ip address
+		TTL: 3 seconds
+		Routing Policy: Weighted
+		Weight: 10
+	Create another Record
+		Name: Weighted // Very important to keep the same across all weighted records
+		Record Type: A - (to IPv4)
+		Value: 2nd ip address
+		TTL: 3 seconds
+		Routing Policy: Weighted
+		Weight: 70
+
+	Going to weighted.domain.com will then randomly get one of the ip addresses based on the weights
+	
+
+//////////////////////////////////////////////////////////////////////////
+Routing Policies - Latency
+//////////////////////////////////////////////////////////////////////////
+
+Redirect to resource in list that has the least latency for client
+
+Very useful when speed is priority
+
+Latency is based on traffic between users and AWS Regions
+
+Can be associated with health checks
+	Has a failover capability -so it can reroute to a recovery region if needed
+
+
+We pick different regions to get good global coverage
+
+Creation:
+In Route 53 > Hosted Zones > domain.com
+	Create a Record
+		Name: Latency
+		Record Type: A - (to IPv4)
+		Value: 1st ip address
+		TTL: 3 seconds
+		Region: Asia Pacific
+		Routing Policy: Latency
+		Weight: 10
+	Create another Record
+		Name: Latency
+		Record Type: A - (to IPv4)
+		Value: 2nd ip address
+		TTL: 3 seconds
+		Region: US East
+		Routing Policy: Weighted
+		Weight: 70
+
+	Going to latency.domain.com will then get the ip address with the smallest latency
+	
+
+//////////////////////////////////////////////////////////////////////////
+
+Health Checks
+//////////////////////////////////////////////////////////////////////////
+
+Health Checks can be set up for Automated DNS Failover:
+1. monitor an endpoint (app, server, AWS resource,...)
+2. monitor another Health Check // We do this to create a Calculated Health Check (see below)
+3. monitor a CloudWatch Alarm // Useful for private resources
+
+Health Checkers Monitoring an Endpoint:
+	Health Checkers are about 15 all around the world
+		Healthy/Unhealthy threshold - 3 (default)
+		Interval - 30 sec (10 sec is a higher cost, fast checker)
+		Supports HTTP, HTTPS, TCP
+		If > 18% of checkers need to say that a resource is healthy, otherwise is unhealthy
+		Ability to choose which locations for Route 53 to use
+	Health checks pass on a response of 2xx or 3xx from the resource
+	Health checks can be setup to pass/fail on response of first 5120 bytes
+	Must have router/firewall allow traffic from Route 53 Health Checker ip range
+
+
+Calculated Health Checks
+	Combine the results of multiple Health Checks into a single Health Check
+	Can be used to have a parent Health Check monitor child Health Checks
+		Can use OR, AND, NOT conditions
+	Can have up to 256 child Health Checks
+	Specify number of children that need to be healthy for the parent to pass
+	Use case: update website without causing all Health Checks to fail
+
+//Health checks are only for public resources, but we can use CloudWatch to get around this
+Health Checks - Private Hosted Zones
+	Route 53 Health Checkers are outside of the VPC
+	They can't access private resources
+
+	We can set a CloudWatch Metric, associate a CloudWatch Alarm, and that alarm is checked by a Health Checker
+
+
+//////////////////////////////////////////////////////////////////////////
+
+
+Routing Policies - Geolocation
+//////////////////////////////////////////////////////////////////////////
+
+Routing based on location
+ 
+User can specify continent, country, or state
+
+Should have a default record in case of no match
+
+Use cases: Website localization, restrict content distribution, load balancing
+
+Can be associated with health checks
+
+ // We can use a VPN to be able to test if these are working
+
+//////////////////////////////////////////////////////////////////////////
+
+Routing Policies - Geoproximity
+//////////////////////////////////////////////////////////////////////////
+
+Routing based on location, but with an added bias value
+	The bias value can pull clients from other resources if the bias value is high enough
+ 
+Ex:
+////////////////////////////////////////////
+There are two resources, and four clients
+All of the clients are spaced at even intervals between the resources,
+and the resources each have a bias of 0
+R0<<<C0<<<C1...C2>>>C4>>>R1
+
+We then change R1 to have a higher bias, which then redirects C1 to also go to R1
+r0<<<C0...C1>>>C2>>>C3>>>R1
+////////////////////////////////////////////
+
+
+Traffic Flow
+//////////////////////
+
+To set up Geoproximity, we define Traffic Flow rules called Traffic Policies
+
+These policies are edited in the Traffic Policies page
+After creating a new traffic policy, we specify that it's for a Geoproximity routing
+We then get an actual map that shows where the sources will draw in clients from
+So one resource will cover its part of the map in blue, the other in orange,
+	and then clients in those areas will be routed to that resource. Cool stuff!
+
+//////////////////////////////////////////////////////////////////////////
+
+
+Routing Policies - IP-based Routing
+//////////////////////////////////////////////////////////////////////////
+
+Routing is of course based on the ip of the client connecting to the resource
+
+This uses CIDR: Classless Inter-Domain Routing (CIDR)
+
+Use cases:
+	Optimize performance
+	Reduce network costs
+Ex:
+	Route users from a specific ISP to a specific endpoint
+	Users from a 203 ip go to resourceA, while the users from 200 ip got to resource
+
+//////////////////////////////////////////////////////////////////////////
+
+
+Routing Policies - Multi-Value
+//////////////////////////////////////////////////////////////////////////
+
+Used for routing to multiple resources
+
+Route 53 returns multiple values/resources
+
+Can be associated with Health Checks // Making them more powerful than Simple
+
+Up to 8 records for each Multi-Value query
+
+Multi-Value is not a substitute for having an ELB
+
+//////////////////////////////////////////////////////////////////////////
+
+Party Domains and Route 53
+//////////////////////////////////////////////////////////////////////////
+
+We can buy our domain name through any service, 
+	and then have Amazon manage the DNS records
+
+To do this, we create a public hosted zone
+	We then list the name servers in the hosted zone details
+
+In this way, we have the domain name provider have their name server point to Route 53
+	
+
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 10
+  __              __   
+ /  \ |  |  /|   /  \
+ |    |__|   |   | /|
+ |    |  |   |   |/ |
+ \__/ |  |. _|_  \__/
+
+VPC Fundamentals
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+
+VPC - Virtual Private Cloud
+
+Needed by:
+	AWS Certified Solutions Architect Associate
+	AWS Certified SysOps Admin
+
+An AWS Certified Developer should know:
+	VPC, Subnets, Internet Gateways & NAT Gateways
+	Security Groups, Network ACL (NACL), VPC Flow Logs
+	VPC Peering, VPC Endpoints
+	Site to Site VPN & Direct Connect
+
+
+//////////////////////////////////////////////////////////////////////////
+
+VPC and Subnets, a Primer
+//////////////////////////////////////////////////////////////////////////
+
+VPC - A private network to deploy resources in a Region
+	Has a CIDR Range of IP addresses that are allowed into the VPC
+
+Subnets - Allows for partitioning a network inside of a VPC
+
+Public Subnet - Allows traffic to and from the Internet
+
+Private Subnet - Does NOT allow traffic to and from the Internet
+		 This is for security and privacy
+
+Route Tables - Defines access to Internet and between subnets
+
+
+Internet Gateway - The way EC2 instances in a Public Subnet access the Internet
+
+NAT Gateway - The way that EC2 instances in a Private Subnet access the Internet
+		This is done through the NAT Gateway inside of the Public Subnet
+			The NAT Gateway then accesses the Internet Gateway
+		NAT Instances are self-managed where NAT Gateways are AWS-managed
+
+
+//////////////////////////////////////////////////////////////////////////
+
+VPC - NACL(network access control list)
+//////////////////////////////////////////////////////////////////////////
+
+Flow of data going into AWS Resources:
+Internet ---> VPC ----> NACL ----> Subnet ----> Security Groups ----> ENI/EC2 Instance
+
+
+NACL - This is a firewall that controls traffic to and from the subnet that is inside of our VPC
+	Stateless // Traffic can be allowed in and/or out
+	Has Allow and Deny rules
+	These are attached to the subnet level
+	Rules only operate on IP addresses
+	Default NACL allows all traffic in and out
+
+Security Groups // These are the second layer of defense AFTER NACLs
+	Stateful // Traffic allowed out can go in
+	Firewall that controls traffic to and from ENI/EC2 instances inside of the subnet
+	Can only have Allow rules
+	Rules affect IP addresses and security groups
+
+VPC Flow Log - Info about the traffic flowing through our VPC, Subnet, and ENI
+	Helps to monitor subnets to Internet, subnet to subnet, and Internet to subnet
+	Looking over these will help with connectivity problems
+	Can be sent to S3, CloudWatch Logs, and Kinesis Data Fire Hose
+
+
+//////////////////////////////////////////////////////////////////////////
+
+
+
+VPC Peering
+//////////////////////////////////////////////////////////////////////////
+
+VPC Peering - Connect two VPCs privately
+	Same behavior as if they were part of the same network
+	Must not have overlapping address ranges
+	Each instance only connects two VPCs, even if those VPCs have other peering connections
+	So if C<-->A<-->B, C and A, A and B, are connected, C and B are not
+
+	
+VPC Endpoints
+	All of AWS is publicly accessible, but we can access endpoints privately
+	VPC Endpoint Gateways can only connect to S3 and DynamoDB
+	VPC Endpoint Interfaces can connect to everything else
+
+There are two types of VPN connections that connect a Site to an AWS VPC
+	Site to Site
+		Connect over the Internet through an AWS VPN
+		Encrypted
+	Direct Connect
+		Physical connection between the site and AWS (takes at least a month)
+		Completely private network
+
+
+//////////////////////////////////////////////////////////////////////////
+
+VPC Closing Comments and Summary
+//////////////////////////////////////////////////////////////////////////
+
+VPC - Virtual Private Cloud
+	One for each AWS region used
+	We've been using the default one this entire time
+Subnets - Tied to AZ, network partition of the VPC
+Internet Gateways - at VPC level, provides Internet access
+NAT Gateway/Instances - give Internet access to private subnets
+NACL - Stateless, subnet level rules for inbound/outbound traffic
+Security Groups - Stateful, ENI/EC2 instance level
+VPC Peering - Connects two VPCs with non-overlapping IP ranges, non-transitive
+VPC Endpoints - Provides a way to get AWS Resources from within a VPC
+VPC Flow Logs - Monitoring traffic to and from a VPC
+Site to Site VPN - VPN connection over public Internet
+Direct Connect - A physical connection from site to AWS
+
+//////////////////////////////////////////////////////////////////////////
+
+Three Tier Architecture
+//////////////////////////////////////////////////////////////////////////
+
+The typical three tier architecture follows
+	A public-facing ELB via Route 53
+	A private VPC with an auto-scaling group
+		The group has three subnets, 
+			The subnets each have an EC2 instance across three different AZs
+	A private VPC with a Database and an Elasticache
+		The Elasticache will save user sessions and respond to database queries
+
+LAMP stack for EC2
+Linux - OS for the EC2
+Apache - Web server on Linux
+MySQL - Database
+PHP - App logic
+
+	This stack can add Redis/Memcached(Elasticache) to include caching
+	It can also store local app data and software on EBS drive (root)
+
+Wordpress on AWS
+	Send data to an ELB
+	Data then goes to EC2 instances
+	Data finally goes through ENI to an EFS
+	Wordpress has a very helpful diagram that covers Wordpress on AWS
+
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 11
+  __                 
+ /  \ |  |  /|   /|  
+ |    |__|   |    |  
+ |    |  |   |    |  
+ \__/ |  |. _|_  _|_
+
+Amazon S3 Introduction
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+S3 Security
+//////////////////////////////////////////////////////////////////////////
+
+User-Based
+	IAM Policies - controls which IAM Users can access
+
+Resource-Based
+	Bucket Policies - bucket-wide policies from S3 console, allows cross-account access
+	Object Access Control List (ACL) - finer grain
+	Bucket Access Control List (ACL) - less common
+
+So, an IAM principal can access an S3 object if
+	The user's IAM permissions allow it OR the resource policy allows it
+	AND there is no explicit deny
+
+Encryption - encrypts objects in S3 using encryption keys
+
+S3 Bucket Policies
+	JSON based policies
+		Resources: buckets and objects
+		Effect: Allow/Deny
+		Actions: Set of API to Allow or Deny
+		Principal: Account or user to apply policy to
+	S3 bucket policies
+		Grant public access to the bucket
+		Force objects to be encrypted at upload
+		Grant access to another account (Cross-Account access)
+
+JSON Ex: (allows anyone to access any object from the examplebucket)
+{
+	"Version": "2020-10-06",
+	"Statement": {
+		"Sid": "PublicRead",
+		"Effect": "Allow",                     // Allow
+		"Principal": "*",                      // anyone
+		"Action": [                            //
+			"s3:GetObject"                 // to get objects
+		],                                     //
+		"Resource": [                          //
+			"arn:aws:s3:::examplebucket/*" // from anything in examplebucket
+		]
+	}
+}
+
+When granting access
+	Users will be given access through IAM Policies
+	EC2 instances will be given access through EC2 instance roles
+	Cross-Account will be given access through an S3 Bucket Policy
+
+Bucket Settings for Block Public Access
+	Settings created to prevent conpany data leaks
+	If the bucket should never be public, leave these on
+	If no buckets should ever be public, just set this at the account level
+
+//////////////////////////////////////////////////////////////////////////
+
+S3 - Static Website Hosting
+//////////////////////////////////////////////////////////////////////////
+
+S3 can host static websites and give public Internet access to them
+
+Website URL will be
+	http://bucketname.s3-website-aws-region.amazonaws.com
+	OR
+	http://bucketname.s3-website.aws-region.amazonaws.com // has a '.' instead of a '-'
+
+This of course requires that the bucket has public reads
+	Will give a 403 error if no public reads
+
+
+//////////////////////////////////////////////////////////////////////////
+
+S3 - Versioning
+//////////////////////////////////////////////////////////////////////////
+
+We can version in S3
+	Enabled at the bucket level
+Uploading a file takes a key to ientify the file
+	Uploading a file with that same key will create a new version
+It is best practice to version buckets to not delete files accidentally
+
+Notes
+	Any file uploaded prior to versioning enabled will be version null
+	Suspending versioning does not delete previous versions
+
+//////////////////////////////////////////////////////////////////////////
+
+S3 - Replication (CRR && SRR)
+//////////////////////////////////////////////////////////////////////////
+
+CRR - Cross-Region Replication
+SRR - Same-Region Replication
+Must enable Versioning in source and destination buckets
+Buckets can be in different AWS accounts
+Copying is asynchronous
+Must give proper IAM permissions to S3
+
+Use Cases
+	CRR - Compliance, lower latency access, replication across accounts
+	SRR - Log aggregation, live replication between production and test accounts
+
+
+Notes:
+
+Enabling Replication only replicates new objects
+	Optionally, existing objects can be replicated with S3 Batch Replication
+
+Delete Operations
+	Can replicate delete markers from source to target (optional)
+	Deletions with a version are not replicated (avoids malicious deletes)
+
+No chaining of replication
+	Bucket A is replicated to Bucket B, which does have replication to Bucket C
+		Bucket B does not replicate Bucket A items into Bucket C		
+
+//////////////////////////////////////////////////////////////////////////
+
+
+S3 - Storage Classes Overview
+//////////////////////////////////////////////////////////////////////////
+
+S3 Standard - General Purpose
+S3 Standard-Infrequent Access (IA)
+S3 One Zone-Infrequent Access
+S3 Glacier Instant Retrieval
+S3 Glacier Flexible Retrieval
+S3 Glacier Deep Archive
+S3 Intelligent Tiering
+
+Can move between classes manually or using S3 Lifecycle configurations
+
+
+S3 Durability and Availability
+Durability
+	High durability (99.999999...) of objects across multiple AZs
+	If you store 10,000,000 objects w/ S3, you will, on average, lose one object in 10,000 years
+	Same for all storage classes
+
+Availability
+	Measures how readily available a service is
+	Varies depending on storage class
+	Ex: S3 standard has 99.99% availability, means not available 53 mins a year
+		Although low, we do have to take this into account for apps
+
+S3 Standard - General Purpose
+	99.99% availability
+	Used for frequently accessed data
+	Low latency and high throughput
+	Sustain 2 concurrent facility failures on the side of AWS
+	Use cases: Big data analytics, mobile and gaming apps, content distribution....
+
+S3 Storage Classes - Infrequent Access
+///////////////////
+Data that is rarely accessed, but is rapid when accessed
+Lower cost than S3 Standard
+	
+S3 Standard-Infrequent Access (S3 Standard-IA)
+	99.9% availability
+	Use cases: Disaster recovery, backups
+S3 One Zone-Infrequent Access (S3 One Zone-IA)
+	High durability (99.999....) in single AZ, data lost when AZ is destroyed
+	99.5% availability
+	Use cases: Storing secondary backups of on-premise data, or data that can be recreated
+///////////////////
+
+S3 Glacier Storage Classes
+///////////////////
+Low-cost storage meant for archiving/backup
+Pricing: price for storage + object retrieval cost
+
+S3 Glacier Instant Retrieval
+	Millisecond retrieval, great for data accessed once a quarter
+	Minimum storage length is 90 days
+S3 Glacier Flexible Retrieval
+	Expedited (1 to 5 mins), Standard (3 to 5 hours), Bulk (5 to 12 hours) - free
+	Minimum storage length is 90 days
+S3 Glacier Deep Archive - for LONG term storage
+	Lowest cost
+	Standard (12 hours), Bulk (48 hours)
+	Minimum storage length is 180 days
+///////////////////
+
+
+S3 Intelligent-Tiering
+///////////////////
+
+Small monthly monitoring and auto-tiering fee
+Moves objects automatically Access Tiers based on use
+There are no retrieval charges
+
+Frequent Access tier (automatic): default
+Infrequent Access tier (automatic): objects not accessed for 30 days
+Archive Instant Access tier (automatic): objects not accessed for 90 days
+Archive Access tier (optional): configurable from 90 to 700+ days
+Deep Archive Access tier (optional): configurable from 180 to 700+ days
+
+///////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 12
+  __              __
+ /  \ |  |  /|   /  \
+ |    |__|   |      /
+ |    |  |   |     /
+ \__/ |  |. _|_   /__
+
+AWS CLI, SDK, IAM Roles and Policies
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+EC2 Instance Metadata
+//////////////////////////////////////////////////////////////////////////
+
+EC2 Instance Metadata (IMDS) - Powerful, but least known by developers
+
+Allows EC2 instances to "learn about themselves" without using an IAM Role
+
+Instances get their metadata from a url: http://169.254.169.254/latest/meta-data
+
+We can get the IAM Role name for the metadata, but NOT the IAM Policy
+
+Metadata - Data about the instance
+Userdata - Launch script of the EC2 instance
+
+IMDSv1 vs IMDSv2
+	IMDSv1 - accessed from the url directly (http://169.254.169.254/latest/meta-data)
+	IMDSv2 - access is done in two steps:
+		Get session token using headers and PUT
+		Use session token in IMDSv2 calls, using headers
+		
+
+//////////////////////////////////////////////////////////////////////////
+
+AWS CLI Profiles
+//////////////////////////////////////////////////////////////////////////
+
+We can switch between AWS Profiles using the AWS CLI
+
+We just need to set the name
+	aws configure --profile <new-profile-name>
+Set the Access Key ID
+	<access key id string>
+Set the Secret Access Key itself
+	<secret access key string from actual AWS Account>
+Set the region
+	<us-west-2 as an example>
+And then just hit Enter for the Default output format
+
+From here, we can execute commands from either the default or other accounts
+	Default: aws s3 ls
+	Other:   aws s3 ls --profile <new-profile-name>
+
+This is just good to know as a developer
+//////////////////////////////////////////////////////////////////////////
+
+Using MFA on the CLI
+//////////////////////////////////////////////////////////////////////////
+
+To use MFA on the CLI, we use a temporary session
+We run STS GetSessionToken
+	aws sts get-session-token --serial-number arn-of-the-mfa-device --token-code code-from-token --duration-seconds 3600
+
+We then get back a JSON object in the form of:
+	Credentials
+		SecretAccessKey
+		SessionToken
+		Expiration
+		AccessKeyId
+
+Assign a virtual MFA device in the AWS Console
+In the CLI, use the STS get-session-token call, and fill with info from the virtual MFA device
+The response is temporary credentials
+Create an MFA profile in the CLI
+	aws configure --profile mfa
+	Fill out all of the fields with data from the credentials, or just hit Enter (default)
+	Open the credentials file at aws/credentials
+		Create the entry for aws_session_token and paste the token from the MFA profile
+
+//////////////////////////////////////////////////////////////////////////
+
+AWS SDK Overview
+//////////////////////////////////////////////////////////////////////////
+
+Used when coding against AWS services like DynamoDB
+
+Trivia: The AWS CLI uses Python SDK (boto3)
+Exam expects takers to know when to use an SDK
+We'll get to practice this in using the Lamba Fns
+
+Important: If we don't specify, or configure, a region, it will default to us-east-1
+
+//////////////////////////////////////////////////////////////////////////
+
+AWS Limits
+//////////////////////////////////////////////////////////////////////////
+
+API Rate Limits
+	DescribeInstances API for EC2 has a limit of 100 calls per second
+	GetObject on S3 has a limit of 5500 GET calls per second per prefix
+		A prefix is anything in front of a filename, so Imgs/Photos/photo0.jpg has two prefixes
+	For Intermittent Errors, implement Exponential Backoff
+	For Consistent Errors: request am API throttling limit increase
+
+Service Quotas (Service Limits)
+	Running on-demand standard instances: 1152 virtual CPUs
+	We can request a service limit increase by opening a ticket
+	We can request a service quote increase by using the Service Quotas API
+
+
+Exponential Backoff
+	If getting ThrottlingException intermittently, use exponential backoff
+	Retry mechanism already included in AWS SDK API calls
+	Must implement yourself if using the AWS API as-is, or in specific cases
+		Only use this for 5xx server errors and throttling
+		Do not use on 4xx errors, because these are client errors, no throttling errors
+
+How Exponential Backoff works
+	1st attempt: try after 1 second
+	2nd attempt: try after 2 seconds
+	3rd attempt: try after 4 seconds
+	4th attempt: try after 8 seconds
+	5th attempt: try after 16 seconds
+	And so on...
+
+By having all, or many, clients doing this, the server or resource gets less and less hammered by requests
+
+//////////////////////////////////////////////////////////////////////////
+
+AWS Credentials Provider and Chain
+//////////////////////////////////////////////////////////////////////////
+
+The AWS Credentials Provider has a chain of priority
+	So any conflicts are resolved by the higher priority entry
+
+1. Command Line Options: 
+	--region, --output, --profile
+2. Environment Variables: 
+	AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
+3. CLI credentials file:
+	Linux/Mac: ~/.aws/credentials
+	Windows: C:\Users\<username>\.aws\credentials
+4. CLI configuration file:
+	Linux/Mac: ~/.aws/config
+	Windows: C:\Users\<username>\.aws\config
+5. Container credentials
+	For EC2 tasks
+6. Instance profile credentials
+	For EC2 Instance Profiles
+
+
+The SDKs also have a priority chain.
+Here is the one for Java SDK as an example
+
+1. Java system properties
+	aws.accessKeyId, aws.secretKey
+2.Environment Variables
+	AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+3. Default credentials profiles file
+	~/.aws/credentials // shared by many SDKs
+4. Amazon ECS container credentials
+	For EC2 containers
+5. Instance profile credentials
+	Used on EC2 instances
+
+Example AWS Credentials Scenario:
+	App deployed on an EC2 instance is using environment variables.
+	Credentials are from an IAM user to call the Amazon S3 API
+
+	IAM user has S3FullAccess permissions
+	
+	App only uses one S3 bucket, so best practices:
+		IAM role and EC2 Instance Profile created for EC2 instance
+		Role was assigned minimum permissions for the S3 bucket
+
+	IAM Instance Profile was assigned to EC2 instance
+		Still has access to all S3 buckets. Why?
+
+	The reason is that the credentials given to the IAM user
+		These come from the Environment Variables
+		We must get rid of these to use the EC2 instance rules
+
+AWS Credentials Best Practices
+	NEVER store credentials in code
+	Best practice is to use the credentials chain, and inherit rules
+	Inside of AWS, use IAM Roles
+		And EC2 Instance Roles for EC2 Instances
+		ECS Roles for ECS tasks
+		Lambda Roles for Lambda functions
+	Outside of AWS, use environment variables / named profiles
+
+//////////////////////////////////////////////////////////////////////////
+
+Signing AWS API Requests
+//////////////////////////////////////////////////////////////////////////
+
+Calling the AWS HTTP API signs the request for identification using AWS credentials (access key and secret key)
+
+Some requests don't need to be signed
+	Requests for publicly available objects
+
+Using the SDK or CLI signs the HTTP requests automatically
+
+AWS HTTP requests should be signed using Signature v4 (Sigv4)
+
+There are two ways to send the Sigv4
+	HTTP Header option (signature in Auth header) // How CLI works
+	Query String option, Ex: S3 pre-signed URLS (signature in X-Amz-Signature)
+
+Example of an HTTP request for a file saved inside of an S3 Bucket:
+///////////////
+https://tempthisismybucket.s3.us-west-2.amazonaws.com/Wallpaper.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&
+X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&
+X-Amz-Credential=ASIASKY2OJFSKE7XNTG6%2F20241123%2Fus-west-2%2Fs3%2Faws4_request&
+X-Amz-Date=20241123T135426Z&
+X-Amz-Expires=300&
+X-Amz-Security-Token=IQoJb3JpZ2luX2VjED4aCXVzLXdlc3QtMiJGMEQCIElODFZYmbwbzvUxtJuUlVt%2FCpcUIJ4GSfMJFmEay%2FosAiBcz6yRkPpqwnyQuB4lRIzGYF1EjDnYoRLRJE4w2Xg5bSr2AgjX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAIaDDE2MDU3OTg2NDkzMiIMurrIyOFOKfBN%2BES4KsoCjozw2nPremL4XPZreqDmZBm8rrh56K3euHCfbtweLVVdOgpGmRnohKvBJqPHdgJ9f6xGHY7t2RAWtYi34Mnqpp88fFNCG%2BSS427kDe0p9CY8F6l7rP2S65Z3pOjMfBBN%2FLm9OVYKLauuwDG44K09n3jHMdDy%2Fl%2FvaQoXF0QeYsizlNjZpmxMUFQRL0yczBiAo4RybDHEj1JW8M%2BztQblX3n6lJv9OrZErJKn7zx5iZbIxu%2BfjGyDArxc3K%2Fw2t0MREi%2ByEJJssW65%2FOMD2%2BMXkzPBwPTGXQacvEl9j6PUkuA15iXEwLCdHyPi2ZVlogemLCwWzpX2Li4yrEUe5WDyMfdfNi%2FZGAxC0rcYwgqBZbut6sTX1vXKY%2FLIooTjeoeUURpx%2FAo3N9N5aGMdOB79p%2FIt%2BaKtvrAHKhx56EadVYF83F59v7WQ%2Fj8MMGjhboGOrQCEvqTXRRuqN7P67qeGBEpz%2B16DpJORfhzFEy35kK38YHsE8yZgdLMyRaXlgRmK9p1FHhYeETn5rjkZB2K0KNtotmv2I9qypDGBoPiva3tsNOqbdlqndnI%2FSFdrtHhZE2OVjqpv%2BNG7Yktjogj7BI6vQ%2BaQLNNeorqiRV1%2FDfy%2FIAyMIkQWwlO72K7MN9AOip8wH0dyWLsHCYogLqXYSHzUYSu%2BqvVpUzBy%2BprSvHs4TMZ81liHevLZhDs%2FyVcKhH9%2Ba9HSBtBnrCCbplRrkCLVlcSjwZPsAiV7P2%2FsD468T9P92vWB9df%2BoR5AvIxzCzvjBLvGErxRL549nVUkagHQ4xEV3obOKVv52WHXGrlUuPfHuQqzPlDiephsiXLNqzY17FYeEB3eO3BwMsXxyOla%2F%2BoVgU%3D&
+X-Amz-Signature=0fa43d653a873c40a30c120ffb1cc1eedffaf2749dfd1273d96b3323c67b6e55&
+X-Amz-SignedHeaders=host&response-content-disposition=inline
+///////////////
+
+//////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 13
+  __              __
+ /  \ |  |  /|   /  \
+ |    |__|   |     _/
+ |    |  |   |      \
+ \__/ |  |. _|_  \__/
+
+Advanced Amazon S3
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+S3 Lifecycle Rules
+//////////////////////////////////////////////////////////////////////////
+
+Moving Between Storage Classes
+//////////////
+Can transition objects between storage classes
+	Standard, Intelligent Tiering, Infrequent Access, Glacier
+
+For infrequently accessed objects, move them to StandardIA
+
+For archive objects that don't need fast access, move them to Glacier or Glacier Deep Archive
+
+Moving objects can be automated with Lifecycle Rules
+//////////////
+
+S3 Lifecycle Rules
+//////////////
+	Transition Actions - configure objects to transition to another storage class
+		Ex: Move objects to Standard IA class after 60 days of creation
+		Ex: Move to Glacier for archiving after 6 months
+
+	Expiration Actions - objects expire (delete) after a set time
+		Ex: Access log files can be set to delete after 365 days
+		Ex: Delete old versions of files (if versioning enabled)
+		Ex: Delete incomplete Multi-Part uploads
+
+	Rules can be created for a certain prefix (Ex: s3://mybucket/mp3/*)
+	Rules can be created for certain object Tags (Ex: Department: Finance)
+		Object Tags are applied by selecting the S3 object and applying a (Key: Value) Tag
+//////////////
+
+Ex Scenario 1
+//////////////
+App on EC2 creates image thumbnails after profile photos are uploaded to S3.
+Thumbnails are easily recreated, and only kept for 60 days.
+Source images should be immediately accessible for those 60 days.
+After 60 days the user can wait up to 6 hours.
+How to design this?
+
+The App should have an IAM Role with PUT and GET permissions for that S3 bucket.
+App puts photos on Standard.
+App puts thumbnails on One-Zone IA after creation. // Not able to do this with Transition rules
+Set a Lifecycle Rule, After 60 days: Photos will move to Glacier Flexible Retrieval
+	                             Thumbnails get deleted
+//////////////
+
+
+Ex Scenario 2
+//////////////
+
+S3 objects can be recovered from deletion immediately for 30 days.
+	Rarely happens.
+After 30 days, and up to 365 days, deleted objects can be recovered within 48 hours.
+How to design this?
+
+Enable versioning, so we can recover objects.
+App puts noncurrent versions of objects directly into Standard IA.
+Set a Lifecycle Rule: noncurrent versions of objects are moved to Glacier Deep Archive after 30 days.
+Set a Lifecycle Rule: delete noncurrent versions of objects after 365 days.
+
+//////////////
+
+S3 Analytics - Storage Class Analysis
+//////////////
+
+These are analytics to help decide when to transition objects, and which storage class to go to.
+
+Recommendations for Standard and Standard IA
+	Does NOT work for One-Zone IA or Glacier
+
+Report is updated daily
+	Start seeing data analysis after 24 to 48
+
+The analytics are a good first step to put together Lifecycle Rules, or improve them.
+
+//////////////
+
+//////////////////////////////////////////////////////////////////////////
+
+S3 Event Notifications
+//////////////////////////////////////////////////////////////////////////
+
+We can create rules around object events, like an object being created, deleted, restored, etc
+	ObjectCreated, ObjectRemoved, ObjectRestore, etc...
+
+Can filter by name (*.jpg)
+	Use case: Generate thumbnails of images loaded to S3 bucket
+
+Create as many S3 Events as needed
+
+S3 event notifications typically deliver events in seconds, but can take a minute or longer
+
+Events can be sent to
+	SNS (Simple Notification Service)
+	SQS (Simple Queue Service)
+	Lambda (Script to perform action)
+	Amazon EventBridge (Sends to other resource endpoints)
+
+SNS, SQS, and Lambda must all have a Resource Policy
+	SNS: SNS Resource (Access) Policy
+	SQS: SQS Resource (Access) Policy
+	Lambda: Lambda Resource Policy
+
+S3 Event Notifications w/ Amazon EventBridge
+	Advanced filtering options w/ JSON rules
+	Multiple Destinations - Step Fns, Kinesis Streams/Firehose, etc...
+	EventBridge Capabilities - Archive, Replay Events, Reliable delivery
+
+//////////////////////////////////////////////////////////////////////////
+
+S3 Performance
+//////////////////////////////////////////////////////////////////////////
+
+S3 Baseline Performance
+//////////////
+
+S3 automatically scales to high request rates, latency 100-200 ms
+
+An App can achieve at least 3,500 PUT/COPY/POST/DELETE or 5,500 GET/HEAD requests per second per prefix in an S3 bucket
+	There are no limits to the number of prefixes in a bucket
+
+Per Second Per Prefix
+	Ex: (Object Path => prefix)
+	bucket/folder/subfolder1/file => /folder/subfolder1/
+	bucket/folder/subfolder2/file => /folder/subfolder2/
+	bucket/folder1/file => /folder1/
+	bucket/folder2/file => /folder2/
+	Reads spread evenly across all four prefixes, can achieve 22,000 requests per second for GET and HEAD
+//////////////
+		
+S3 Performance - Uploads
+//////////////
+
+Multi-Part Uploads
+	Recommended for big files (> 100MB)
+	Must use for BIG files (> 5GB)
+	Can help parallelize uploads (speed up transfers)
+
+S3 Transfer Acceleration
+	Increase transfer speed by moving file to edge location, and then the target S3 bucket
+	Compatible with Multi-Part uploads
+	Ex: File in USA -> Edge Location in USA -> S3 in Australia
+
+//////////////
+
+S3 Byte-Range Fetches
+//////////////
+
+Parallelize GETs by requesting specific byte ranges
+Better resilience in case of failures
+Can be used to speed up downloads
+Can be used to retrieve only partial data (Ex: head of a file)
+
+//////////////
+
+
+//////////////////////////////////////////////////////////////////////////
+
+S3 Object Tags and Metadata
+//////////////////////////////////////////////////////////////////////////
+
+S3 User-Defined Object Metadata
+	When uploading an object, you can also assign metadata
+	Name-value (key: value) pairs
+	User-defined metadata names must begin with "x-amz-meta-"
+	Metadata can be retrieved while retrieving the object
+	
+S3 Object Tags
+	Key-value pairs for objects in Amazon S3
+	Useful for fine-grained permissions (only access specific objects w/ specific tags)
+	Useful for analytics purposes (using S3 Analytics to group tags)
+
+CANNOT search the object metadata or object tags directly
+	Instead, use an external DB as a search index such as DynamoDB
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 14
+  __
+ /  \ |  |  /|   |  |
+ |    |__|   |   |__|
+ |    |  |   |      |
+ \__/ |  |. _|_     |
+
+Amazon S3 Security
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+S3 Security
+//////////////////////////////////////////////////////////////////////////
+
+S3 - Object Encryption
+//////////////
+
+Objects can be encrypted in S3 buckets using one of 4 methods.
+3 of these methods are Server-Side Encryption (SSE):
+	Server-Side Encryption (SSE)
+		SSE with S3 Managed Keys (SSE-S3) // Enabled by default
+			Encrypts S3 objects using keys handled and owned by AWS
+		SSE with KMS Keys stored in AWS KMS (SSE-KMS)
+			Leverages AWS KMS to manage encryption keys
+		SSE with Customer-Provided Keys (SSE-C)
+			When you want to manage your own encryption keys
+The last is Client-Side Encryption
+	Client-Side Encryption - Client uploads already encrypted files
+		Encryption Keys stay on-site
+		
+It is important to know which one to use where, for the exam
+//////////////
+
+Server-Side Encryption (SSE)
+//////////////
+
+Encryption using keys handled, managed, and owned by AWS
+Objects are encrypted server-side
+Encryption type is AES-256
+Must send header "x-amz-server-side-encryption": "AES256"
+Enabled by default for new buckets and objects
+                                                ___________________________
+User-> File uploaded w/ (HTTP(S) + Header) --> |                          |
+                                               |Object                    |
+                                               |   +  -> encryption -> S3 |
+                                               |  Key                     |
+                                               |__________________________|
+//////////////
+
+AWS Key Management Service (SSE-KMS)
+//////////////
+
+Encryption keys are handled and managed by AWS KMS
+KMS Advantages: user control + audit key usage using CloudTrail
+Object is encrypted server-side
+Must set header "x-amz-server-side-encryption": "aws:kms"
+                                                ___________________________
+User-> File uploaded w/ (HTTP(S) + Header) --> |                          |
+                                               |Object                    |
+                                               |   +  -> encryption -> S3 |
+                                               |KMS Key                   |
+                                               |__________________________|
+SSE-KMS Limitation:
+	Use may be impacted by KMS limits
+When uploaded, calls are made to the GenerateDataKey KMS API
+
+When downloaded, calls are made to the Decrypt KMS API
+
+These count toward the KMS quota per second
+	(5500, 10000, 30000, req/s based on region)
+
+A quota increase can be requested with the Service Quotas Console
+//////////////
+
+Customer-Provided Keys (SSE-C)
+//////////////
+
+Server-Side Encryption using keys that are managed client-side
+S3 does NOT store the encryption key, which is provided by the client
+HTTPS must be used
+Encryption keys must be provided in HTTP headers for every TTP request made
+                                                ___________________________
+User->File uploaded w/(HTTPS only) Key in Header)->                       |
+                                               |Object                    |
+                                               |   +  -> encryption -> S3 |
+                                               |Client Provided Key       |
+                                               |__________________________|
+//////////////
+
+Client-Side Encryption
+//////////////
+
+Use client libraries such as S3 Client-Side Encryption Library
+Clients must encrypt data themselves before sending to Amazon S3
+Clients must decrypt data themselves when retrieving from Amazon S3
+Customer fully manages keys and encryption cycle                                                                
+                                                   ________________________
+User->File encrypted w/ Client Key -> Uploaded -> |                       |
+                                     w/ HTTP(S)   |                       |
+                                                  |                    S3 |
+                                                  |                       |
+                                                  |_______________________|
+//////////////
+
+Encryption in Transit (SSL/TLS)
+//////////////
+
+Encryption in flight exposes two endpoints:
+	HTTP Endpoint - not encrypted
+	HTTPS Endpoint - encryption in flight
+	Sites w/ green locks signify they are using encryption in flight
+
+HTTPS is recommended whenever using Amazon Services
+HTTPS is mandatory when using SSE-C
+Most clients use the HTTPS endpoint by default
+//////////////
+
+Force Encryption in Transit (aws: Secure Transport)
+//////////////
+
+To force using HTTPS, we can create a Deny bucket policy
+
+...
+"Effect": "Deny",
+"Principal": "s3:GetObject",
+"Resource": "arn:aws:s3:::my-bucket/*",
+"Condition": {
+	"Bool": {
+		"aws:SecueTransport": "false"
+	}
+}
+...
+
+//////////////
+
+About DSSE-KMS
+//////////////
+
+A new type of encryption has come out, called DSSE-KMS
+	This is just "Double-Encryption based on KMS"
+	This shouldn't show up in the exam
+//////////////
+
+//////////////////////////////////////////////////////////////////////////
+
+S3 Default Encryption
+//////////////////////////////////////////////////////////////////////////
+
+S3 Default Encryption vs Bucket Policies
+	All new buckets have SSE-S3 enabled by default
+	Optionally, can "force encryption" using a bucket policy
+		 Can refuse any API call that tries a PUT without encryption headers (SSE-KMS or SSE-C)
+
+Note that bucket policies are always evaluated before default encryption settings
+
+//////////////////////////////////////////////////////////////////////////
+
+CORS
+//////////////////////////////////////////////////////////////////////////
+
+CORS: Cross-Origin Resource Sharing
+//////////////
+
+Origin: scheme (protocol) + host (domain) + port
+	Ex: http://www.example.com (implied port is 443 for HTTPS, 80 for HTTP)
+Web Browser based mechanism to allow requests to other origins from main origin
+Main Origin: http://ex.com/page
+Other Origin: http://other.com/component
+Requests will only be fulfilled if Other Origin allows for requests, using CORS Headers
+	Ex: Access-Control-Allow-Origin
+                                                  ______________
+CORS:                         Preflight Request->|  other.com   |
+ ex.com        |           |<--Preflight Response|    Web       |
+Web Server <-->|Web Browser|                     |   Server     |
+ (Origin)      |           |  <-CORS Headers->   |(Other Origin)|
+                     (received already by Origin)|______________|
+//////////////
+
+Amazon S3 - CORS
+//////////////
+
+A client making a cross-origin request on our S3 bucket
+	Need to enable correct CORS headers
+
+POPULAR EXAM QUESTION!!!!
+
+Can all for a specific origin, or * for all origins	
+
+Ex: CORS w/ S3 Buckets
+                                     ______________________
+CORS:       |--->GET/index.html----->|  mainBucket.html   |
+|           |                        |____________________|
+|Web Browser|                         ______________________
+|           |                         |  imageBucket.html  |
+            |->GET/images/coffee.jpg->|____________________|
+
+//////////////
+//////////////////////////////////////////////////////////////////////////
+
+S3 - MFA Delete
+//////////////////////////////////////////////////////////////////////////
+
+(Multi-Factor Authentication Delete)
+
+MFA - force users to generate a code on a device (usually mobile or USB MFA Device), before doing important operations on S3
+
+MFA will be required to:
+	Permanently delete an object version
+	Suspend versioning on the bucket
+
+MFA won't be required to:
+	Enable versioning
+	List deleted versions
+
+To use MFA Delete, Versioning must be enabled on the bucket
+
+Only the bucket owner (root account) can enable/disable MFA Delete
+	This is one of the few things the root account will be used for
+
+To enable/disable MFA Delete, it must be done on the AWS CLI, AWS SDK, or the Amazon S3 REST API
+
+
+//////////////////////////////////////////////////////////////////////////
+
+S3 Access Logs: Warning
+//////////////////////////////////////////////////////////////////////////
+
+S3 Access Logs
+//////////////
+For audit purposes, may want to log all access to S3 buckets
+
+Any request to S3, from any account, authorized or denied, will be logged in a DIFFERENT bucket
+	See below for the Logging loop warning
+
+That data can be analyzed using data analysis tools
+
+The target logging bucket must be in the same region
+//////////////
+
+WARNING:
+	Do not set your logging bucket to be the monitored bucket
+	It will create a logging loop, creating an infinite amount of data
+		Logging observes bucket
+		Logging writes log after observing an access
+		Logging accesses bucket and places log inside
+		Logging sees its own access to bucket
+		Logging writes log after observing the access
+		Cycle repeats
+
+//////////////////////////////////////////////////////////////////////////
+
+S3 Logging - Hands On
+//////////////////////////////////////////////////////////////////////////
+
+Create Log-Storage Bucket // Logging-storage bucket
+
+Create Activity Bucket // Bucket to have activity logged
+
+Go to Properties of Activity Bucket, and enable Server Access Logging
+	Set file storage target as the Log-Storage Bucket
+		Permissions to do this are automatically written into the bucket's Bucket Policy
+
+It can take several hours for logs to start being written to the Logging-Storage Bucket
+
+//////////////////////////////////////////////////////////////////////////
+
+S3 - Pre-Signed URLs
+//////////////////////////////////////////////////////////////////////////
+
+Overview:
+	A User will create a pre-signed URL that allows a non-authorized user to access private S3
+		This access is equal to the permissions of the user that pre-signed the URL
+	This access is temporary, and allows for GET and/or PUT actions
+
+Generate pre-signed URLs using the S3 console, AWS CLI, or SDK
+
+URL Expiration
+	S3 Console - 1 min up to 720 mins (12 hours)
+	AWS CLI - configure expiration with -expires-in parameter in seconds
+		default is 3600 seconds, max 604,800 seconds (168 hours)
+
+Users given a pre-signed URL inherit the permissions of the user that generated the URL for GET/PUT
+
+Examples:
+	Allow only logged-in users to download a premium video from the S3 bucket
+	Allow an ever-changing list of users to download files by generating URLs dynamically
+	Allow temp access to a user for uploading a file to a specific location in the S3 Bucket
+
+//////////////////////////////////////////////////////////////////////////
+
+S3 - Pre-Signed URLs - Hands On
+//////////////////////////////////////////////////////////////////////////
+
+Select object in private bucket
+
+Confirm that it is private by copying the URL and attempting to view it in a new tab
+
+Once the page shows an access error, we know that the object is private
+
+Go to the object in the S3 Console
+	Select Create Pre-Signed URL under Actions
+	Select the number of minutes that the URL will be active
+	Copy the URL and go there in a new tab
+		The object should now be accessible
+
+//////////////////////////////////////////////////////////////////////////
+
+S3 - Access Points
+//////////////////////////////////////////////////////////////////////////
+
+Overview:
+	Create Access Points so users of the system can get specific permissions (READ/WRITE) into S3
+	These Access Points have permissions through a policy, and the S3 Bucket's Policy must allow the access from that Access Point
+
+Access Points simplify security management for S3 Buckets
+Each Access Point has:
+	Its own DNS Name (Internet Origin or VPC Origin)
+	An Access Point Policy (similar to a Bucket Policy) - allows for managing security at scale
+
+Users (Finance) --> Policy w/ R/W to /finance in Bucket --> Finance Access Point --> 📁/finance/...
+
+Users (Sales) --> Policy w/ R/W to /sales in Bucket --> Sales Access Point --> 📁/sales/...
+
+Users (Analytics) --> Policy w/ R to entire Bucket --> Analytics Access Point --> 📁/finance/...
+                                                                              \__>📁/sales/...
+
+VPC Origin
+/////////////
+Can define the Access Point to be accessible only from within VPC
+Must create a VPC Endpoint to access the Access Point (Gateway or Interface Endpoint)
+VPC Endpoint Policy must allow access to the target bucket and Access Point
+
+VPC:______________________________
+|                                |
+| EC2 Instance -> VPC Endpoint ----->Access Point (VPC Origin) --> S3 Bucket
+|             (w/Endpoint Policy)| (w/ Access Point Policy)      (w/ Bucket Policy)
+|________________________________|
+
+/////////////
+
+//////////////////////////////////////////////////////////////////////////
+
+S3 Object Lambda
+//////////////////////////////////////////////////////////////////////////
+
+Use AWS Lambda Fns to change an object before sending it to a calling application
+
+Only one S3 Bucket is needed, then create S3 Access Points and S3 Object Lambda Access Points
+	These Access Points modify, enrich, and/or redact per customer need
+
+Use Cases :
+	Redacting PII for analytics or non-production environments
+	Converting between data formats (Ex: XML to JSON)
+	Resizing and watermarking images using caller-specific details
+                  _____________________________________
+                 |AWS Cloud:                           |
+E-Commerce App<-------------------------->S3 Bucket    |
+                 |                               |     |
+		 |                       Supporting    |
+                 |                     S3 Access Point |
+                 |                               |     |
+                 |                               |     |
+Analytics App <---S3 Object Lambda<-->Redacting<-|     |
+		 |  Access Point      Lambda Fn  |     |
+                 |                               |     |
+Marketing App <---S3 Object Lambda<-->Enriching<--     |
+		 |  Access Point      Lambda Fn        |
+                 |                        ^            |
+                 |                        |            |
+                 |                 Customer Loyalty    |
+                 |                    Database         |
+                 |_____________________________________|
+
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 15
+  __              ___
+ /  \ |  |  /|   |   
+ |    |__|   |   |__
+ |    |  |   |      |
+ \__/ |  |. _|_  ___|
+
+Amazon Cloudfront
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront Overview
+//////////////////////////////////////////////////////////////////////////
+
+AWS CloudFront
+///////////////////
+Content Delivery Network (CDN)
+Improves users experience for static data retrieval
+216 Points of Presence
+DDoS Protection (b/c worldwide), integration w/ Shield, AWS Web App Firewall
+///////////////////
+
+CloudFront Origins
+///////////////////
+S3 Bucket, Uses:
+	For distributing files and caching them at edge
+	Enhanced security w/ CloudFront Origin Access Control (OAC)
+		OAC is replacing Origin Access Identity (OAI)
+	CloudFront can be used as an ingress (upload files to S3)
+
+Custom Origin (HTTP), Examples:
+	An Application Load Balancer
+	EC2 Instance
+	S3 static website
+	Any HTTP backend as desired
+///////////////////
+
+CloudFront High-Level
+///////////////////
+Client requests data from CloudFront Edge Location
+CloudFront gets data from S3 Bucket or other website
+CloudFront stores data in its local cache
+Next client to request same data
+CloudFront gets that data from its local cache, and gives that to the client
+                                                              _________________
+Client --> www.example.com --> CloudFront Edge Location <---> | Origin:        |
+	                             (local cache)            |         S3     | 
+                                                              |         or     | 
+                                                              |        HTTP    | 
+                                                              |________________|
+///////////////////
+
+CloudFront vs S3 Cross Region Replication
+///////////////////
+While these can have similar roles, they have different use cases
+
+CloudFront
+	Global Edge Network
+	Files are cached for a TTL(time to live) (about a day)
+	Great for static content that must be available everywhere
+	Ex: A single static website that doesn't change often
+	
+S3 Cross Region Replication
+	Must be setup for each region that needs a replication
+	Files are updated in real-time
+	Read-Only
+	Great for dynamic content that needs to be available at low-latency in few regions
+	Ex: A region-specific weather service with real-time updates
+///////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront - Hands On
+//////////////////////////////////////////////////////////////////////////
+
+Go to CloudFront in AWS Console
+
+Create a Distribution
+	Choose a resource (S3 Bucket, Load Balancer, etc.)
+	Select Origin Access Control Settings
+		Create a new OAC
+		Copy the policy
+		Paste the policy to the resource's Access Policy (Ex: S3's Bucket Policy)
+	No need to enable security protections (WAF) for a demo
+	Once the Distribution is deployed, we can access the resource
+		And further requests pull from the faster cache, rather than the resource
+	
+
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront - Caching and Caching Policies
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront Caching
+///////////////////
+Each CloudFront Edge Location has its own cache
+
+CloudFront identifies each object in the cache using a Cache Key
+
+On a request, CloudFront looks in the cache
+	On a miss, it goes to the origin, and saves that data in the cache as well
+	On a hit (determined by the cache key) it just returns from the cache
+	Data a TTL (time to live), after which it expires
+
+Data in the cache can be marked as invalid before the TTL is up
+		Uses the CreateInvalidation API
+///////////////////
+
+Cache Key
+///////////////////
+Unique identifier for every object in the cache
+
+Default consists of hostname + resource portion of URL
+
+Sometimes a more complex approach is needed:
+	If an app that serves content varies based on user, device location, etc.
+	Can add other elements (HTTP Headers, cookies, etc...) to the Cache Key
+		Uses CloudFront Cache Policies
+///////////////////
+
+Cache Policy
+///////////////////
+Cache based on:
+	HTTP Headers: None or Whitelist
+	Cookies: None, Whitelist, Include All Except, or All
+	Query Strings: None, Whitelist, Include All Except, or All
+
+Control the TTL (0 seconds to one year)
+	Can be set by the origin using Cache-Control header or Expires header
+
+Create a custom policy or use Predefined Managed Policies
+
+ALL HTTP headers, cookies, and query strings included in the Cache Key are auto-included in (forwarded to) origin requests
+But note, the Origin Request Policy will have its own list of required data that is also pulled from the client's request on a cache miss
+
+/////
+Ex: HTTP Headers
+/////
+_______________
+Request|       |
+--------       |
+Get ...        |
+User-Agent:... |
+Date:...       |
+Auth:...       |
+Keep-Alive:... |
+Language: fr-fr| // This request is for the French language
+_______________|
+
+None:
+	Don't include any headers in Cache Key
+	Headers are not forwarded (except default)
+	Best caching performance
+Whitelist:
+	Only specific headers included in Cache Key
+	Specified headers are also forwarded to Origin
+/////
+Ex: Query Strings
+/////
+Get /image/cat.jpg?border=red&size=large HTTP/1.1
+
+None:
+	Don't include any headers in Cache Key
+	Query strings are not forwarded
+Whitelist:
+	Only specific query strings included in Cache Key
+	Only specific query strings are forwarded
+Include All-Except:
+	Include all query strings in Cache Key except the specified list
+	All query strings are forwarded except the specified list
+All:
+	Include all query strings in Cache Key
+	All query strings are forwarded
+	Worst caching performance
+/////
+///////////////////
+
+CloudFront Policies - Origin Request Policy
+///////////////////
+Specify values that will be included in origin requests
+	None of these values in the Cache Key and Origin Request Policy will overlap
+		So, no duplicated cache content
+Can include:
+	HTTP Headers: None, Whitelist, All - viewer headers options
+	Cookies: None, Whitelist, All
+	Query Strings: None, Whitelist, All
+
+Can add CloudFront HTTP Headers and Custom Headers in origin request
+	These do not need to be present in the client's request
+
+Can create custom policy or Predefined Managed Policies for the Origin Request Policy
+///////////////////
+
+Cache Policy vs Origin Request Policy
+///////////////////
+            Request                      Forward
+Client -----------------> CloudFront ----------------> Origin (EC2 Instance)
+                          (w/ Cache)
+         Cache Policy                                   Origin Request Policy (Whitelist)
+         - URL                                          - HTTP Headers: User-Agent, Authorization
+         - Prefixes                                     - Cookies: session_id
+	 - Header: Authorization                        - Query Strings: ref
+
+Request ________        Forward ________
+|              |        |              |
+Get ...        |        Get ...        |
+Host:...       |        Host:...       |
+User-Agent:... |        User-Agent:... |
+Date:...       |        Auth:...       |
+Auth:...       |        Cookie:...     |
+Keep-Alive:... |        |______________|
+Cookie:...     |
+|______________|
+
+In this example, the Request is received and then enhanced before being sent to the Origin
+// It seems that the Forwarded Origin Request is composed of the fields from both the Cache Policy and the Origin Request Policy
+///////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront - Cache Invalidations
+//////////////////////////////////////////////////////////////////////////
+
+When data is cached, it is given a TTL, but we may update the backend data prior to the TTL expiring
+	TTL: time to live
+When this happens, we can send a command to invalidate a specific file (file.fileType), or the content of an entire folder (folder/*) saved in the cache, or all files (*)
+	This of means that the cache will consider any request for that data a cache miss, and make a request to the Origin
+
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront - Cache Behaviors
+//////////////////////////////////////////////////////////////////////////
+
+Overview
+///////////////////
+Configure different setting for a given URL path pattern
+
+Ex:
+One specific cache behavior to images/*.jpg files on your origin web server
+
+Route to different kind of origins/origin groups based on the content type or path pattern
+	/images/*
+	/api/*
+	/* (default cache behavior)
+
+When adding additional Cache Behaviors, the Default Cache Behavior is always the last to be processed and is always /* (the default)
+	So we check for any modified behavior, and will default to /* otherwise
+                                               _____________________
+                                              |Origins:             |
+                                              |                     |
+                         |------> (/api/*)------> App Load Balancer |
+Route to Multiple Origins|                    |                     |
+                         |------> (/*)----------> S3 Bucket         |
+                                              |_____________________|
+///////////////////
+
+Ex: Sign-In Page
+///////////////////
+In this example, we are requiring users to login
+Once logged in they are given a signed cookie, and able to access the static website in the S3 bucket
+If they do not have the signed cookie, they are redirected to the login page when they try to access any other page
+
+                                           _________________ (returns  ______________________________
+                                          |Cache Behaviors: | signed  |Origins:                      |
+                             ____________ |                 | cookies)|              (Generate signed|
+     |<-Signed Cookies->|<->|CloudFront  |<->(/login)<-----------------> EC2 Instance    cookies)    |
+Users|                  |   |Distribution|                  |         |                              |
+     |<-authenticate--->|<->|____________|<->(/*)----------------------> S3 Bucket                   |
+                                          |_________________|         |______________________________|
+///////////////////
+
+
+CloudFront - Maximize Cache Hits by Separating Static and Dynamic Distributions
+///////////////////
+In this example, we are requiring users to log in
+Once logged in they are given a signed cookie, and able to access the static website in the S3 bucket
+If they do not have the signed cookie, they are redirected to the login page when they try to access any other page
+                         ______________  Cache based
+                        |CDN Layer     | on correct   
+                        |CloudFront    | headers and   
+                        |              | cookie        Dynamic Content (REST, HTTP server): ALB + EC2              
+     |-Dynamic--------->|(Dynamic dist)|-------------->(hub)------------------> EC2 M5 Instance
+Users|                  |(Static dist) |                 
+     |-Static Requests->|______________|-----(static content)-----------------> S3 Bucket
+            For the static dist, no headers/session caching rules                
+            Required for maximizing cache hits
+///////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront - Caching & Caching Invalidations - Hands On
+//////////////////////////////////////////////////////////////////////////
+
+Distribution
+///////////////////
+Go to: CloudFront > Distributions > *Distribution* > Edit Behavior
+
+We can't change the Default Behavior (*)
+
+In: CloudFront > Policies > Cache > Create Cache Policy
+	Put in a name
+	TTL Min, Max, Default
+	Set: Headers, Query Strings, Cookies // For demo we don't set any
+	Create origin request policy
+		Set Name
+		
+
+In: CloudFront > Distributions > *Distribution* > Create Behavior
+	Set the Path
+	Set: Origin and origin groups // Origin the behavior applies to (S3 Bucket, EC2 instance, etc)
+	Set: Cache Key and Origin Requests
+
+// Most specific is selected first, (/images/*) is more specific than (/*)
+///////////////////
+
+Invalidations
+///////////////////
+Files loaded into the cache will stay there until the TTL expires
+	Changing the actual file will not show up because the cached version gets loaded
+The files can be invalidated through the online console, which will load the newest version
+
+This is done at CloudFront > Distributions > *Distribution* > Invalidations
+	Select: Create Invalidation
+	For all items, put in "/*"
+	After a minute, it completes, and the newest version of the file will be loaded
+	
+///////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront - ALB or EC2 as an Origin
+//////////////////////////////////////////////////////////////////////////
+
+This is the layout of how an EC2 instance or an ALB can be the Origin for a CloudFront Distribution
+
+EC2 Instance:
+////////////////////
+- Must be public to be accessed
+- Accessed through the CloudFront URL
+
+         Edge                  Allow Public
+       Location                   IP of           ______________________________________
+          _                    Edge Locations    |  Security Group:                     |
+Users <->|_|<-------------------------------------------->EC2 Instance (MUST be public) |
+                               CloudFront URL    |______________________________________|
+////////////////////
+
+Application Load Balancer (ALB):
+////////////////////
+- In front of an EC2 Instance(s)
+	- These instances can be private
+- The ALB itself must be public
+
+
+
+         Edge        Allow Public   ________________ (Allow Security ______________________________
+       Location           IP of    |Security Group: | Group Load    |                              |              
+          _          Edge Locations|  ALB           | Balancer)     |  Security Group:             |
+Users <->|_|<--------------------->|________________|<-------------->EC2 Instances(can be private) |
+                                  (ALB MUST be public)              |______________________________|
+////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront - Geo Restriction
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront Distributions can restrict based on the location of the user
+
+- These can be:
+	No Restriction: Allows all
+	Allowlist: Allow access only from those countries on the Allowlist
+	Denylist:  Allow access only from those countries NOT on the Denylist
+
+- The "country" is determined using a 3rd party Geo-IP database
+- Use case: Copyright Laws to control access to content
+- Found under:
+	CloudFront > Distributions > *Distribution* > Security
+		Under CloudFront geographic restrictions
+			Next to Countries, select Edit
+
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront - Signed URL / Cookies
+//////////////////////////////////////////////////////////////////////////
+
+The Goal: Distribute paid shared content to premium users all over the world
+Solution: Use CloudFront Signed URL / Cookie. Attach policy with:
+	Includes URL expiration
+	Includes IP ranges to access data from
+	Trusted Signers // AWS accounts that can create signed URLs
+
+How long should the URL be valid for?
+	Shared content (movie, music, etc.), make it short (a few minutes)
+	Private Content (private to the user), this can last years
+
+Signed URL: access to individual files (one signed URL per file)
+Signed Cookie: access to multiple files (one signed cookie for many files)
+
+In the below, Signed URL and Signed Cookie can be interchanged,
+	but use the correct one where needed (URL for single files, Cookie for multiple)
+
+Signed URL
+////////////////////
+- Place an Origin Access Control (OAC) between the Edge Locations and the S3 Object
+- 1. Client uses an authorization to access the application
+- 2. The application will then get the Signed URL from CloudFront
+- 3. The application will then send the Signed URL to the Client
+- 4. Client uses the Signed URL to access CloudFront and then the S3 Object
+                   
+                   4.
+                   Signed URL   _________________          ___________
+            Client<----------->|Amazon CloudFront|  OAC   | Amazon S3 |
+1.            | | 2.           |                 <-------->           |
+Authentication| | Return       | Edge Location   |        |           |
++ Authorization | Signed URL   |                 |        |           |
+              | |              | Edge Location   |        |  Object   |
+          Application<-------->|_________________|        |___________|
+                    3.Use AWS SDK
+		      Generate Signed URL
+////////////////////
+
+CloudFront Signed URL vs S3 Pre-Signed URL
+////////////////////
+
+- CloudFront Signed URL:
+	Allow access to path, not considering the Origin (S3, EC2 instance, etc.)
+	Account wide key-pair, only the root can manage it
+	Can filter by IP, path, date, expiration
+	Can leverage caching features
+
+          Signed URL    Edge Location          Origin 
+Client <-------------------> |_| <---------------------> EC2 M5 Instance
+
+- S3 Pre-Signed URL:
+	Issue a request as the AWS account who pre-signed the URL
+	Uses the IAM key of the signing IAM principle
+		This also means the pre-signed URL has all of the permissions as the signing account
+	Limited lifetime
+	Not using CloudFront
+
+          Pre-Signed URL 
+Client <------------------> S3 Bucket
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront - Signed URL - Key Groups + Hands On
+//////////////////////////////////////////////////////////////////////////
+
+Two types of signers:
+	1. Trusted Key Group (recommended)
+		Can leverage APIs to create and rotate keys, using IAM for API security
+	2. An AWS Account containing the CloudFront Key Pair
+		Root Account manages keys in AWS console (NOT recommended b/c uses root)
+
+In CloudFront distribution, create one or more trusted key groups
+
+Generate a public key and private key
+	Private key is used by app (EC2 instance) to sign URLs
+	Public key is uploaded to CloudFront, and then used by CloudFront to verify URLs		
+Create Key Group, Hands On - New Way (Recommended)
+////////////////////
+Go to any online key generator, and generate a private and public 2048 bit key
+
+Go to CloudFront > Public Keys > Create Public Key and paste in the public key
+
+Go to CloudFront > Key Groups > Create Key Group
+	Name the Key Group
+	Select the Public Key
+////////////////////
+
+Create Key Group, Hands On - Old Way (NOT Recommended)
+////////////////////
+
+// MUST be logged in as root account
+Go to AWS Management Console > My Account (dropdown) > My Security Credentials > CloudFront Key Pairs
+	Select Create New Key Pair
+	Download the Private Key
+	Download the Public Key
+	Key Pair is added to CloudFront
+	Upload the Private Keys to the EC2 Instances
+
+// I really looked around for where and why the EC2 Instances would have a private key
+// It seems like they would use it to grant access to authorized users that just accessed the app they run, but I couldn't find anywhere that said this
+// All of the advice seems to say that private keys are only stored in very secure storage
+////////////////////
+
+// If my understanding is correct, a signed URL has a "Signature" parameter that has a hash of the public key
+// This parameter is then used by CloudFront to compare it to the private key, which is stored on CloudFront as the Key Pair, but is never accessed directly
+// We would store the private key in a safe location (personal computer) just to have a backup in case the private key in CloudFront was ever lost
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront - Advanced Concepts
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront - Pricing
+////////////////////
+Pricing differs by geographic region, and by amount of data transferred.
+
+Pricing starts at first 10TB, and goes up to over 5PB
+////////////////////
+
+CloudFront - Price Classes
+////////////////////
+The number of Edge Locations can be reduced to save on costs
+There are three Price Classes for this:
+	1. Price Class All - all regions, best performance
+	1. Price Class 200 - most regions, but excludes most expensive
+	1. Price Class 100 - only least expensive regions
+////////////////////
+
+CloudFront - Multiple Origin
+////////////////////
+Route to different kinds of Origins based on content type
+Or based on path pattern (/images/*, /api/*, /*)
+
+                                _________________          ___________
+                               | Cache Behaviors:|        | Origins:  |
+ _________________             |                 |        |           |
+|Amazon CloudFront|----------------> /api/* -----------------> ALB    |
+|                 |            |                 |        |           |
+|                 |            |                 |        |           |
+|_________________|-----------------> /* -----------------> S3 Bucket |
+                               |_________________|        |___________|
+////////////////////
+
+CloudFront - Origin Groups
+////////////////////
+Increase high-availability and do failover
+Origin Group: one primary and one secondary Origin
+If the primary Origin fails, the second one is used
+
+EC2 Instances:
+                                     1.(Request 
+                     _________________  Returns _____________________________
+                    |Amazon CloudFront| Error  | EC2 Instances Origin Group: |
+ _________________  |                 | Code)  |                             |
+|Client           |--->               |<--------->Origin A (Primary Origin)  |
+|                 | |                 |        |                             |
+|                 | |                 |        |                             |
+|_________________| |                 |<--------->Origin B                   |
+                    |_________________|2.(Retry|_____________________________|
+                                          Request)
+
+S3 Buckets:
+                                     1.(Request 
+                     _________________  Returns ___________________________
+                    |Amazon CloudFront| Error  | S3 Origin Group:          |
+ _________________  |                 | Code)  |                           |
+|Client           |--->               |<--------->Origin A (Primary Origin)|
+|                 | |                 |        |      |                    |
+|                 | |                 |        |Replication across Regions |
+|                 | |                 |        |      |                    |
+|_________________| |                 |<---------->Origin B                |
+                    |_________________|2.(Retry|___________________________|
+                                          Request)
+
+////////////////////
+
+CloudFront - Field Level Encryption
+////////////////////
+Protect sensitive user info through app stack
+Adds an additional layer of security along with HTTPS
+Sensitive info encrypted at the edge closest to user
+Use asymmetric encryption
+Usage:
+	Specify set of fields in POST requests to be encrypted (up to 10 fields)
+	Specify the public key to encrypt them
+
+In this example, each step of the process is encrypted with in-flight encryption b/c of HTTPS
+
+Ex. Encrypt credit card number of Request
+
+Request:
+POST ...
+Host ...
+cc#  ... // Credit Card Number
+
+                        |-All along this stack, the CC# is encrypted-|
+
+       HTTPS   _________  HTTPS  __________  HTTPS   ________  HTTPS    ___________      
+Client------->|  Edge   |------>|Amazon    |------->|Origins:|-------> |Web Servers|
+              |Location |       |CloudFront|        |        |         |___________|
+              |_________|       |__________|        | ALB    |        Decrypt CC# w/
+            Encrypt CC# w/                          |________|         Private Key
+             Public Key
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFront - Real Time Logs
+//////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 15
+  __              ___
+ /  \ |  |  /|   |   
+ |    |__|   |   |___
+ |    |  |   |   |   |
+ \__/ |  |. _|_  |___|
+
+Amazon ECS, ECR, and Fargate - Docker in AWS
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+Docker Intro
+//////////////////////////////////////////////////////////////////////////
+
+Docker Overview
+////////////////////
+Docker is a software development platform to deploy apps
+Apps are packaged in containers that can be run on any OS
+Apps run the same, regardless of where they're run
+	Any machine
+	No compatibility issues
+	Predictable behavior
+	Less work
+	Easier to maintain and deploy
+	Works with any language, OS, and technology
+Use cases:
+	Microservices architecture
+	Lift-and-shift apps from on-premises to AWS cloud
+	More....
+////////////////////
+
+Docker on an OS
+////////////////////
+Docker can run on a server (Ex: EC2 Instance)
+
+The individual containers can all be running different things on the same server
+	Java app
+	NodeJS app
+	MySQL database
+
+Where are Docker images stored?
+	Stored in Docker Repositories
+	Docker Hub (https://hub.docker.com)
+		This is a public repository
+		Can also find base images for many technologies or OS
+	Amazon ECR (Elastic Container Registry)
+		Private repository (default)
+		Public repository option
+			ECR Public Gallery: (https://gallery.ecr.aws)
+////////////////////
+
+Docker vs Virtual Machines
+////////////////////
+Virtual Machines:
+
+Apps run in VMs,
+which are handled by a hypervisor,
+which runs on a host OS,
+which runs on dedicated Infrastructure
+
+The VMs all run individually with a virtual copy of a physical machine.
+This makes them large, and require a dedicated amount of memory when set up
+ ________   ________   ________
+|  Apps  | |  Apps  | |  Apps  | 
+|________| |________| |________|
+|Guest OS| |Guest OS| |Guest OS| 
+|  (VM)  | |  (VM)  | |  (VM)  | 
+|________|_|________|_|________|
+|          Hypervisor          | //Communicates resource use between host and guest(s)
+|______________________________|
+|          Infrastructure      | 
+|______________________________| 
+
+
+Docker is "sort of" a virtualization technology, but not exactly
+Resources are shared with the host => many containers on one server 
+Each container runs a virtual copy of an OS
+This makes containers much more like any other application that runs on the computer
+	Containers have all of the libraries and dependencies they require to run
+Containers can have small file sizes
+ _________   _________   _________
+|Container| |Container| |Container| 
+|_________| |_________| |_________|
+|Container| |Container| |Container| 
+|_________| |_________| |_________|
+|Container| |Container| |Container| 
+|_________|_|_________|_|_________|
+|          Docker Daemon          | //Communicates resource use for container(s)
+|_________________________________|
+|     Host OS (EC2 Instance)      | 
+|_________________________________|
+|          Infrastructure         |
+|_________________________________|
+////////////////////
+
+Getting Started with Docker
+////////////////////
+
+Docker containers start out as a script
+
+Script:
+_________________
+FROM ubuntu:18.04
+
+COPY . /app
+RUN make /app
+
+CMD python3 /app/app.y
+_________________
+
+
+The Script is built into a read-only Docker Image
+	These builds can be pushed to a Docker Repository
+		Docker Repositories are Docker Hub and Amazon ECR
+		Containers can then be pulled from the repository
+Docker Images can then be run as an application
+////////////////////
+
+Docker Containers Management on AWS
+////////////////////
+There are four tools that are used to manage Docker Containers:
+
+Amazon Elastic Container Service (ECS)
+	Amazon's container platform
+
+Amazon Elastic Kubernetes Service (EKS)
+	Amazon's Kubernetes (open source)
+
+AWS Fargate
+	Amazon's severless container platform
+	Works with ECS and EKS
+
+AWS Elastic Container Registry (ECR)
+	Store container images
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+Amazon Elastic Container Service (ECS)
+//////////////////////////////////////////////////////////////////////////
+
+ECS - EC2 Launch Type
+////////////////////
+Launch Docker containers on AWS = Launch ECS Tasks on ECS Clusters
+EC2 Launch Type: must provision & maintain infrastructure (EC2 instances)
+Each EC2 Instance must run the ECS Agent to register in the ECS Cluster
+	(The EC2 Instances are all part of an ECS Cluster)
+AWS takes care of starting/stopping the containers
+
+ _________________________________
+|       Amazon ECS Cluster        | 
+|          _                      |
+|         |_|New Docker Container |  // Docker Container gets pulled from repository
+|       ___|_________             | 
+|      |             |            | 
+|   ___|_________  __|__________  |
+|  |EC2 Instance ||EC2 Instance | |
+|  |             || ___________ | | 
+|  |             |||Docker     || |  
+|  |             |||Container  || |
+|  |             |||___________|| |  
+|  |  __________ || ___________ | | 
+|  | |Docker    ||||Docker     || |  
+|  | |Container ||||Container  || |
+|  | |__________||||___________|| |  
+|  |  __________ || ___________ | | 
+|  | |Docker    ||||Docker     || |  
+|  | |Container ||||Container  || |
+|  | |__________||||___________|| |    
+|  |  __________ || ___________ | | 
+|  | |Docker    ||||Docker     || |  
+|  | |ECS Agent ||||ECS Agent  || |
+|  | |          ||||           || | 
+|  | |          ||||           || | 
+|  | |__________||||___________|| | 
+|  |_____________||_____________| | 
+|_________________________________|
+////////////////////
+
+ECS - Fargate Launch Type
+////////////////////
+Fargate is a serverless way to execute Container Tasks.
+There's no EC2 Instances to create and manage, and it scales with the workload.
+
+Launch Docker containers on AWS
+Don't need to provision infrastructure (no EC2 Instances to manage)
+All serverless!
+Create task definitions
+AWS runs ECS Tasks based on CPU/RAM needed
+To scale, just increases the of tasks.
+	No more EC2 Instances
+
+ 
+          _                      
+         |_|New Docker Container   // Docker Container gets pulled from repository
+       ___|_________              
+      |             |             
+   ___|_____________|__________  
+  |  AWS Fargate / ECS Cluster |  
+  |                ___________ |  
+  |               |Docker     ||   
+  |               |Container  || 
+  |               |___________||   
+  |  __________    ___________ |  
+  | |Docker    |  |Docker     ||   
+  | |Container |  |Container  || 
+  | |__________|  |___________||   
+  |  __________    ___________ |  
+  | |Docker    |  |Docker     ||   
+  | |Container |  |Container  || 
+  | |__________|  |___________|| 
+  |____________________________| 
+////////////////////
+
+ECS - IAM Roles for ECS
+////////////////////
+EC2 Instance Profile (EC2 Launch Type only)
+	Used by ECS Agent
+	Makes API calls to ECS Service
+	Send container logs to CloudWatch Logs
+	Pull Docker image from ECR
+	Reference sensitive data in Secrets Manager or SSM Parameter Store
+
+ECS Task Role
+	Allows each task to have a specific role
+	Use different roles for different ECS Services
+	Task Role is defined in the Task Definition
+                        _____
+                    |->| ECS |
+                    |  |_____|
+   _______________  |   _____
+  | EC2 Instance  | |  | ECR |
+  |  ___________  | |->|_____| 
+  | |Docker     | |-|   _________________ 
+  | |ECS Agent  | | |->| CloudWatch Logs |
+  | |___________| |    |_________________|
+  |  __________   |
+  | |Task A    |  |  
+  | |        ECS Task A Role ------> S3 Bucket
+  | |__________|  |
+  |  __________   |
+  | |Task B    |  |   
+  | |        ECS Task B Role ------> DynamoDB
+  | |__________|  | 
+  |_______________| 
+////////////////////
+
+ECS - Load Balancer Integrations
+////////////////////
+Application Load Balancer
+	Supported for most use cases
+
+Network Load Balancer
+	Recommended only for: 
+		High throughput/performance cases
+		To pair with AWS Private Link 
+
+Classic Load Balancer
+	Deprecated, not recommended
+
+ __________________
+|Amazon ECS Cluster|
+|   _____________  |
+|  |EC2 Instance | | 
+|  |  __________ | |
+|  | |ECS Task  || | 
+|  | |          |<-----|
+|  | |__________|| |   |
+|  |  __________ | |   |
+|  | |ECS Task  || |   |
+|  | |          |<-----|
+|  | |__________|| |   |
+|  |_____________| |   |
+|   _____________  |   |----------> Application Load Balancer <---> Users
+|  |EC2 Instance | |   |
+|  |  __________ | |   |
+|  | |ECS Task  || |   |
+|  | |          |<-----|
+|  | |__________|| |   |
+|  |  __________ | |   |
+|  | |ECS Task  || |   |
+|  | |          |<-----|
+|  | |__________|| | 
+|  |_____________| | 
+|__________________|
+////////////////////
+
+ECS - Data Volumes, Elastic File System (EFS)
+////////////////////
+The EFS File System is how we can give the ECS Tasks memory, and to share data between them.
+It is important to note that all ECS Tasks in an AZ will have access to the File System.
+
+Mount EFS file Systems onto ECS tasks
+Works for both EC2 and Fargate
+Tasks running in any AZ will share the same data in the EFS file system
+Fargate + EFS = Serverless
+Use Cases:
+	Persistent multi-AZ shared storage for containers
+Note:
+	Amazon S3 cannot be mounted as a file system
+
+ __________________
+|Amazon ECS Cluster|
+|   _____________  |
+|  |EC2 Instance | | 
+|  |  __________ | |
+|  | |ECS Task  || | 
+|  | |          |<-----|
+|  | |__________|| |   | Mount onto ECS Tasks
+|  |  __________ | |   |
+|  | |ECS Task  || |   |
+|  | |          |<-----|
+|  | |__________|| |   |
+|  |_____________| |   |             _____________
+|   _____________  |   |----------->| Amazon EFS  |
+|  |EC2 Instance | |   |            |             |
+|  |  __________ | |   |            | File System |
+|  | |ECS Task  || |   |            |_____________|
+|  | |          |<-----|
+|  | |__________|| |   |
+|  |  __________ | |   |
+|  | |ECS Task  || |   | Mount onto ECS Tasks
+|  | |          |<-----|
+|  | |__________|| | 
+|  |_____________| | 
+|__________________|
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+ECS - Hands On Part 1
+//////////////////////////////////////////////////////////////////////////
+Create the ECS instance:
+Amazon Elastic Container Service > Create Cluster
+	Give a unique name
+	Select both Fargate and EC2 Instances
+	Select Create new ASG
+	Leave the rest of the defaults
+	Create the Cluster
+	Takes a minute to finish
+	Under EC2, a new ASG will have been created, called Infra-*something*
+Under Amazon Elastic Container Service > Clusters > *Cluster Name* > Infrastructure
+	The active EC2 instances are shown under Container Instances
+	In EC2 > Amazon Auto Scaling Groups, increasing the desired count will create an EC2 Instance
+	Under Amazon Elastic Container Service > Clusters > *Cluster Name* > Instance Management
+		The EC2 Instance will be seen here
+//////////////////////////////////////////////////////////////////////////
+
+ECS - Hands On Part 2
+//////////////////////////////////////////////////////////////////////////
+
+The Docker container used is on Docker Hub: nginxdemos/hello
+Go to Amazon Elastic Container Service
+Create a new Task Definition
+	Give it a unique name
+	Launch on Fargate to keep it easy, but can launch on an EC2 Instance
+	Set CPU: 0.5, and Memory: 1GB // Just to keep it free/cheap
+	Set Task Role: None // Important if it uses any AWS resources
+	Task Execution Role: *Set automatically by AWS*
+	Container name: "nginxdemos-hello", Image URI: "nginxdemos/hello"
+		This pulls the nginx demos hello container from Docker Hub
+	Container Port: 80, Port Name: "nginxdemos-hello-80"
+	Leave the rest as Default
+Launch a Cluster
+	Go to Amazon Elastic Container Service > Clusters > *Cluster Name* > Services
+	Create a new Service
+		Set Compute Options to Launch Type
+			Launch Type: Fargate, Platform Version: Latest
+		Application Type: Service
+		Family: *our nginxdemos-hello*, Revision: Latest
+		Assign a unique name: "nginxdemos-hello"
+		Desired Tasks: 1 // This is how many we want to create right now
+		Create a new Security Group
+			Security Group Name: "nginxdemos-hello"
+			Description: "SG for NGINX"
+			Type: HTTP, Port: 80, Source: Anywhere
+		Create a Load Balancer
+			Name: "DemoAlbForEcs"
+			Select the nginxdemo container to load balance
+			Create new listener
+				Port: 80, Protocol: HTTP
+			Create new target group
+				Name: "tg-nginxdemos-hello"
+				Both Protocols: HTTP, Health Check Path: "/"
+			Defaults from here are good
+Amazon Elastic Container Service > Clusters > *Cluster Name* > Services
+	Under Cluster Overview, status should be active, with 1 registered instance
+	In Health, there should be 1 desired task, and is running
+	Target group should be linked
+		Target Group has link to ALB
+			Copy DNS name
+			Go to the URL
+				The NGINX demo page should come up
+Launch some more tasks
+	Go to Amazon Elastic Container Service > Clusters > *Cluster Name* > Services
+	Select nginxdemos-hello > Update Service
+	Set Desired Tasks to 3
+	Defaults are good
+	Two more tasks are created
+	This can be seen under Tasks
+	Now refreshing the page with the Nginx demo, the ip address changes
+		This is the ALB cycling through our tasks
+Finish the demo by setting Desired Tasks back to 0
+	This removes all tasks
+//////////////////////////////////////////////////////////////////////////
+
+ECS - Auto Scaling
+//////////////////////////////////////////////////////////////////////////
+
+Automatically increase/decrease desired number of ECS Tasks
+ECS Auto Scaling uses AWS Application Auto Scaling // Triggers for auto-scaling
+	ECS Service Average CPU Utilization
+	ECS Service Average Memory Utilization - Scale on RAM
+	ALB Request Count per Target - Metric coming from ALB
+
+Target Tracking - scale based on target value for a specific CloudWatch metric
+
+Step Scaling - scale based on specific CloudWatch Alarm
+
+Scheduled Scaling - scale based on specified date/time for predictable changes
+
+Must Remember:
+ECS Service Auto Scaling (task level) IS NOT EC2 Auto Scaling (EC2 Instance level)
+	This is why using Fargate is an easier option
+
+//////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
