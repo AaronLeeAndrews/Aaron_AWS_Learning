@@ -998,7 +998,7 @@ Useful for resilient workloads
 	Batch jobs
 	Data analysis
 	Image processing
-	Any istribute workloads
+	Any distributed workloads
 	Workloads w/ a flexible start and end time
 
 NOT useful for critical jobs or DBs // Exam Q!!!!
@@ -1325,7 +1325,7 @@ Scaling In/Out vs Up/Down
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 Ch 7
-  __        ___        
+  __         __       
  /  \ |  |  |  |  
  |    |__|     |  
  |    |  |     |  
@@ -1757,28 +1757,600 @@ We can now see them by going to the NLB's Public IP
 
 //////////////////////////////////////////////////////////////////////////
 
-
-Load Balancers
+Gateway Load Balancer (GWLB)
 //////////////////////////////////////////////////////////////////////////
 
-Load Balancing
-	Balancing traffic load across multiple machines automatically
+Overview
+//////////
+Gateway Load Balancers greatly simplify the task of inspecting traffic to an app
+This load balancer focuses on security system Target Groups
+	Just like other Load Balancers, it spreads out the traffic between them
+- Deploy, scale, and manage a fleet of 3rd party network virtual appliances in AWS
+- Ex: 
+	Firewalls
+	Intrusion Detection and Prevention Systems
+	Deep Packet Inspection Systems
+	payload manipulation
+- Operates at Layer 3 (Network Layer) - IP Packets
+- Combines the following functions:
+	Transparent Network Gateway - single entry/exit for all traffic
+	Load Balancer - distributes traffic to virtaul appliances
+- Uses the GENEVE protocol on port 6081
+//////////
 
-Security Groups for Load Balancers
-	We can have public and private load balancers
-		For public, just like with a machine acting as a server, we'll have it accessible from anywhere
-	This does change the Security Group need of the EC2 instances, which then just need a port 80 access point as they will not be accessed directly, and will only be accessible from the Load Balancer
+Diagram 1
+//////////
+In this diagram:    
+1. 
+Users send their connect and data through the GWLB
+The GWLB spreads the tasks across a Target Group of security software
 
-Health Checks
-	Checks to make sure that machine is working properly, and can receive traffic
+2.
+The approved traffic is sent back to teh GWLB
 
-Routing Tables
-	Tables that route traffic based on paths in URL, hostname in URL, and query string headers
+3.
+The approved traffic is then routed to the application
+                                   _____________________
+                         ____     |  Target Group       |
+                        |    |1.  | (3rd party Security |
+Users----Route Table--->|GWLB|--->|  Virtual Appliances |
+                        |    |    |                     |
+                        |    |2.  |                     |
+                        |    |<---|_____________________|
+                        |    |
+                        |    |3.    ___________
+                        |____|---->|Application|
+                                   |___________|
 
-Target Groups
-	EC2 instances/tasks, Lambda Fns, IP Addresses
-	Load Balancers can route to multiple Target Groups
-	Health Checks happen at the Target Group level
+//////////
+
+GWLB - Target Groups Diagram
+//////////
+
+Target Groups can be:
+	resource endpoints, like EC2 Instances
+	IP Addresses - MUST be private IPs
+                                                          ____________________________
+                                                         |Target Group (EC2 Instances)|
+                                                         |  _                         |
+                        _____________        |------------>|_| Instance 1             | 
+                       |             |-------|           |  _                         |
+                       |    GWLB     |       |------------>|_| Instance 2             |
+                       |             |                   |____________________________|
+                       |_____________|                    ____________________________
+                        _____________                    |Target Group (IP Addresses) |
+                       |             |                   |                            |
+                       |    GWLB     |       |------------>EC2 Instance (192.168.1.10)|
+                       |             |-------|           |                            |
+                       |_____________|       |------------>Server (10.168.1.10)       |
+                                                         |____________________________|
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+Elastic Load Balancers - Sticky Sessions
+//////////////////////////////////////////////////////////////////////////
+
+Overview
+//////////
+Sticky Sessions allow Users to keep data on the application.
+This keeps users on the same EC2 Instance and not be bumped to a different one
+	This is done by a cookie specifically used for Sticky Sessions
+		The cookie has an expiration date controlled by the dev
+This works for ALBs and NLBs
+This of course can cause the Load Balancers to become unbalanced
+//////////
+
+Cookie Names
+//////////
+Application-based Cookies
+	Custom Cookie
+		Generated by the target (the app itself)
+		Can include custom attributes required by the app
+		Cookie name must be specified individually for each Target Group
+		DO NOT USE:
+			AWSALB
+			AWSALBAPP
+			AWSALBTG 
+			These are all reserved by the ELB
+	Application Cookie
+		Generated by the Load Balancer
+		Cookie name is AWSALBAPP
+
+Duration-Based Cookies
+	Cookie generated by the Load Balancer
+	Cookie name is:
+		AWSALB, for ALB
+		AWSELB, for CLB
+//////////
+
+Hands On
+//////////
+
+> EC2 > Target Groups
+	Under Actions dropdown
+		Select Edit Attributes
+			Scroll down to Target Selection Configuration
+				-> Turn on stickiness
+				Choices are:
+					Load Balancer generated (duration based)
+						Can set duration
+					Application-Based ()
+						Can set duration
+						Set name as well
+			-> Save Changes
+
+Now, reloading the ALB page doesn't bring up a different EC2 Instance page.
+Looking at the session details in the Web Developer Tools Console,
+	The cookie can be found with the name that it was set with
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+Cross Zone Load Balancing
+//////////////////////////////////////////////////////////////////////////
+
+There can be an issue where two AZs have an uneven number of EC2 Instances
+	The traffic for the AZs are distributed evenly between the two AZs
+	But, this overloads the AZ with fewer EC2 Instances
+//////////
+Diagram Ex:
+//////////
+NO Cross-Zone Load Balancing:
+                                                          ____________________________
+                                                         |AZ1                         |
+                        _____________        50%         |                            |
+                       |             |-------------------->EC2 Instances (x8)  50%    | 
+                       |             |                   |   (6.25% per Instance)     |
+                       |             |                   |                            |
+                       |             |                   |____________________________|
+                       |             |                    ____________________________
+                       |             |                   |AZ2                         |
+                       |             |       50%         |                            |
+                       |      LB     |-------------------->EC2 Instances (x2)  50%    |
+                       |             |                   |   (25% per Instance)       |
+                       |_____________|                   |                            |
+                                                         |____________________________|
+WITH Cross-Zone Load Balancing:
+                                                          ____________________________
+                                                         |AZ1                         |
+                        _____________        50%         |                            |
+                       |             |-------------------->EC2 Instances (x8)  80%    | 
+                       |             |                   | (10% per Instance)         |
+                       |             |                   |                            |
+                       |             |                   |____________________________|
+                       |             |                    ____________________________
+                       |             |                   |AZ2                         |
+                       |             |       50%         |                            |
+                       |      LB     |-------------------->EC2 Instances (x2)  20%    |
+                       |             |                   | (10% per Instance)         |
+                       |_____________|                   |                            |
+                                                         |____________________________|
+//////////
+
+Enabling Cross-Zone Load Balancing
+//////////
+Application Load Balancer
+	Enabled by default (can be disabled at Target Group Level)
+	No charges for inter-AZ data
+	
+Network Load Balancer & Gateway Load Balancer
+	Disabled by default
+	Pay charges for inter AZ data if enabled
+//////////
+
+Hands On: NLB
+//////////
+> EC2 > Load Balancers > *NLB name*
+	Scroll down
+	Select Attributes tab
+	-> Edit
+		Enable/Disable Cross-zone Load Balancing
+		-> Save Changes
+//////////
+
+Hands On: GWLB
+//////////
+> EC2 > Load Balancers > *GWLB name*
+	Scroll down
+	Select Attributes tab
+	-> Edit
+		Enable/Disable Cross-zone Load Balancing
+		-> Save Changes
+//////////
+
+Hands On: ALB
+//////////
+> EC2 > Load Balancers > *ALB name*
+	Scroll down
+	Select Attributes tab
+	-> Edit
+		Cross-zone Load Balancing is locked on and can't be disabled here
+	
+	Select Listeners tab
+		Under Forward to
+			-> *Target Group name*
+				Select Attributes tab
+					-> Edit
+						Change Cross-Zone Load Balancing
+						-> Save Changes
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+SSL Certificates
+//////////////////////////////////////////////////////////////////////////
+
+SSL Certs are the way that hosts guarantee a secure connection from client to entry-point
+	This is what makes traffic HTTPS vs HTTP
+		HTTP is used for the internal services, which are secure w/ Security Groups
+	TLS is latest version, but still referred to as SSL
+	SNI is the way to have an LB acting as the entry-point for multiple websites
+		The LB has an SSL Cert for each website
+		SNI requires the client to give the desired hostname on initial handshake
+
+SSL/TLS - Basics
+//////////
+These security certs ensure encryption over the web, from client to our entry-point.
+
+An SSL Certificate allows for traffic between users and a Load Balancer to be encrypted
+	AKA: In-Flight Encryption
+SSL: Secure Sockets Layer, encrypts connections
+TLS: Transport Layer Security, new version of SSL
+
+Current practice is to use TLS, but is still referred to as SSL
+
+SSL Certs are issued by Certificate Authorities (CAs)
+	Ex. (GoDaddy, Comodo, Symantec, etc...)
+
+SSL Certs have a set expiration date and must be renewed
+//////////
+
+SSL Certificates Diagram
+//////////
+for all outer traffic, use HTTPS to ensure security.
+For all inner traffic, can use just HTTP
+	Make sure that inner traffic is secure with Security Groups
+
+       HTTPS(encrypted) Over www                 HTTP, Over private VPC
+Users <-------------------------> Load Balancer <----------------------> EC2 Instance
+
+Outer traffic is done over HTTPS, making sure that it is secure
+Inner traffic is done over HTTP, because we already know the traffic is secure
+
+Load Balancer uses an X.509 cert (SSL/TLS server certificate)
+Certificates can be managed by ACM (AWS Certificate Manager)
+	Personal SSL Certs can also be uploaded
+
+HTTPS Listener:
+	MUST specify a default cert
+	Can add a list of certs to support multiple domains
+	Clients can specify a security policy to support older versions of SSL/TLS
+	Clients can use an SNI to specify hostname of site they want
+		SNI: Server Name Indication
+See next section for more info on SNI
+//////////
+
+SNI - Server Name Indication
+//////////
+SNI is a newer protocol where the client gives the LB the desired hostname
+	The LB uses this info to load the correct SSL Cert and direct traffic to that site
+
+SNI allows for having multiple SSL certs on one web server
+	This is to serve multiple websites behind the Load Balancer
+SNI is a newer protocol (so not universally supported)
+	This is the client stating the desired hostname on initial handshake
+Server fins the correct cert and loads that
+	If not found, loads the default
+
+Note:
+	Only works for ALB and NLB and CloudFront
+		Does NOT work for Classic LB
+//////////
+
+Summary: Elastic Load Balancers - SSL Cert
+//////////
+ALB and NLB
+	Supports multiple Listeners w/ multiple SSL Certs
+		Uses SNI to make this work
+//////////
+
+//////////////////////////////////////////////////////////////////////////
+
+SSL Certificates Hands On
+//////////////////////////////////////////////////////////////////////////
+
+Both ALB and NLB are very similar for setting up the SSL/TLS Cert
+Basically, this is just adding a listener and loading in the cert
+
+> EC2 > Load Balancers
+	-> Select ALB
+		-> Add Listener
+			Protocol: TLS
+			Port:443
+			Under Forward to
+				Choose: Target Group, w/ HTTP
+			Secure Listener Settings:
+				Set the ALB Security Policy
+				Select SSL/TLS Cert location
+	-> Select ALB
+		-> Add Listener
+			Protocol: TLS
+			Port:443
+			Under Forward to
+				Choose: Target Group
+			Secure Listener Settings:
+				Set the ALPN Policy
+				Select SSL/TLS Cert location
+
+//////////////////////////////////////////////////////////////////////////
+
+Connection Draining aka Deregistration Delay
+//////////////////////////////////////////////////////////////////////////
+
+Feature name:
+	Classic Load Balancer: Connection Draining
+	ALB and NLB: Deregistration Delay
+
+Gives a delay to complete in-flight requests,
+	while an Instance is de-registered OR marked unhealthy
+Stops sending new Instance which is de-registering
+
+Diagram
+//////////
+While the EC2 Instance is in a Draining state, it will receive no new traffic.
+Traffic will be routed to other EC2 Instances
+
+                      |<----> EC2 Instance (Draining)
+Users <----> ELB <--->|<----> EC2 Instance
+                      |<----> EC2 Instance
+
+Time to complete in-flight requests to the EC2 Instance
+Stops sending new requests to EC2 Instance which is de-registering
+Default is 300 seconds, can be set from 1 to 3600 seconds
+Can be disabled (set to 0)
+Set to a low value if requests are short (30 seconds)
+If the app is preforming a long process, it's better to set a longer time
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+Auto Scaling Group (ASG) Overview
+//////////////////////////////////////////////////////////////////////////
+ASGs increase or decrease the number of Instances based on load or CloudWatch Alarms
+Attributes for the new Instances need to have been set
+
+Overview
+//////////
+Website load can change very quickly
+Cloud has features to add and remove Instances very quickly
+
+Goal of an ASG is to:
+	Scale out (add EC2 Instances) when load increases
+	Scale in (remove EC2 Instances) when load decreases
+	Ensure min/max number of EC2 Instances running
+	Automatically register new Instances to a Load Balancer
+	Re-create an EC2 Instance in case a previous one is terminated
+ASGs themselves are free, but of course we must pay for all resources used
+//////////
+
+Diagram:
+//////////           
+ELB can check the health of EC2 Instances, removing them if unhealthy
+Scales out on load increase, up to set max
+Scales in on load decrease, down to set min
+
+Normal, from Initial Capacity: (Min Instances: 2, Max Instances: 4)
+                           ________________
+                          |   ASG          |
+                          |                |
+                      |<----> EC2 Instance |
+             ELB <--->|<----> EC2 Instance |
+                      |<----> EC2 Instance |
+                          |________________|
+
+Load Increased: (Min Instances: 2, Max Instances: 4)
+                           ________________
+                          |   ASG          |
+                          |                |
+                      |<----> EC2 Instance |
+             ELB <--->|<----> EC2 Instance |
+                      |<----> EC2 Instance |
+                      |<----> EC2 Instance |
+                          |________________|
+
+Load Decreased: (Min Instances: 2, Max Instances: 4)
+                           ________________
+                          |   ASG          |
+                          |                |
+             ELB <--->|<----> EC2 Instance |
+                      |<----> EC2 Instance |
+                          |________________|
+
+//////////
+
+Auto Scaling Group Attributes
+//////////
+There is a list of Attributes that are used when launching new Instances
+The ASG itself also has Attributes needed for Instance count boundaries
+
+A Launch Template has:
+	AMI + Instance Type
+	EC2 User Data
+	EBS Volumes
+	Security Groups
+	SSH Key Pair
+	IAM Roles for your EC2 Instances
+	Network + Subnets Info
+	Load Balancer Info
+Min / Max / Initial Capacity
+Scaling Policies
+//////////
+
+CloudWatch Alarms and Scaling
+//////////
+Scaling can done using CloudWatch Alarms
+Alarms monitor a metric (Average CPU or custom metric)
+Metrics like Average CPU are computed for overall ASG Instances
+Actions based on alarm:
+	Create scale-out policies
+	Create scale-in policies
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+Auto Scaling Group (ASG) Hands On
+//////////////////////////////////////////////////////////////////////////
+
+Creating an ASG mostly
+
+> EC2
+Select: Auto Scaling Groups on the left-hand side
+	-> Create Auto Scaling Group
+		Set name
+		-> Create Launch Template
+			Set name
+			Set Description
+			Select Amazon Linux 2 (Free Tier)
+			Select Instance Type: t2.micro
+			Key Pair: Select key-pair
+			Subnets: Don't include in Launch Template
+			Select the Security Group
+			For User Data: Input the standard website installer script
+			-> Create Launch Template
+		Set Launch Template to what we just created
+		-> Next
+		Leave Defaults
+		-> Next
+		Select: Attach to Existing Load Balancer
+		Select: Choose from your Load Balancer Target Groups
+			Chooses the Target Group attached to the LB
+		Health Checks
+			Check ELB
+		-> Next
+		Leave Defaults
+		-> Next
+		Leave Defaults
+		-> Next
+		Review details
+		-> Create Auto Scaling Group
+
+Now the chosen LB will show the EC2 Instance(s) that are a part of the ASG
+
+In setting up the ASG, we left the min/max/initial all set to 1
+	So only 1 EC2 Instance was created
+> EC2 > Auto Scaling Groups > *ASG name*
+	Select: Details tab
+		-> Edit
+			Change the min/max/desired capacities as needed
+//////////////////////////////////////////////////////////////////////////
+
+Auto Scaling Groups - Scaling Policies
+//////////////////////////////////////////////////////////////////////////
+There are a few types of triggers that can be used with an ASG
+	How much the trigger scales in/out can also be modified
+We can also create custom triggers with CloudWatch
+
+
+Types of Scaling
+//////////
+Dynamic Scaling
+	Target Tracking Scaling
+		Simple to set up
+		Ex: (Keep average ASG CPU to around 40%)
+	Simple / Step Scaling
+		CloudWatch Alarm triggers when CPU > 70%, then add 2 Instances
+		CloudWatch Alarm triggers when CPU < 30%, then remove 1 Instance
+Scheduled Scaling
+	Scaling based on known usage patterns
+	Ex: Increase capacity on Fri at 5pm
+Predictive Scaling:
+	Forecasts what the need will be and adjusts to meet that
+	Forecast will be trying to find cyclical data
+//////////
+
+Good Metrics to Scale On
+//////////
+CPUUtilization: Avg CPU load across all Instances
+RequestCountPerTarget: Keep requests to each Instance stable
+Avg Network In/Out: (For network bound apps) 
+Any custom metric: Uses CloudWatch triggers
+//////////
+
+Scaling Cooldowns
+//////////
+Triggers don't cause an effect right away.
+The ASG gives the Instances a chance to stabilize
+
+Cooldown period takes effect after a scaling activity happens
+During the cooldown period, ASG will not perform any more scaling 
+	(giving a chance for metrics to stabilize)
+Advice: Using a ready-to-use AMI will reduce config time
+	Thus, allowing us to reduce cooldown periods
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+Auto Scaling Groups - Scaling Policies Hands On
+//////////////////////////////////////////////////////////////////////////
+> EC2 > Auto Scaling Groups > *ASG_name*
+
+Here we can change the Scaling Policy that the ASG uses
+There are three broad categories
+	Scheduled Actions
+	Predictive Scaling
+	Dynamic Scaling
+
+Scheduled Actions
+//////////
+-> Create Scheduled Action
+	Set name
+	Set Desired Capacity, Min, and Max
+	Set Recurrence
+	Can also set Start and End times
+//////////
+
+Predictive Scaling
+//////////
+-> Create Predictive Scaling Policy
+	This is machine-learning driven!
+	Under: Turn on Scaling
+		Turn on Scaling Based on Forecast
+	Under: Metrics and Target Utilization
+		Select the Metric to Scale on
+		Set Target Utilization
+	-> Create
+This does need about a week or so of data
+//////////
+
+Dynamic Scaling
+//////////
+-> Create Dynamic Scaling Policy
+	Set Policy Type
+		Step Scaling: How much to add/remove based on the breached metric
+			So, Add 10 Instances if CPUs at 50%, 15 if at 60%
+		Target Tracking Scaling: Things like CPU Utilization
+	Select: Metric Type
+	Set: Target Value
+	-> Create
+This will also create the CloudWatch Alarms for us
+
+Go to the Details tab
+	-> Edit
+		Set the Min, Max, and Desired Capacities
+
+We can use a stress program to fully utilize the EC2 Instance, so CPU at 100%
+	This triggers the CloudWatch Alarm and new Instances are created
+The EC2 Instances can be observed under the Monitoring tab
+Actions like Adding/Removing can be seen under the Activity tab
+The created CloudWatch Alarms can be seen at: > CloudWatch > Alarms
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+Auto Scaling - Instance Refresh
+//////////////////////////////////////////////////////////////////////////
+Instance Refresh is a way of updating the EC2 Instances
+	This involves gradually removing the old Instances and spinning up new ones
+
+Goal: Update launch template and re-creating all EC2 Instances
+Set the minimum healthy percentage
+Specify warm-up time (how long until the new EC2 Instance should be ready)
+
+//////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -1797,14 +2369,422 @@ AWS Fundamentals: RDS + Aurora + Elasticache
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
+Amazon RDS Overview
+//////////////////////////////////////////////////////////////////////////
+
+RDS: Relational Database Service
+This is a managed DB service, using SQL as the query language
+These DBs are in the cloud and managed by AWS
+	Postgres
+	MySQL
+	MariaDB
+	Oracle
+	Microsoft SQL Server
+	IBM DB2
+	Aurora (AWS Proprietary database)
+
+AWS Managed DBs
+//////////
+These databases being managed means that Amazon is taking care of their infrastructure
+This means that AWS gives us a lot of features here
+	Automated provisioning, OS patching
+	Continuous backups and restore to a timestamp (Point in Time Restore)
+	Monitoring dashboards
+	Read replicas for increased read performance (horizontal scaling)
+	Increased size on demand (vertical scaling)
+	Multi AZ setup for Disaster Recovery (DR)
+	Maintenance windows for upgrades
+	Scaling (vertical and horizontal)
+	Storage backed up by EBS
+
+However, can't SSH into Instances of these DBs
+//////////
+
+RDS - Storage Auto Scaling
+//////////
+Dynamically increase storage on RDS DB Instance
+Auto-scales on detecting that free storage is running out
+Lets us avoid manually scaling the DB
+Should set a Maximum Storage Threshold
+Storage will automatically modify if:
+	Free storage is less than 10% of allocated
+	Low-storage lasts at least 5 minutes
+	6 hours have passed since last modification
+Very useful for apps with unpredictable workloads
+Applies to all RDS database engines
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+RDS Read Replicas vs Multi AZ
+//////////////////////////////////////////////////////////////////////////
+
+RDS Read Replicas for read scalability
+//////////
+Up to 15 Read Replicas // Most likely an exam Q!!!!
+These can be:
+	Within AZ
+	Cross AZs
+	Cross Region
+Replication is Async, which means that reads are eventually consistent
+	Called: Eventually Consistent
+	Data may not be completely up to date
+While they are replicas, they are only read from, not written to
+	They can become their own DB
+Applications must update the connection string to use read replicas
+//////////
+
+RDS Read Replicas - Use Cases
+//////////
+Situation: Prod DB with normal load
+           Client needs Reporting App to read from DB to run analytics
+	   Adding these reads onto the main DB would overload it
+Solution:  Create a Read Replica that serves the Analytics App
+	   This leaves the main DB completely unimpacted
+//////////
+
+RDS Read Replicas - Network Cost
+//////////
+With other services, AWS will charge if data travels from one AZ to another
+However, with RDS Read Replicas, AWS does NOT charge for cross AZ data transfer
+Once this becomes cross-region, there will be charges
+
+Cross AZ: Free                          Cross Region: $$$
+ __________        __________          ___________        ____________
+|  AZ 1a   |      |   AZ 1b  |        |  Region 1 |      |  Region 2  |
+|__________|<---->|__________|        |___________|<---->|____________|
+//////////
+
+RDS Multi AZ (Disaster Recovery)
+//////////
+Sync Replication
+One DNS name - automatic app failover to standby
+	This is all done under the one hostname, so any replacing of main is invisible to users
+	This means that if the main fails, the standby automatically replaces main
+Increases availability
+Failover in case of AZ, network, or storage loss
+All automatic, so no manual intervention needed
+This is not for scaling
+	The Standby does not get any read/write requests
+	It is only a backup that replaces the main DB if things go wrong
+Can be set up as Multi AZ for disaster recovery
+//////////
+
+RDS - From Single AZ to Multi AZ
+//////////
+How to make an RDS in one AZ (Single AZ) available in multiple AZs (Multi AZ)
+
+This can be done as a zero downtime operation (no need to stop the DB)
+From the developer perspective, this just involves selecting "Modify" and changing a setting
+What goes on internally:
+	A snapshot is taken
+	A new DB is restored from the snapshot into the new AZ
+	The two DBs are synced (Sync Replication)
+	// I'm guessing the snapshot is deleted
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+RDS Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal:
+	Creating an RDS DB, connecting to it, and uploading data
+
+> RDS > Create Database
+
+Select Standard Create // Longer, but shows all options
+	Other Option is Easy Create
+Choose MySQL
+Select the version
+Under: Templates
+	Select: Free Tier
+Under: Availability and Durability
+	Select: Single DB Instance
+Under: Settings
+	Master Username: "admin"
+		Should already be set to this
+	Set a password
+	Confirm password
+Under: Instance Configuration
+	Select: Burstable Classes
+		Burstable Classes are EC2 Instances that don't usually make full use of the CPU
+			But they have the capacity to make full use when needed
+	Select: db.t3.micro // These settings let us stay in the Free Tier
+Under: Storage
+	Select: gp2 // Lets us stay in Free Tier
+	Deselect Autoscaling // The Udemy tutorial keeps this checked, but why?
+Under: Connectivity
+	Select: Don't Connect to EC2 Instance
+	// Connecting to an Instance makes things easier, but we'll look at all of the options
+	Public Access: Check Yes
+		This is VERY IMPORTANT for connecting from a desktop DB tool
+	-> Create New Security Group
+		Set name
+		Set AZ to No-Preference
+		Leave Port as 3306
+Under: Database Authorization
+	Select: Password Authorization
+Under: Monitoring
+	Disable Monitoring
+Under: Additional Configuration
+	Set the DB name
+-> Create Database
+
+From here, we'll open up a desktop B tool, like MySQL Workbench
+Once open, we put in the details for the DB to a desktop DB tool
+	DB Type (MySQL)
+	DB Address
+	DB Password
+	DB Username (admin)
+	DB name
+Errors:
+	Check that all of the details are correct
+	Check that the DB is ready
+	Check that the DB is set to Public
+	Check that the DB has a Security Group that allows all traffic from Anywhere
+Now we can use our DB tool to add, pull, and modify data using SQL commands
+
+Additionally, from the Management console, we can:
+	Make a snapshot of the DB
+	Monitor the status and actions under the Monitoring tab
+//////////////////////////////////////////////////////////////////////////
+
+Amazon Aurora
+//////////////////////////////////////////////////////////////////////////
+Aurora is a cloud-focused DB by Amazon
+This means that it has a lot of really great features specific to the cloud
+Things like high availability, auto-scaling read replicas, and fast backup from standbys
+
+Overview
+//////////
+- Aurora is proprietary to Amazon, not open sourced
+- Postgres or MySQL DB connections are supported
+	So, anything that connects to these can connect to Aurora
+- It's AWS cloud optimized, (5x perf over MySQL on RDS, 3x perf over Postgres on RDS)
+- Storage auto-grows in increments of 10GB, up to 128TB of storage
+- Can have up to 15 Read Replicas, with a faster replication process (<10 seconds lag)
+- Failover recovery is instant
+- Aurora does cost more than RDS (20% more)
+//////////
+
+High Availability and Read Scaling
+//////////
+Aurora will create 6 copies of the data across 3 AZs
+	4 copies out of 6 needed for writes
+	3 copies out of 6 need for reads
+	Self healing with peer-to-peer replication
+	Storage is striped across 100s of volumes
+All of this leads to high redundancy, high availability, and data that can be verified by the other copies of it
+
+One Aurora Instance takes Writes (the Master)
+Automated failover can happen in less than 30 seconds
+The Master can have up to 15 Read Replicas, AND they can become the Master on a Failover
+These Read Replicas also support Cross-Region Replication
+//////////
+
+Aurora DB Cluster
+//////////
+With the Aurora DB Cluster, there is a single Endpoint for Writes to the Master DB
+In the case of a Failover, that Endpoint will automatically switch to the new Master
+	And all clients will never have to change anything (sending Writes to the Endpoint)
+Very important:
+	The Read Replicas will have a Reader Endpoint
+	The Reader Endpoint will load balance the reads
+
+Normal:
+            ____________________                        ________
+Client---->|  Writer Endpoint   |--------> Master ---->| Shared |
+           | Pointing to Master |                      | Storage|
+           |____________________|                      | Volume |
+						       |        |
+            ___________________________                |        |
+Client<----|  Reader Endpoint          |<|<-Replica1<--|        |
+           | Connection Load Balancing | |<-Replica2<--|        |
+           |___________________________| |<-Replica3<--|        |
+					               |________|
+
+On a Failover:
+The Read Replica 1 becomes the Master, and the client sees no disruption
+            ____________________                        ________
+Client---->|  Writer Endpoint   |   (Former) Master    | Shared |
+           | Pointing to Master |----> (New) Master--> | Storage|
+           |____________________|                      | Volume |
+						       |        |
+            ___________________________                |        |
+Client<----|  Reader Endpoint          |<|             |        |
+           | Connection Load Balancing | |<-Replica2<--|        |
+           |___________________________| |<-Replica3<--|        |
+					               |________|
+//////////
+
+Features of Aurora
+//////////
+Bullet-point list of Aurora Features:
+	Automatic Failover
+	Backup and Recovery
+	Isolation and security
+	Industry compliance
+	Push-button scaling
+	Automated Patching w/ zero downtime
+	Advanced monitoring
+	Routine maintenance
+	Backtrack (Restore data from any point in time w/o maintaining backups)
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+Aurora Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal:
+	Go through the process of creating an Aurora DB
+
+> RDS > Create Database
+
+Under: Choose a database creation method
+	Select: Standard Create
+Under: Engine Options
+	Select: MySQL Compatible
+	Keep default version
+Under: Templates
+	Select: Production
+Under: Settings
+	DB cluster identifier: database-2
+	Master username: admin
+	Set and confirm a password
+Under: Cluster storage configuration
+	Select: Aurora Standard
+Under: Instance configuration
+	Select: Include previous generation classes
+	        Burstable classes (include t classes)
+		db.t3.medium
+Under: Availability and durability
+	Select: Create an Aurora Read Replica // NOT FREE, but good to see options
+Under: Connectivity
+	Compute Resource: Don't connect to an EC2 compute resource
+	Network Type: IPv4
+	VPC: Default VPC
+	Public Access: Yes
+	VPC Security Group: Create new
+		name: demo-db-aurora
+		Database port: 3306 (Default)
+Under: Monitoring
+	Deselect: Enable Enhanced Monitoring
+Under: Additional configuration
+	name: mydb
+	Backup retention: 1 day
+	Encryption: Enabled
+-> Create Database
+
+In: > RDS > Databases
+	There is now a database-2
+	Under it is a Writer Instance and a Reader Instance
+In the Connectivity and security tab:
+	Under: Endpoints
+		There is the Writer Endpoint and Reader Endpoint
+		These Endpoints will always work, even during/after a Failover
+Through the Actions dropdown:
+	More Readers can be added
+	Cross-Region Read Replicas can be created
+	Add AWS Region
+		Only works if the Global Database feature was enabled
+		Wil require a large enough database instance size
+	Delete the DB
+		To delete the DB, first delete the Read and Write Instances
+		Then the cluster can be deleted
+//////////////////////////////////////////////////////////////////////////
+
+RDS & Aurora Security
+//////////////////////////////////////////////////////////////////////////
+
+At-Rest Encryption:
+	The data stored at the Endpoint is encrypted, and needs a password to be accessed
+	Can encrypt DB master and Replicas using AWS KMS (must be defined at launch)
+	Master must be encrypted for Read Replicas to be encrypted
+	To encrypt an un-encrypted DB, go through a DB snapshot and retore as encrypted	
+In-Flight Encryption: 
+	The entire connection and its traffic is encrypted
+	TLS-ready by default
+	Clients MUST use the AWS TLS root certificates client-side
+IAM Authentication: 
+	IAM roles can be used to connect to the DB (Instead of username/password)
+	Username and password can still be used
+Security Groups: Control Network access to RDS/Aurora DB
+No SSH available on RDS Custom
+Audit Logs:
+	These can be enabled to analyze traffic, but are short-lived
+	For longer retention they can be sent to CloudWatch Logs
+//////////////////////////////////////////////////////////////////////////
+
+RDS Proxy
+//////////////////////////////////////////////////////////////////////////
+A proxy for the DB (RDS or Aurora) can be created to reduce load on the actual DB
+
+- Fully managed DB proxy for RDS/Aurora
+- Allows apps to pool and share DB connections
+- Improves DB efficiency by:
+	Reducing stress on DB resources (CPU and RAM)
+	Minimizes open connections (and timeouts)
+- Serverless autoscaling (Lambda is a big one here), and multi-AZ
+- Reduced RDS and Aurora Failover time, up to 66%
+- Supports:
+	RDS - MySQL, PostgreSQL, MariaDB, MS SQL Server
+	Aurora - MySQL, PostgreSQL
+- No code changes needed for most apps
+- Enforce IAM Authentication for DB and securely store credentials in AWS Secrets Manager
+- RDS Proxy is never publicly accessible, only being accessed by the VPC (See diagram)
+
+Diagram:
+ __________________________________
+|VPC:                              |
+| _  _  _  _  _                    |
+||_||_||_||_||_| (Lambda Fns)      |
+| |  |  |  |  |                    |
+| |  |  |  |  | IAM Authentication |
+| |__|__|__|__|  to access Proxy   |
+|       |                          |
+|  _____|_______________________   |
+| |     |      (Private Subnet) |  |
+| |  RDS Proxy                  |  |
+| |     |                       |  |
+| |  RDS DB Instance            |  |
+| |_____________________________|  |
+|__________________________________|
+//////////////////////////////////////////////////////////////////////////
+
+ElastiCache Overview
+//////////////////////////////////////////////////////////////////////////
+
+Overview
+//////////
+- The same way RDS is to get managed Relational DBs...
+	ElastiCache is to get managed Redis or Memcached
+- Caches: in-memory DBs w/ really high performance, low latency
+- Helps reduce load off of DB for read intensive workloads
+- Helps make your app stateless (puts state of app into ElastiCache)
+- This is managed, so AWS takes care of:
+	OS maintenance/patching, 
+	optimizations, 
+	setup, 
+	configuration, 
+	monitoring, 
+	failure recovery,
+	backups
+- This is not a simple change! It takes heavy app changes to work.
+	(App has to be written to query the cache before)
+//////////
+
+Solutions Architecture - User Session Store
+//////////
+
+- User logs into any of th
+
+//////////
+//////////////////////////////////////////////////////////////////////////
+
+
 RDS - Databases
 //////////////////////////////////////////////////////////////////////////
 
 We can choose a MySQL Database, and then connect to it with MySQL Workbench
 
 Through the MySQL Workbench, we're able to create tables and data entries.
-
-
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -1816,7 +2796,7 @@ The AuroraDB is a specialized DB by Amazon
 
 It works by having a built-in Write-Entry-Point, so every service that writes to the DB goes through the same entry point.
 
-The same is true for reads, and the DB can have up to 15 read-replikas, that it uses to load-balance and back up the master DB if needed
+The same is true for reads, and the DB can have up to 15 read-replicas, that it uses to load-balance and back up the master DB if needed
 
 To encrypt a non-encrypted DB, we can make a snapshot, and then restore that snapshot with encryption enabled.
 
