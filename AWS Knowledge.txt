@@ -431,7 +431,7 @@ Some AWS services will need to perform actions on other AWS resources
 To do this, these AWS services will need to be assigned Permissions with IAM Roles
 
 Ex. (Giving an EC2 Instance an IAM Role)
-	The IAM ROle is given Permissions for Access AWS
+	The IAM Role is given Permissions for Access AWS
 
 Common Roles
 	EC2 Instance Roles
@@ -530,7 +530,7 @@ IAM Section - Summary
 - Roles: for EC2 Instances or AWS Services
 - Security: MFA and Password Policy
 - AWS CLI: Manage AWS Services using command-line
-- AWS SDK: Mage AWS Services using a programming language
+- AWS SDK: Manage AWS Services using a programming language
 - Access Keys: Access AWS using the CLI or SDK
 - Audit: IAM Credential Reports and IAM Access Advisor
 
@@ -605,7 +605,7 @@ Features:
  - Distributing load across machines (ELB)
  - Scaling services using an auto-scaling group (ASG)
 
-Knowing EC2 is fundamental to unerstand how the Cloud works
+Knowing EC2 is fundamental to understand how the Cloud works
 //////////
 
 EC2 Sizing and Configuring Options
@@ -1087,7 +1087,7 @@ EC2 Instance Storage
 EBS Overview
 //////////////////////////////////////////////////////////////////////////
 An EBS Volume (Elastic Block Store Volume) is a network drive for an EC2 Instance
-	If non-root, default is to persist after attached EC2 Instance termination
+	If non-root, default is to persist after attached EC2 Instance is  terminated
 	Very helpful to think of these as Network USB Sticks
 	An EBS can only be mounted to one EC2 Instance at a time
 		An EC2 Instance can have multiple attached EBSs
@@ -1235,7 +1235,7 @@ They act like cache in a computer, storing fast-access memory while the computer
  - A downside is that they go away when the EC2 instance stops (they're ephemeral)
  -- Risk of data loss on a hardware failure
 If all we care about is IOPS. then choosing this as a solution is just fine
-Can handle a very high IOPS
+Can handle a very high IOPS, depending on i3 chosen (see slide) (100,000 to 2 million Reads per Second)
 //////////
 
 EBS Volumes:
@@ -1308,6 +1308,10 @@ EBS Volumes:
  - To Migrate to new AZ:
  -- Take Snapshot
  -- Restore instance from snapshot inside of a new AZ
+ - To Migrate to new Region:
+ -- Take Snapshot
+ -- Copy Snapshot to new Region
+ -- Restore instance from snapshot inside of a new AZ in that Region
 EFS Volumes:
  - Made to be attached to multiple EC2 instances across AZs
  - Only available on Linux OSs
@@ -1316,6 +1320,7 @@ EFS Volumes:
 Instance Store:
  - Acts as the RAM of an EC2 Instance OS
  - Is wiped every time it shuts down
+ - Very fast IOPS
 
 
 Scaling In/Out vs Up/Down
@@ -1401,7 +1406,7 @@ Load Balancers are servers that take traffic and distribute it to resources
 Why Use a Load Balancer
 //////////
 Spread load across multiple Instances
-Expose single point of access (DNS) for app
+Expose single point of access (Static DNS) for app // This is the static URL name provided by AWS that we can connect to with a browser or Service
 Seamlessly hide resource Instance failures
 Do regular health checks on resource Instances
 Provide SSL termination (HTTPS) for websites
@@ -1417,7 +1422,7 @@ An Elastic Load Balancer is a managed Load Balancer
 	AWS guarantees that it will be working
 	AWS takes care of the infrastructure (upgrades, maintenance, high availability)
 	AWS provides only a few configuration parameters
-Costs less to setup a personal Load Balancer, but is much harder
+Costs less to setup a personal Elastic Load Balancer, but is much harder
 
 ELBs are integrated w/ many AWS offerings/services
 	EC2, EC2 Auto Scaling Groups, Amazon ECS
@@ -1666,7 +1671,7 @@ NOT included in the AWS Free Tier
 
 TCP (Layer 4) Based Traffic
 //////////
-Diagram shows how an NLB routes traffic based on 
+Diagram shows how an NLB routes traffic based on TCP vs HTTP
                                                           ____________________________
                         _____________        TCP         |Target Group (Users)        | 
    |  TCP + Rules      |             |<----------------->|                     Health |
@@ -1888,7 +1893,7 @@ Looking at the session details in the Web Developer Tools Console,
 //////////
 //////////////////////////////////////////////////////////////////////////
 
-Cross Zone Load Balancing
+Cross Availability Zone Load Balancing
 //////////////////////////////////////////////////////////////////////////
 
 There can be an issue where two AZs have an uneven number of EC2 Instances
@@ -2041,7 +2046,7 @@ SNI allows for having multiple SSL certs on one web server
 	This is to serve multiple websites behind the Load Balancer
 SNI is a newer protocol (so not universally supported)
 	This is the client stating the desired hostname on initial handshake
-Server fins the correct cert and loads that
+Server finds the correct cert and loads that
 	If not found, loads the default
 
 Note:
@@ -3184,7 +3189,7 @@ Route 53 - Records
 	Record Type, Ex: (A, AAAA, CNAME, ...)
 	Value, Ex: (12.34.45.56)
 	Routing Policy, this is how Route 53 responds to queries
-	TTL: amount of time the record cached at DNS Resolvers
+	TTL: amount of time the record stays cached at DNS Resolvers
 Route 53 supports the following DNS record types
 	MUST KNOW: A, AAAA, CNAME, NS
 	Good to know: CAA, DS, MX, NAPTR, PTR, SOA, TXT, SPF, SRV
@@ -3240,6 +3245,8 @@ Private Hosted Zones are only accessible from within their VPC
 	These are used as internal tools, DBs, and apps not for the public
 	Instances in the VPC use the Private Hosted Zone to find the IP addresses
 		(IP addresses within the VPC)
+Does this mean that when we are asking for Resource that we are already doing that through a Hosted Zone???
+	(Ex. EC2 Instance to DB) 
 
 Diagram:
 Internal resource requests private Hostname, Private Hosted Zone finds the IP and returns it
@@ -3408,14 +3415,6 @@ Alias Records
 - Automatically recognizes changes in resource's IP addresses
 - Unlike CNAME, it can be used for the top node of a DNS namespace (Zone Apex), Ex: example.com
 ///////////////
-
-
- // Alias can be free on AWS, native health-check
-These map a hostname to an AWS resource
-// Can't be used as the top-node of a DNS namespace, like, example.com
-// An Alias can route to a number of different AWS services, but NOT EC2 instances
-Alias can point to something.domain.com OR domain.com // It can be root OR non-root name, like 
-
 //////////////////////////////////////////////////////////////////////////
 
 Routing Policies
@@ -3460,7 +3459,6 @@ In Route 53 > Hosted Zones > domain.com
 Routing Policies - Weighted
 //////////////////////////////////////////////////////////////////////////
 
-
 Weights don't have to add up to 100 // can they be more than 100???
 
 Can be associated with health checks
@@ -3495,6 +3493,8 @@ In Route 53 > Hosted Zones > domain.com
 	
 
 //////////////////////////////////////////////////////////////////////////
+
+
 Routing Policies - Latency
 //////////////////////////////////////////////////////////////////////////
 
@@ -3533,6 +3533,7 @@ In Route 53 > Hosted Zones > domain.com
 	
 
 //////////////////////////////////////////////////////////////////////////
+
 
 Health Checks
 //////////////////////////////////////////////////////////////////////////
@@ -3590,6 +3591,7 @@ Can be associated with health checks
 
 //////////////////////////////////////////////////////////////////////////
 
+
 Routing Policies - Geoproximity
 //////////////////////////////////////////////////////////////////////////
 
@@ -3625,7 +3627,7 @@ So one resource will cover its part of the map in blue, the other in orange,
 Routing Policies - IP-based Routing
 //////////////////////////////////////////////////////////////////////////
 
-Routing is of course based on the ip of the client connecting to the resource
+Routing is of course based on the IP of the client connecting to the resource
 
 This uses CIDR: Classless Inter-Domain Routing (CIDR)
 
@@ -3654,18 +3656,18 @@ Multi-Value is not a substitute for having an ELB
 
 //////////////////////////////////////////////////////////////////////////
 
+
 Party Domains and Route 53
 //////////////////////////////////////////////////////////////////////////
 
+Domain Registrar vs DNS Service:
 We can buy our domain name through any service, 
-	and then have Amazon manage the DNS records
+	and then have Amazon Route 53 (or any other DNS Service) manage the DNS records
 
-To do this, we create a public hosted zone
-	We then list the name servers in the hosted zone details
+To do this, we create a public hosted zone in Route 53
+	We then update the NS Records on the 3rd party website to use the Route 53 Name Servers
 
 In this way, we have the domain name provider have their name server point to Route 53
-	
-
 //////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////
@@ -3725,7 +3727,15 @@ NAT Gateway - The way that EC2 instances in a Private Subnet access the Internet
 		This is done through the NAT Gateway inside of the Public Subnet
 			The NAT Gateway then accesses the Internet Gateway
 		NAT Instances are self-managed where NAT Gateways are AWS-managed
+//////////////////////////////////////////////////////////////////////////
 
+VPC Diagram (See Slide 202)
+//////////////////////////////////////////////////////////////////////////
+
+Slide shows AWS Cloud being the outermost layer
+	Then the Region contains AZs
+	The VPC goes across AZs
+		In each AZ is a Public and Private Subnet
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -3751,6 +3761,7 @@ Security Groups // These are the second layer of defense AFTER NACLs
 	Rules affect IP addresses and security groups
 
 VPC Flow Log - Info about the traffic flowing through our VPC, Subnet, and ENI
+		ENI: Elastic Network Interface
 	Helps to monitor subnets to Internet, subnet to subnet, and Internet to subnet
 	Looking over these will help with connectivity problems
 	Can be sent to S3, CloudWatch Logs, and Kinesis Data Fire Hose
@@ -3855,7 +3866,7 @@ S3 Security
 //////////////////////////////////////////////////////////////////////////
 
 User-Based
-	IAM Policies - controls which IAM Users can access
+	IAM Policies - controls which IAM Users can access the S3 Bucket
 
 Resource-Based
 	Bucket Policies - bucket-wide policies from S3 console, allows cross-account access
@@ -4664,7 +4675,7 @@ Amazon S3 - CORS
 //////////////
 
 A client making a cross-origin request on our S3 bucket
-	Need to enable correct CORS headers
+	Need to enable correct CORS headers (specific site or *)
 
 POPULAR EXAM QUESTION!!!!
 
@@ -4907,7 +4918,7 @@ CloudFront gets data from S3 Bucket or other website
 CloudFront stores data in its local cache
 Next client to request same data
 CloudFront gets that data from its local cache, and gives that to the client
-                                                              _________________
+                                                               ________________
 Client --> www.example.com --> CloudFront Edge Location <---> | Origin:        |
 	                             (local cache)            |         S3     | 
                                                               |         or     | 
@@ -5138,13 +5149,15 @@ CloudFront - Maximize Cache Hits by Separating Static and Dynamic Distributions
 In this example, we are requiring users to log in
 Once logged in they are given a signed cookie, and able to access the static website in the S3 bucket
 If they do not have the signed cookie, they are redirected to the login page when they try to access any other page
+
                          ______________  Cache based
                         |CDN Layer     | on correct   
                         |CloudFront    | headers and   
                         |              | cookie        Dynamic Content (REST, HTTP server): ALB + EC2              
      |-Dynamic--------->|(Dynamic dist)|-------------->(hub)------------------> EC2 M5 Instance
-Users|                  |(Static dist) |                 
-     |-Static Requests->|______________|-----(static content)-----------------> S3 Bucket
+Users|                  |              |                 
+     |-Static Requests->|(Static dist)-|-----(static content)-----------------> S3 Bucket          
+                        |______________|
             For the static dist, no headers/session caching rules                
             Required for maximizing cache hits
 ///////////////////
@@ -5450,6 +5463,10 @@ Client------->|  Edge   |------>|Amazon    |------->|Origins:|-------> |Web Serv
 
 CloudFront - Real Time Logs
 //////////////////////////////////////////////////////////////////////////
+Get real-time logs sent to Kinesis Data Streams
+Content delivery performance used for events or analysis
+
+//////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -5578,7 +5595,7 @@ Docker Images can then be run as an application
 
 Docker Containers Management on AWS
 ////////////////////
-There are four tools that are used to manage Docker Containers:
+There are four AWS tools that are used to manage Docker Containers:
 
 Amazon Elastic Container Service (ECS)
 	Amazon's container platform
@@ -5899,7 +5916,7 @@ ECS Cluster Capacity Provider
 Diagram: ECS Scaling - CPU Usage Ex.
 ////////////////////
 
-This diagram shows the flow of overloaded Tasks being autoscaled using CloudWatch Alarms
+This diagram shows the flow of overloaded Tasks being auto-scaled using CloudWatch Alarms
 
 1. An increase in Customer usage causes the CPU Usage of the Tasks to increase
 
@@ -5989,7 +6006,7 @@ Event Bridge ---------------------->|          |       ||
 
 Diagram: ECS Tasks Invoked by Event Bridge Schedule
 ////////////////////
-In this diagram, it shows the how Tasks are created based on the workload given
+In this diagram, it shows how Tasks are created based on the workload given
 In this Ex, 3 messages come in, so the Auto Scaling creates 3 Tasks to handle them
 
                                     ________________________
@@ -6331,7 +6348,7 @@ ECS Task Placement Process
 	(None of these are perfect, and their effectiveness depends on the situation)
 - Amazon uses the following to determine Task Placement:
 	- Identify Instances that satisfy requirements in Task Definition (CPU, Memory, Ports) 
-	- Identify Instances that satsfy the Task Placement Constraints
+	- Identify Instances that satisfy the Task Placement Constraints
 	- Identify the Instances that satisfy the Task Placement Strategies
 	- Select a qualifying Instance for Task Placement
 ////////////////////
@@ -6418,7 +6435,7 @@ ECS Task Placement Constraints
 There are two types of Constraints:
 	distinctInstance - place each Task on a different Container Instance
 	memberOf - places Task on Instances that satisfy an expression
-		- Uses the Cluster Query Language (advanced)
+		 - Uses the Cluster Query Language (advanced)
 
 // Here the Constraint of distinctInstance is set
 distinctInstance JSON:
@@ -6703,7 +6720,7 @@ Amazon EKS - Data Volumes
 	- Amazon FSx for NetApp ONTAP
 
 // Lustre is a parallel distributed file system generally used for Clusters
-// ONTAP is NetApp's internal OS specially optimize for storage functions
+// ONTAP is NetApp's internal OS specially optimized for storage functions
 
 ////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -7163,7 +7180,7 @@ Goal: Clone an Environment
 > CloudFormation > Stacks > *dev stack name*
 
 -> Action dropdown > Clone
-Very limited options, but we are free to edit the clone after it creation
+Very limited options, but we are free to edit the clone after its creation
 ////////////////////
 //////////////////////////////////////////////////////////////////////////
 
@@ -7172,10 +7189,954 @@ Beanstalk Migrations
 
 Elastic Beanstalk Migration: Load Balancer
 ////////////////////
+Changing the Load Balancer type (ALB/NLB) requires a rework of the Environment.
+To do this, the environment must be copied, and then the new Environment created, 
+	connecting to the new Load Balancer
 ////////////////////
 
+RDS with Elastic Beanstalk
+////////////////////
+RDS tied to Elastic Beanstalk is fine for dev, but not prod
+The correct way is to have an external RDS and attach it to the Environment
+	This is done through Environment Variables
+////////////////////
+
+Elastic Beanstalk Migration: Decouple RDS
+////////////////////
+Goal decouple the RDS from the Elastic Beanstalk App so it doesn't get lost
+Steps:
+- Create snapshot to ensure we don't lose the RDS
+- Create a new EB Environment
+- Connect to the external RDS
+- Swap the Environments using Blue/Green
+- Delete the old Environment
+////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 18
+  __             ___
+ /  \ |  |  /|  /   \   
+ |    |__|   |  \___/
+ |    |  |   |  /   \
+ \__/ |  |. _|_ \___/
+
+AWS CloudFormation
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+AWS CloudFormation - Overview
+//////////////////////////////////////////////////////////////////////////
+
+AWS CloudFormation
+////////////////////
+CloudFormation is a way to write out the structure of a full-stack app
+Allows the dev to provision all resources (EC2, ALB, ...) in the correct order
+////////////////////
+
+CloudFormation - Template Example
+////////////////////
+After writing the CloudFormation code, it can be visualized w/ Infrastructure Composer
+////////////////////
+
+Benefits of AWS CloudFormation (1/2)
+////////////////////
+No manually created resources, 
+	can version control the code, 
+	Infrastructure changes are reviewed through the code
+Costs are easy to estimate as resources are price-tagged and totaled
+////////////////////
+
+Benefits of AWS CloudFormation (2/2)
+////////////////////
+Easy to create and delete entire infrastructure, and work off of established projects and online templates
+////////////////////
+
+How CloudFormation Works
+////////////////////
+CloudFormation pulls a Version of a code script from S3, and creates the full app.
+On deletion, it deletes all resources that it created.
+////////////////////
+
+Deploying CloudFormation Templates
+////////////////////
+There are two ways to edit CloudFormation Templates: Manual and Automated.
+Manual is just writing it out by hand in a code editor,
+	or selecting parameters using Infrastructure Composer
+Automated is editing a YAML file, which allows for an automated pipeline,
+	and can be used in a CICD pipeline
+////////////////////
+
+CloudFormation - Building Blocks
+////////////////////
+There are lots of components that go into a CloudFormation Template (see slide)
+	Most important are AWSTemplateFormatVersion and Resources
+There are also Template's Helpers for References and Functions
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - Create Stack - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Practice creating Stacks using CloudFormation
+
+Using simple Template, we can edit in YAML or JSON
+	And view it in Infrastructure Composer
+
+Using Create Stack, and a very simple YAML file
+	Example file has just one Resource, an EC2 Instance
+		With a few parameters filled in
+Just this is enough to deploy this Stack
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudFormation - Update and Delete Stack - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Practice Updating and Deleting Stacks using CloudFormation
+
+Update:
+An Update can only be done by replacing hte current Template w/ a new one
+	(Upload a new Version)
+
+If the new Version has a call for something like a Description: 
+	We get the prompt to fill that in at Creation/Update
+Before finalizing an Update, we get a Change Set Preview
+	Gives a list of changes from the old Version
+	CloudFormation auto-decides if a Resource has changed enough to warrant a Replacement or just an Edit
+
+Once Update is confirmed, looking at the Resources during Update
+	Resources can be seen deleting/creating
+
+Delete:
+Deleting the Stack deletes all Resources of the Stack
+These are even deleted in the correct order
+//////////////////////////////////////////////////////////////////////////
+
+YML Crash Course
+//////////////////////////////////////////////////////////////////////////
+
+Teacher prefers YAML for its string interpolation
+Main Points:
+	Key-Value pairs
+	Nested objects
+	Supported Arrays
+	Multi-line strings
+	// Can support comments!
+
+Ex. (Simple list, looks a lot like JSON) // Would need to research differences
+Resources:
+	- Type: Thing1
+	- Type: Thing2
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - Resources
+//////////////////////////////////////////////////////////////////////////
+CloudFormation - Resources
+////////////////////
+Resources are the AWS Resources that a CloudFormation scrpt can allocate and configure.
+This is full configuration, including referencing other Resources in the script.
+Many, MANY, Resource types, and are of the form:
+	service-provider::service-name::data-type-name
+////////////////////
+
+Resource Reference Docs
+////////////////////
+https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html
+
+This is a doc with all of the Resource types that can be allocated.
+	And the rest can be allocated with custom types!
+Each entry has its important features, such as:
+	Default // value
+	Required
+	Type // String, int, etc
+	Update requires // If update requires replacement, stopping the Resource, etc.
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - Parameters
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - Parameters, Overview
+////////////////////
+Parameters are a way to put Resources into a script like variables.
+This means that we can define the Resource separately with a name, and use that name in the script.
+	Teacher does call these scripts a "template"
+Doing this means that these Parameters can be used throughout the script, and variable.
+	When the Parameter is defined, its constraints are also defined.
+	So we can constrain a Parameter to be an EC2 Instance, with a limited number of sizes.
+		Ex: (t2 micro, t3 micro, etc)
+////////////////////
+
+When to Use a Parameter
+////////////////////
+Ex:
+Parameters:
+	SecurityGroupDescription:
+		Description: Security Group Description
+		Type: String
+
+When a Resource is likely going to change in future uses of a script.
+////////////////////
+
+CloudFormation - Parameter Settings
+////////////////////
+Parameters have a number of different settings that can be applied:
+	Type // Which itself has a large number of settings (see slide)
+	Description
+	ConstraintDescription
+	MORE...
+////////////////////
+
+CloudFormation - Parameters Example
+////////////////////
+// A Parameter for a variable EC2 Instance
+// Has constrained options and a Default
+Parameters:
+	InstanceType:
+		Description: Chhose an EC2 Instance type
+		Type: String
+		AllowedValues:
+			- t2.micro
+			- t2.small
+			- t2.medium
+		Default: t2.micro
+
+// Here the Parameter is used in the script
+Resources:
+	MyEC2Instance:
+		Type: AWS::EC2Instance
+		Properties:
+			InstanceType: !Ref InstanceType // The !Ref lets us use the Parameter here
+			ImageId: ami-0c09df90sdf
+////////////////////
+
+How to Reference a Parameter
+////////////////////
+We use the Fn::Ref function
+But, as seen above, the !Ref (YAML shortcut) lets us use a Parameter in a script
+
+In the script, we don't have to put all Parameters under the Parameters section.
+We can name a Resource, filling in all of the settings, and then reference it in other places
+////////////////////
+
+CloudFormation - Psuedo Parameters
+////////////////////
+Psuedo Parameters are Parameters that are variables already set up in AWS
+These are things like
+	AWS::Region
+	AWS::StackName
+	etc
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - Mappings
+//////////////////////////////////////////////////////////////////////////
+CloudFormation - Mappings Overview
+////////////////////
+Mappings are fixed variables within a CloudFormation template.
+Can be used to differentiate between different environments like dev and prod.
+All of the values are hardcoded within the template.
+
+Mappings are variables derived from defined values like Region, AZ, AWS Account, etc
+
+////////////////////
+
+Accessing Mapping Values (Fn::FindInMap)
+////////////////////
+The function Fn::FindInMap is used to find a value in the mapping
+!FindInMap [MapName, TopLevelKey, SecondLevelKey]
+So if the Mapping is:
+Mappings:
+	RegionMap:
+		us-east-1:
+			HVMG2: ami-easteast
+		us-west-1:
+			HVMG2: ami-westwest
+// The mapping can be accessed by AWS::Region and HVMG2
+// Works great for AMIs b/c they are region-specific
+Resources:
+	MyEC2Instance:
+		Type:AWS::EC2::Instance
+		Properties:
+			ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", HVMG2]
+////////////////////
+
+When to use Mappings vs Parameters
+////////////////////
+Mappings are preferable when the variables will only change based on things that can be deduced later. These are things like:
+	Region
+	AZ
+	AWS Account
+	Environment
+	...
+
+Parameters are used when the variables change based on the specific needs of a User
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - Outputs & Exports
+//////////////////////////////////////////////////////////////////////////
+CloudFormation - Outputs Overview
+////////////////////
+A Stack can output from a Resource
+	This can be picked up by the console
+	Or another Stack
+		This does require Exporting from one Stack, and Importing by another Stack
+
+In the script, this is done by setting the Export: field
+Ex:
+	Export:
+		Name: SSHSecurityGroup	
+////////////////////
+
+CloudFormation - Outputs Cross-Stack Reference
+////////////////////
+To have the Cross-Stack Referencing, the in-taking Stack must have a !ImportValue set
+Important: Every Stack that Imports the Output MUST be deleted first
+Ex:
+Resources:
+	...
+		SecurityGroups:
+			- !ImportValue SSHSecurityGroup
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+
+CloudFormation - Conditions
+//////////////////////////////////////////////////////////////////////////
+
+Overview
+////////////////////
+Controls the creation of Resources based on Conditions.
+Conditions can be any measurable value: 
+	Region
+	AZ
+	Environment (Dev, Test, Prod, ...)
+Conditions can also reference other Conditions
+////////////////////
+
+How to Define a Condition
+////////////////////
+Here, we create a Condition that can then be used elsewhere
+
+Ex:
+Conditions:
+	CreateProdResources: !Equals [ !Ref EnvType, prod ]
+
+CreateProdResources // Logical ID
+!Equals             // Intrinsic Function
+
+Intrinsic Functions can be:
+	And, Equals, If, Not, Or
+////////////////////
+
+How to Use a Condition
+////////////////////
+Here, the above Condition is used to determine if this Resource should be created
+
+Ex:
+Resources:
+	MountPoint:
+		Type: AWS::EC2::VolumeAttachment
+		Condition: CreateProdResources
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudFormation - Intrinsic Functions
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+There are MANY of these (see slide)
+Most common are:
+	Ref, GetAtt, ImportValue
+////////////////////
+
+Intrinsic Function - Fn::Ref
+////////////////////
+References a Parameter or Resource
+
+Ex:
+Resources:
+	DBSubnet1:
+		Type: AWS::EC2::Subnet
+		Properties:
+			VpcId: !Ref MyVPC
+
+MyVPC - Is a Resource or Parameter defined earlier in the script
+Works by getting het ID of a Resource
+////////////////////
+
+Intrinsic Function - Fn::GetAtt
+////////////////////
+Gets attributes attached to a Resource, like the Resource's AZ
+Ex:
+Slide shows an EC2 Instance get defined
+	Then, an EBSVolume is allocated
+		This is placed in the same AZ as the EC2 Instance
+		This is done dynamically by using GetAtt to get the AZ from the EC2 Instance:
+			*EBSVolume:*
+				...
+				AvailibilityZone: !GetAtt EC2Instance.AvailabilityZone
+
+EC2Instance is the name of the Resource definition
+////////////////////
+
+Intrinsic Function - Fn::FindInMap
+////////////////////
+Returns a named value from a specific key
+Stucture is:
+	!FindInMap [ MapName, TopLevelKey, SecondLevelKey ]
+Slide defines RegionMap, where different Regions use different AMIs
+	These are further broken down by HVM64 and HVMG2
+Later in the script, when defining an EC2 Instance, it will pull the correct AMI:
+	MyEC2Instance:
+		...
+		ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", HVM64]
+
+So in the Ex:
+	It pulls from RegionMap
+	It get the Region for where the script is being run
+	It get the HVM64 AMI 
+////////////////////
+
+Intrinsic Function - Fn::ImportValue
+////////////////////
+Imports values exported by other definitions
+Ex:
+MySecureInstance:
+	...
+	SecurityGroups:
+		- !ImportValue SSHSecurityGroup
+////////////////////
+
+Intrinsic Function - Fn::Base64
+////////////////////
+Converts String to Base64 representation
+
+	!Base64 "ValueToEncode"
+
+The most common use is to convert the String of User Data to an EC2 Instance
+
+Ex: Putting a String into the UserData of a WebServer
+WebServer:
+	Type: AWS::EC2::Instance
+	...
+	UserData:
+		!Base64 |
+			#!/bin/bash
+			dfn update -y
+			dfn install -y httpd
+////////////////////
+
+Intrinsic Function - Fn::Condition Functions
+////////////////////
+These are the Condition Functions from the previous section:
+	And, Equals, If, Not, Or
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - Rollbacks
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Rollbacks have different behavior, based on app status.
+Stack Creation Failure - delete everything or troubleshoot
+Stack Update Failure - Rollback to previous working state
+Rollback Failure - Manual fixes and continue Rollback
+////////////////////
+
+Hands On
+////////////////////
+Goal:
+	Trigger a Rollback to test everything deleted vs only failed Resources
+
+Rollback can affect everything, or some Resources
+	So if only one Resource failed to create, the rest could be created
+After fixing the issue, User MUST delete the failed Stack and re-update
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - Service Role
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+CloudFormation uses ServiceRoles as its Security Groups
+These are IAM Roles given to CloudFormation for the purpose of creating Resources.
+User creating a Stack w/ CloudFormation doesn't have the Permissions needed for those Resources
+	This is called an IAM PassRole
+////////////////////
+
+Hands On
+////////////////////
+Created through the IAM Console
+	For an AWS Service (CloudFormation)
+Default IAM Role is the Permissions of the User creating the PassRole
+Optional is to create a separate IAM Role with designated Permissions
+	So now this CloudFormation Service will only have the Permissions of the IAM Role
+	And will use those Permissions every time it creates its Stack
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - Capabilities
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+CAPABILITY_NAMED_IAM and CAPABILITY_IAM
+Used when creating or updating IAM Resources (CAPABILITY_IAM) 
+	or named IAM Resources (CAPABILITY_NAMED_IAM)
+
+CAPABILITY_AUTO_EXPAND
+Needed for Macros or Nested Stacks
+Template may change before deploying
+
+InsufficientCapabilitiesException
+Excepton thrown during deployment when Capabilities haven't been acknowledged
+////////////////////
+
+Hands On
+////////////////////
+In practice, this just comes down to checking a box when the Stack's script will create IAM Resources.
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - DeletionPolicy
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+This is a top-level attribute of a Resource that controls what happens on deletion of the Stack
+Ex:
+Resources:
+	MyResource:
+		...
+		DeletionPolicy: //delete, retain, or snapshot 
+////////////////////
+
+CloudFormation - DeletionPolicy Delete
+////////////////////
+Just delete with the rest of the Stack
+May need to be modified first (like an S3 Bucket needs to be emptied first)
+////////////////////
+
+CloudFormation - DeletionPolicy Retain
+////////////////////
+Keep this Resource when the Stack is deleted
+////////////////////
+
+CloudFormation - DeletionPolicy Snapshot
+////////////////////
+Keep a copy of this Resource when the Stack is deleted
+////////////////////
+
+Hands On
+////////////////////
+After setting the parameters in the script to retain or snapshot
+	We can see these Resources (or a copy) stays after the Stack is deleted
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - Stack Policies
+//////////////////////////////////////////////////////////////////////////
+
+Overview
+////////////////////
+During creation, a Stack has full Permissions as defined by its User or ServiceRole
+However, when updating, we may want to restrict Permissions for Resources
+////////////////////
+
+Ex.
+////////////////////
+Slide shows a script that defines the Update where it has Allow for all Permissions
+It then has the restriction that the created production DB has a Deny for all
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - Termination Protection
+//////////////////////////////////////////////////////////////////////////
+
+Overview
+////////////////////
+Prevents accidental deletes of a Stack
+////////////////////
+
+Hands On
+////////////////////
+Once a Stack has been created, we can go to Stack Actions in the console, and activate this
+	Default is inactive
+It is the first item in the Stack Actions dropdown
+We can't delete the Stack until this has been turned off
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - Custom Resources
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Resources that aren't already supported by CloudFormation
+	Or that are outside of AWS
+	Or that are custom scripts being run (Ex: Empty an S3 bucket so it can be deleted)
+////////////////////
+
+How to define a Custom Resource
+////////////////////
+Defined by:
+	AWS::CloudFormation::CustomResource, or
+	Custom::MyCustomResourceTypeName (recommended)
+
+Ex: (Lambda, b/c it is the most common)
+Resources:
+	MyCustomResourceUsingLambda:
+		Type: MyLambdaResource // Our custom name for the type
+		Properties:
+			ServiceToken: *Lambda arn OR SNS arn* // Must be in same Region
+			*Input values, Optional*
+			ExampleProperty: "ExampleValue"
+////////////////////
+
+Ex: Use Case - Delete content from an S3 bucket
+////////////////////
+When the Stack has delete called, it will empty the S3 Bucket
+	And then the S3 Bucket will be deleted correctly
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CloudFormation - StackSets
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Organizes Stacks into StackSets for ease of creation, updating, and deletion
+	This can go across AWS Accounts in an AWS Organization
+	Can only be created by an Admin Account
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 19
+  __            ___
+ /  \ |  |  /| |   |   
+ |    |__|   | |___|
+ |    |  |   |     |
+ \__/ |  |. _|_    |
+
+AWS Integration & Messaging: SQS, SNS, and Kinesis
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+Introduction to Messaging
+//////////////////////////////////////////////////////////////////////////
+
+Section Intro (1/2)
+////////////////////
+There are two types of Messaging used by AWS
+	Synchronous: Direct communication from one Service to another
+	Asynchronous: Messaging goes to a middle layer (like a queue), before the next Service
+////////////////////
+
+Section Intro (2/2)
+////////////////////
+The type used depends on application needs, and traffic load
+
+In the case of high traffic, it's better to use:
+	SQS, SNS, or Kinesis
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+Amazon SQS - Standard Queue Overview
+//////////////////////////////////////////////////////////////////////////
+Amazon SQS - What's a Queue?
+////////////////////
+Producer puts messages into the Queue
+Consumer takes messages from the Queue
+////////////////////
+
+Amazon SQS - Standard Queue
+////////////////////
+SQS is Amazon's oldest AWS offering
+Unlimited throughput
+Default hold is 4 days to max of 14 days
+Low latency with limit of 256KB per message
+
+At least once delivery (duplicates allowed)
+May be out of order
+////////////////////
+
+SQS - Producing Messages
+////////////////////
+Produced messages persist in the queue from 4 to 14 days, or until a Consumer deletes it
+Messages are sent to the queue by the SDK (SendMessage API)
+////////////////////
+
+SQS - Consuming Messages
+////////////////////
+Consumers can be EC2 Instances, servers, AWS Lambda
+Messages can be consumed (up to 10 at a time)
+On consumption the messages are deleted (DeleteMessage API)
+////////////////////
+
+SQS - Multiple EC2 Instances Consumers
+////////////////////
+Messages can be consumed in parallel,
+which is a great use-case for scaling consumers horizontally.
+////////////////////
+
+SQS with Auto Scaling Group (ASG)
+////////////////////
+Diagram
+	Slide shows a CloudWatch Metric checking the Queue Length
+	If the queue gets too big, it sets off an alarm
+ 	The alarm triggers the ASG to increase the Consumer capacity
+////////////////////
+
+SQS to Decouple Between App Tiers
+////////////////////
+Diagram
+	Slide shows a diagram of jobs coming in, processing, and storage to an S3 Bucket
+	Because the processing can take a while, it is beneficial to decouple it
+	The front-end web app takes the jobs
+	The Queue holds the jobs
+	The Back-end processing takes the jobs, process them, and then stores them in an S3
+	
+	Both the front-end and back-end have an ASG, so neither gets overwhelmed
+		Or wastes resources
+////////////////////
+
+SQS - Security
+////////////////////
+There are three types of encryption:
+	Uses in-flight encryption w/ HTTPS API
+	At-rest encryption w/ KMS Keys
+	Client-side encryption if client wants to handle the encryption/decryption
+
+SQS Access Policies are similar to S3 Bucket Policies:
+	Cross-account access
+	Allows other Resources to write to the SQS queue
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+SQS - Standard Queue Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal:
+Set up an SQS queue, an be able to receive and process messages
+
+> Amazon SQS > Queues
+-> Create Queue
+
+We're creating a Standard Queue
+Leave the default Configuration and Encryption
+Access Policy defines who can access the queue, and what they can do
+	Default is everyone can access, and do everything
+
+Once created, we can now create messages that are sent to the queue
+We can then pull those messages, and check its information
+//////////////////////////////////////////////////////////////////////////
+
+SQS Queue Access Policy
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+SQS Queue Access Policy is like an S3 Bucket Policy, controlling access
+	Controls access by Users and Services
+Same parameters as a Bucket Policy
+////////////////////
+
+Hands On
+////////////////////
+In the hands on, an S3 Bucket is set to send messages to the SQS Queue
+	The SQS is set so its Access Policy allows messages from the S3
+	This happens on the S3 Event of a new object being added
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+SQS - Message Visibility Timeout
+//////////////////////////////////////////////////////////////////////////
+Overview:
+////////////////////
+The SQS will have a message taken by a consumer
+	That message is then invisible to other consumer for a timeout period
+		(If it is not processed and removed)
+	That timeout period must be balanced between too long and too short
+		(To avoid duplicate processing on the same message)
+	Too long: Something went wrong with the consumer, processing takes too long
+	Too short: Becomes visible in the queue too soon, and duplicate processing occurs
+////////////////////
+
+Hands On
+////////////////////
+Create message
+	Have consumer1 pull the message
+	Have consumer2 search messages (does not see the message)
+	Something goes wrong w/ consumer1 (processing takes a long time)
+	Timeout finishes
+	Consumer2 now sees and pulls the message
+		This is now duplicate processing
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+SQS - Dead Letter Queue
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Dead Letter Queues are quarantine zones for messages that have been pulled too many times
+	(More times than the MaximumReceives setting)
+	This means that there is something wrong with the message or consumer
+	It is sent to the Dead Letter Queue for manual analysis
+Queue type must be the same, so FIFO to a FIFO, or standard to a Standard
+Messages in the Dead Letter Queue will have an expiration date
+////////////////////
+
+Redrive to Source
+////////////////////
+Once the errors are resolve, the messages are sent back into the main queue to be processed
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+SQS - Dead Letter Queue Hands On
+//////////////////////////////////////////////////////////////////////////
+Setup:
+	Select a queue
+	Enable Dead Letter Queue
+	Set MaximumReceives to 3
+	Create message w/ poison pill message (can't be processed)
+Consumer pulls and puts back the message three times
+	On the fourth time, it goes to the Dead Letter Queue
+	Resolve the message or consumer
+	Enable the DLQ Redrive
+	Message goes back to the main queue
+//////////////////////////////////////////////////////////////////////////
+
+SQS Delay Queue
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+The DelaySeconds parameter delays messages showing up in the queue
+	Message goes in
+	Delay
+	Message is available for pulling
+////////////////////
+
+Hands On
+////////////////////
+Setup:
+	Create queue w/ DelaySeconds set to 30 seconds
+	Creating messages for the queue, standard delay is what we set the queue to
+Pulling messages show nothing for 30 seconds
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+SQS - Certified Developer Concepts
+//////////////////////////////////////////////////////////////////////////
+Long Polling
+////////////////////
+This is where the consumer polls the queue over a long period of time
+	This decreases the number of API calls to the queue
+////////////////////
+
+SQS Extended Client
+////////////////////
+Allows consumers to get large files that have to be stored in an S3 Bucket
+	The message in the queue tells the consumer to go get the data from S3
+////////////////////
+
+Must Know API
+////////////////////
+There are several API calls to interact with the queues
+A few of these can also be used with batch processing
+////////////////////
+
+Long Polling Hands On
+////////////////////
+Done by increasing the value of the Polling Duration variable of the consumer
+	This keeps the polling going without needing to do another API call
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+SQS - FIFO Queues
+//////////////////////////////////////////////////////////////////////////
+
+Overview
+////////////////////
+First In, First Out
+	Messages only send once, and are processed in order
+////////////////////
+
+Hands On
+////////////////////
+By naming the queue with ".fifo" at the end, we get a FIFO queue
+	Make sure to check the box for de-duplication
+Now, even though we have four different consumers all grabbing messages, they execute in order
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+SQS - FIFO Queues Advanced
+//////////////////////////////////////////////////////////////////////////
+
+FIFO - Deduplication
+////////////////////
+First In, First Out
+De-duplication set to 5 minutes
+	Requires a Message De-duplication ID to set explicitly
+////////////////////
+
+SQS FIFO - Message Grouping
+////////////////////
+Same MessageGroupID means that all messages with it will be processed in-order
+	If all messages have the same MessageGroupID, then they will all be processed in-order
+	Groups of messages with the same MessageGroupID will be in-order for that subset
+////////////////////
+
+Hands On
+////////////////////
+Sending the same message again and again doesn't result in duplicates, nothing happens
+	So there is already some de-duplication
+Sending a group of messages with the same MessageGroupID makes them all be in order to each other
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+Amazon SNS
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+SNS is an abstraction, allowing Services to send messages out to other Services/Endpoints
+	Rather than having each Service get Permissions to send messages
+////////////////////
+
+Subs and Pubs
+////////////////////
+Services are Subscribers to Publishers (Publishers send to SNS)
+	There are filtering options
+	The communication can handle a LOT of Messages
+Lot of AWS Services can be Publishers/Subscribers
+////////////////////
+
+AWS SNS - How to Publish
+////////////////////
+////////////////////
+
+AWS SNS - Security
+////////////////////
+////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
 
 
 
