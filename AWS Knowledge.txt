@@ -335,7 +335,7 @@ How Users can access AWS, Three Options
 	AWS Management Console: (password + MFA)
 	AWS Command Line Interface (CLI): access keys
 	AWS Software Developer Kit (SDK) - for code: access keys
-Access Keys are generated through he AWS Console
+Access Keys are generated through the AWS Console
 Users manage their own access keys
 Access Keys are secret, just like passwords
 Access Key ID ~= username
@@ -589,7 +589,6 @@ As a default, even Admin Permissions don't allow Users to have access to billing
 		-> Create Budget
 
 // Not super important (seemingly), but the path starts with Bills until selecting an item lower in the Service explorer list, at which point the path starts with Billing and Cost Management
-
 //////////////////////////////////////////////////////////////////////////
 
 EC2 Basics
@@ -774,7 +773,7 @@ Only those Security Groups with authorization will be able to send data with thi
 |            |  |      Inbound            |               
 |            |  |Security Group 1 is auth |
 |EC2 Instance|  |Security Group 2 is auth |
-|EC2 Instance|  |                         |                    ________________
+|            |  |                         |                    ________________
 |           <----------------------------------- Port 122 ----|Security Group 2| 
 |            |  |                         |                   |________________| 
 |            |  |                         |                    ________________
@@ -800,7 +799,6 @@ There are ports usually used for specific things
 
 Security Groups Hands On
 //////////////////////////////////////////////////////////////////////////
-
 EC2 > Network & Security > Security Groups
 	Default Security Group launch-wizard-1 has two rules
 		SSH,  port 22, all sources		
@@ -809,14 +807,13 @@ EC2 > Network & Security > Security Groups
 		If the HTTP port 80 rule is removed, the EC2 Instance can't be accessed anymore
 		
 		Outbound is to everywhere by default, but we can change this
-
 //////////////////////////////////////////////////////////////////////////
 
 SSH Overview
 //////////////////////////////////////////////////////////////////////////
 
 SSH is for Mac, Linux, and <= Windows 10
-Putty is >= Windows 10
+Putty is for >= Windows 10
 EC2 Instance Connect works for all
 
 //////////////////////////////////////////////////////////////////////////
@@ -881,7 +878,7 @@ Permission Denied
 This is either from:
 	Using the wrong security key or no security key for the EC2 Instance
 	Make sure that the EC2 Instance has been started
-		Double-check the command uses the ec2-user@<IPv4>
+		Double-check that the command uses the ec2-user@<IPv4>
 //////////
 
 Nothing is working
@@ -1064,6 +1061,7 @@ Tracking IP Charges:
 	IP charges can be tracked at: Billing and Cost Management > Bills
 	> Amazon VPC IP Address Manager > Public IP Insights
 		Here, we an create an IPAM to track our IPv4 Addresses
+			IPAM: IP Address Manager
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -1444,7 +1442,7 @@ Four Kinds:
 	Classic Load Balancer (Deprecated)
 	Application Load Balancer
 		v2 - new generation - 2016 - ALB
-		HTTP, HTTPS, Websocket
+		HTTP, HTTPS, WebSocket
 	Network Load Balancer
 		v2 - new generation - 2016 - ALB
 		TCP, TLS (secure TCP), UDP
@@ -3659,7 +3657,6 @@ Multi-Value is not a substitute for having an ELB
 
 Party Domains and Route 53
 //////////////////////////////////////////////////////////////////////////
-
 Domain Registrar vs DNS Service:
 We can buy our domain name through any service, 
 	and then have Amazon Route 53 (or any other DNS Service) manage the DNS records
@@ -3705,6 +3702,7 @@ An AWS Certified Developer should know:
 
 //////////////////////////////////////////////////////////////////////////
 
+
 VPC and Subnets, a Primer
 //////////////////////////////////////////////////////////////////////////
 
@@ -3720,7 +3718,6 @@ Private Subnet - Does NOT allow traffic to and from the Internet
 
 Route Tables - Defines access to Internet and between subnets
 
-
 Internet Gateway - The way EC2 instances in a Public Subnet access the Internet
 
 NAT Gateway - The way that EC2 instances in a Private Subnet access the Internet
@@ -3729,23 +3726,21 @@ NAT Gateway - The way that EC2 instances in a Private Subnet access the Internet
 		NAT Instances are self-managed where NAT Gateways are AWS-managed
 //////////////////////////////////////////////////////////////////////////
 
+
 VPC Diagram (See Slide 202)
 //////////////////////////////////////////////////////////////////////////
-
 Slide shows AWS Cloud being the outermost layer
 	Then the Region contains AZs
 	The VPC goes across AZs
 		In each AZ is a Public and Private Subnet
-
 //////////////////////////////////////////////////////////////////////////
+
 
 VPC - NACL(network access control list)
 //////////////////////////////////////////////////////////////////////////
-
 Flow of data going into AWS Resources:
 Internet ---> VPC ----> NACL ----> Subnet ----> Security Groups ----> ENI/EC2 Instance
 	ENI: Elastic Network Interface
-
 
 NACL - This is a firewall that controls traffic to and from the subnet that is inside of our VPC
 	Stateless // Traffic can be allowed in and/or out
@@ -3765,10 +3760,7 @@ VPC Flow Log - Info about the traffic flowing through our VPC, Subnet, and ENI
 	Helps to monitor subnets to Internet, subnet to subnet, and Internet to subnet
 	Looking over these will help with connectivity problems
 	Can be sent to S3, CloudWatch Logs, and Kinesis Data Fire Hose
-
-
 //////////////////////////////////////////////////////////////////////////
-
 
 
 VPC Peering
@@ -3820,7 +3812,7 @@ Three Tier Architecture
 //////////////////////////////////////////////////////////////////////////
 
 The typical three tier architecture follows
-	A public-facing ELB via Route 53
+	A public-facing ELB via Route 53 / Public Subnet
 	A private VPC with an auto-scaling group
 		The group has three subnets, 
 			The subnets each have an EC2 instance across three different AZs
@@ -3930,13 +3922,10 @@ Website URL will be
 
 This of course requires that the bucket has public reads
 	Will give a 403 error if no public reads
-
-
 //////////////////////////////////////////////////////////////////////////
 
 S3 - Versioning
 //////////////////////////////////////////////////////////////////////////
-
 We can version in S3
 	Enabled at the bucket level
 Uploading a file takes a key to identify the file
@@ -3963,9 +3952,7 @@ Use Cases
 	CRR - Compliance, lower latency access, replication across accounts
 	SRR - Log aggregation, live replication between production and test accounts
 
-
 Notes:
-
 Enabling Replication only replicates new objects
 	Optionally, existing objects can be replicated with S3 Batch Replication
 
@@ -3976,13 +3963,11 @@ Delete Operations
 No chaining of replication
 	Bucket A is replicated to Bucket B, which does have replication to Bucket C
 		Bucket B does not replicate Bucket A items into Bucket C		
-
 //////////////////////////////////////////////////////////////////////////
 
 
 S3 - Storage Classes Overview
 //////////////////////////////////////////////////////////////////////////
-
 S3 Standard - General Purpose
 S3 Standard-Infrequent Access (IA)
 S3 One Zone-Infrequent Access
@@ -4044,10 +4029,8 @@ S3 Glacier Deep Archive - for LONG term storage
 	Minimum storage length is 180 days
 ///////////////////
 
-
 S3 Intelligent-Tiering
 ///////////////////
-
 Small monthly monitoring and auto-tiering fee
 Moves objects automatically Access Tiers based on use
 There are no retrieval charges
@@ -4057,10 +4040,9 @@ Infrequent Access tier (automatic): objects not accessed for 30 days
 Archive Instant Access tier (automatic): objects not accessed for 90 days
 Archive Access tier (optional): configurable from 90 to 700+ days
 Deep Archive Access tier (optional): configurable from 180 to 700+ days
-
 ///////////////////
-
 //////////////////////////////////////////////////////////////////////////
+reviewreviewreviewreview
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -4117,8 +4099,7 @@ And then just hit Enter for the Default output format
 From here, we can execute commands from either the default or other accounts
 	Default: aws s3 ls
 	Other:   aws s3 ls --profile <new-profile-name>
-
-This is just good to know as a developer
+	This is just good to know as a developer
 //////////////////////////////////////////////////////////////////////////
 
 Using MFA on the CLI
@@ -4291,7 +4272,6 @@ X-Amz-Security-Token=IQoJb3JpZ2luX2VjED4aCXVzLXdlc3QtMiJGMEQCIElODFZYmbwbzvUxtJu
 X-Amz-Signature=0fa43d653a873c40a30c120ffb1cc1eedffaf2749dfd1273d96b3323c67b6e55&
 X-Amz-SignedHeaders=host&response-content-disposition=inline
 ///////////////
-
 //////////////////////////////////////////////////////////////////////////
 
 
@@ -7065,9 +7045,9 @@ We can also swap the environment domains of dev and prod
 		The prod's URL is now green, and the dev's URL is now blue
 //////////////////////////////////////////////////////////////////////////
 
+
 Beanstalk CLI and Deployment Process
 //////////////////////////////////////////////////////////////////////////
-
 Elastic Beanstalk CLI
 ////////////////////
 - Elastic Beanstalk has its own CLI which can make working w/ it much easier
@@ -7254,12 +7234,14 @@ Costs are easy to estimate as resources are price-tagged and totaled
 
 Benefits of AWS CloudFormation (2/2)
 ////////////////////
-Easy to create and delete entire infrastructure, and work off of established projects and online templates
+Easy to create, see, and delete entire infrastructure
+Work off of established projects and online templates
 ////////////////////
 
 How CloudFormation Works
 ////////////////////
 CloudFormation pulls a Version of a code script from S3, and creates the full app.
+	New Versions are always new updates that have to be uploaded
 On deletion, it deletes all resources that it created.
 ////////////////////
 
@@ -7299,14 +7281,14 @@ CloudFormation - Update and Delete Stack - Hands On
 Goal: Practice Updating and Deleting Stacks using CloudFormation
 
 Update:
-An Update can only be done by replacing hte current Template w/ a new one
+An Update can only be done by replacing the current Template w/ a new one
 	(Upload a new Version)
 
 If the new Version has a call for something like a Description: 
 	We get the prompt to fill that in at Creation/Update
 Before finalizing an Update, we get a Change Set Preview
 	Gives a list of changes from the old Version
-	CloudFormation auto-decides if a Resource has changed enough to warrant a Replacement or just an Edit
+	CloudFormation auto-decides if a Resource has changed enough to warrant Replacement or just an Edit
 
 Once Update is confirmed, looking at the Resources during Update
 	Resources can be seen deleting/creating
@@ -7318,8 +7300,7 @@ These are even deleted in the correct order
 
 YML Crash Course
 //////////////////////////////////////////////////////////////////////////
-
-Teacher prefers YAML for its string interpolation
+Teacher prefers YAML for its string interpolation (rather than JSON)
 Main Points:
 	Key-Value pairs
 	Nested objects
@@ -7335,11 +7316,11 @@ Resources:
 
 CloudFormation - Resources
 //////////////////////////////////////////////////////////////////////////
-CloudFormation - Resources
+Overview
 ////////////////////
-Resources are the AWS Resources that a CloudFormation scrpt can allocate and configure.
+Resources are the AWS Resources that a CloudFormation script can allocate and configure.
 This is full configuration, including referencing other Resources in the script.
-Many, MANY, Resource types, and are of the form:
+Many (over 700), Resource types, and are of the form:
 	service-provider::service-name::data-type-name
 ////////////////////
 
@@ -7397,7 +7378,7 @@ CloudFormation - Parameters Example
 // Has constrained options and a Default
 Parameters:
 	InstanceType:
-		Description: Chhose an EC2 Instance type
+		Description: Choose an EC2 Instance type
 		Type: String
 		AllowedValues:
 			- t2.micro
@@ -7423,9 +7404,9 @@ In the script, we don't have to put all Parameters under the Parameters section.
 We can name a Resource, filling in all of the settings, and then reference it in other places
 ////////////////////
 
-CloudFormation - Psuedo Parameters
+CloudFormation - Pseudo Parameters
 ////////////////////
-Psuedo Parameters are Parameters that are variables already set up in AWS
+Pseudo Parameters are Parameters that are variables already set up in AWS
 These are things like
 	AWS::Region
 	AWS::StackName
@@ -7435,14 +7416,14 @@ These are things like
 
 CloudFormation - Mappings
 //////////////////////////////////////////////////////////////////////////
-CloudFormation - Mappings Overview
+Overview
 ////////////////////
 Mappings are fixed variables within a CloudFormation template.
 Can be used to differentiate between different environments like dev and prod.
 All of the values are hardcoded within the template.
 
-Mappings are variables derived from defined values like Region, AZ, AWS Account, etc
-
+Mappings are variables selected from defined values like Region, AZ, AWS Account, etc
+	Ex: Selecting between EC2 AMIs based on Region
 ////////////////////
 
 Accessing Mapping Values (Fn::FindInMap)
@@ -7463,11 +7444,13 @@ Resources:
 		Type:AWS::EC2::Instance
 		Properties:
 			ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", HVMG2]
+                              // !FindInMap [MapName, TopLevelKey, SecondLevelKey]
 ////////////////////
 
 When to use Mappings vs Parameters
 ////////////////////
-Mappings are preferable when the variables will only change based on things that can be deduced later. These are things like:
+Mappings are preferable when the variables will only change based on things that can be deduced later.
+These are things like:
 	Region
 	AZ
 	AWS Account
@@ -7480,10 +7463,10 @@ Parameters are used when the variables change based on the specific needs of a U
 
 CloudFormation - Outputs & Exports
 //////////////////////////////////////////////////////////////////////////
-CloudFormation - Outputs Overview
+Overview
 ////////////////////
-A Stack can output from a Resource
-	This can be picked up by the console
+A Stack can output a Resource from one Template (script) and import it into another Template
+	Can be read up by the console
 	Or another Stack
 		This does require Exporting from one Stack, and Importing by another Stack
 
@@ -7497,22 +7480,24 @@ CloudFormation - Outputs Cross-Stack Reference
 ////////////////////
 To have the Cross-Stack Referencing, the in-taking Stack must have a !ImportValue set
 Important: Every Stack that Imports the Output MUST be deleted first
+	So, every Stack that created Resources from an Import must have their Stacks deleted first
 Ex:
 Resources:
 	...
 		SecurityGroups:
 			- !ImportValue SSHSecurityGroup
+// To delete the Stack that created the SSHSecurityGroup Export,
+// All Stacks that Imported SSHSecurityGroup need to be deleted first
 ////////////////////
 //////////////////////////////////////////////////////////////////////////
-
-
 
 CloudFormation - Conditions
 //////////////////////////////////////////////////////////////////////////
 
 Overview
 ////////////////////
-Controls the creation of Resources based on Conditions.
+Controls the creation of Resources based on Conditions
+	Ex: dev Environment vs prod Environment
 Conditions can be any measurable value: 
 	Region
 	AZ
@@ -7527,6 +7512,7 @@ Here, we create a Condition that can then be used elsewhere
 Ex:
 Conditions:
 	CreateProdResources: !Equals [ !Ref EnvType, prod ]
+               // Same as Fn::Equals [ !Ref EnvType, prod ]
 
 CreateProdResources // Logical ID
 !Equals             // Intrinsic Function
@@ -7538,7 +7524,7 @@ Intrinsic Functions can be:
 How to Use a Condition
 ////////////////////
 Here, the above Condition is used to determine if this Resource should be created
-
+	And if this is the prod Environment, it will be created
 Ex:
 Resources:
 	MountPoint:
@@ -7546,7 +7532,6 @@ Resources:
 		Condition: CreateProdResources
 ////////////////////
 //////////////////////////////////////////////////////////////////////////
-
 
 CloudFormation - Intrinsic Functions
 //////////////////////////////////////////////////////////////////////////
@@ -7560,6 +7545,7 @@ Most common are:
 Intrinsic Function - Fn::Ref
 ////////////////////
 References a Parameter or Resource
+CANNOT reference a Condition
 
 Ex:
 Resources:
@@ -7569,7 +7555,17 @@ Resources:
 			VpcId: !Ref MyVPC
 
 MyVPC - Is a Resource or Parameter defined earlier in the script
-Works by getting het ID of a Resource
+Works by getting the ID of a Resource
+////////////////////
+
+Intrinsic Function - Fn::Join
+////////////////////
+Joins a list of values with a delimiter between each one
+	An empty string will result in no delimiter between the values
+
+Ex:
+Fn::Join ["-", ["Utter", "Bullshit"]]
+	Result: "Utter-Bullshit"
 ////////////////////
 
 Intrinsic Function - Fn::GetAtt
@@ -7590,7 +7586,7 @@ EC2Instance is the name of the Resource definition
 Intrinsic Function - Fn::FindInMap
 ////////////////////
 Returns a named value from a specific key
-Stucture is:
+Structure is:
 	!FindInMap [ MapName, TopLevelKey, SecondLevelKey ]
 Slide defines RegionMap, where different Regions use different AMIs
 	These are further broken down by HVM64 and HVMG2
@@ -7621,9 +7617,9 @@ Converts String to Base64 representation
 
 	!Base64 "ValueToEncode"
 
-The most common use is to convert the String of User Data to an EC2 Instance
+The most common use is to send the String of User Data to an EC2 Instance
 
-Ex: Putting a String into the UserData of a WebServer
+Ex: Putting a String into the UserData of a WebServer (EC2 Instance)
 WebServer:
 	Type: AWS::EC2::Instance
 	...
@@ -7668,8 +7664,8 @@ Overview
 ////////////////////
 CloudFormation uses ServiceRoles as its Security Groups
 These are IAM Roles given to CloudFormation for the purpose of creating Resources.
-User creating a Stack w/ CloudFormation doesn't have the Permissions needed for those Resources
-	This is called an IAM PassRole
+User creating a Stack w/ CloudFormation doesn't need the Permissions needed for those Resources
+	User must have iam::PassRole Permissions
 ////////////////////
 
 Hands On
@@ -7742,7 +7738,6 @@ After setting the parameters in the script to retain or snapshot
 
 CloudFormation - Stack Policies
 //////////////////////////////////////////////////////////////////////////
-
 Overview
 ////////////////////
 During creation, a Stack has full Permissions as defined by its User or ServiceRole
@@ -7751,17 +7746,17 @@ However, when updating, we may want to restrict Permissions for Resources
 
 Ex.
 ////////////////////
-Slide shows a script that defines the Update where it has Allow for all Permissions
-It then has the restriction that the created production DB has a Deny for all
+Slide shows a script that defines the Update where it has Allow for all Resources
+It then has the restriction that the prod DB has a Deny for all
+	So, everything in the Stack can be upated, except for the DB
 ////////////////////
 //////////////////////////////////////////////////////////////////////////
 
 CloudFormation - Termination Protection
 //////////////////////////////////////////////////////////////////////////
-
 Overview
 ////////////////////
-Prevents accidental deletes of a Stack
+Prevents accidental deletion of a Stack
 ////////////////////
 
 Hands On
@@ -7793,7 +7788,7 @@ Resources:
 	MyCustomResourceUsingLambda:
 		Type: MyLambdaResource // Our custom name for the type
 		Properties:
-			ServiceToken: *Lambda arn OR SNS arn* // Must be in same Region
+			ServiceToken: *Lambda arn* // Must be in same Region
 			*Input values, Optional*
 			ExampleProperty: "ExampleValue"
 ////////////////////
@@ -7809,7 +7804,7 @@ CloudFormation - StackSets
 //////////////////////////////////////////////////////////////////////////
 Overview
 ////////////////////
-Organizes Stacks into StackSets for ease of creation, updating, and deletion
+Organizes Stacks into StackSets for ease of creation, updating, and deletion across Region or accounts
 	This can go across AWS Accounts in an AWS Organization
 	Can only be created by an Admin Account
 ////////////////////
@@ -8116,19 +8111,3324 @@ Services are Subscribers to Publishers (Publishers send to SNS)
 	There are filtering options
 	The communication can handle a LOT of Messages
 Lot of AWS Services can be Publishers/Subscribers
+	Subs can also be things like emails, mobile notifications, and http endpoints
 ////////////////////
 
 AWS SNS - How to Publish
 ////////////////////
+Create SNS -> Create sub(s) -> Publish to SNS
+
+For mobile: Create app -> Create endpoint -> Publish to endpoint
 ////////////////////
 
 AWS SNS - Security
 ////////////////////
+Encryption:
+	Same as SQS, so in-flight, KMS, or Client-side
+
+Access Controls:
+	IAM Policies
+
+SNS Access Policies:
+	Like S3 Bucket Policies, allowing access for accounts and Services
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+SNS and SQS - Fan Out Pattern
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Combines an SNS w/ an SQS to ensure no messages are lost, and it's scalable
 ////////////////////
 
+Application: S3 Events to Multiple Queues
+////////////////////
+An S3 can only have one Event Rule (item created, deleted, etc...)
+	An SNS can fan out that message to multiple Services
+////////////////////
+
+Application: SNS to Amazon S3 Through Kinesis Data Firehose
+////////////////////
+We can send messages from an SNS to KDF and therefore any KDF-supported Service/endpoint
+////////////////////
+
+SNS - FIFO and SQS FIFO Fan Out
+////////////////////
+Messages are sent out in the same order received
+	And has deduplication
+
+Subs can ONLY be SQS Standard or SQS FIFO
+	SQS FIFO just extends the features of the SNS FIFO
+////////////////////
+
+SNS - Message Filtering
+////////////////////
+Filter Policies change which subs get which messages
+
+Ex: slide shows how a filter for the message's "state" variable changes which subs get it
+	"state" can be purchase placed, cancelled, declined, etc...
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+SNS Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Create an SNS that sends messages to an email
+
+SNS > Create SNS
+	Select Standard
+	Select a sub
+	Finish
+
+We now have an SNS that can send messages to an email
+	Can use the confirm button to send a confirmation message as well
+//////////////////////////////////////////////////////////////////////////
+
+Amazon Kinesis Data Streams
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+IMPORTANT!!!! -> Kinesis Data Streams are for real-time data
+	Streams, so created and used right away
+Streamers (create real-time data)
+	-> Producers (app that receive the data)
+		-> Amazon KDS (moves the data elsewhere)
+			-> Consumers (use or store that data)
+
+KDS takes and retains data, usually as lots of small real-time data
+	Stores up to 1 year, and can replay data
+It can be ordered, encrypted, but not deleted (it must expire)
+There are two adjacent Services:
+	Kinesis Producer Library (KPL) // a Producer
+	Kinesis Client Library (KCL)   // a Consumer
+////////////////////
+
+Capacity Modes
+////////////////////
+Provisioned Mode: choose a number of shards of data, with a cost per shard
+
+On-Demand Mode: scaling capacity that charges by stream per hour and data in/out per GB
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+Amazon Kinesis Data Streams - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: simulate a data streaming pipeline to showcase how KDS moves data
+	Lots of this uses pre-created commands from the teacher
+	Applications tab in KDS console has links to example Producers and Consumers
+
+Create a Streamer
+	// We don't have this, rather putting in data, starting at the Producer step
+
+Send data as a Producer
+	Open the AWS CloudShell -> enter command to send data as an AWS Kinesis Producer
+
+Create a KDS
+	Create Data Stream -> On-Demand // No free tier
+
+Create a Consumer
+	Open the AWS CloudShell -> enter command to pull data as an AWS Kinesis Consumer
+
+Doing this simulates the pipeline of:
+	Producer creates a data record (shard) // Would be created by a stream, but we spoof this
+	KDS takes that data, and stores it
+	Consumer pulls that data
 //////////////////////////////////////////////////////////////////////////
 
 
+Amazon Kinesis Firehose
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Receives data from Producers
+	apps, SDKs, KDS, more...
+
+When received, data can be:
+	transformed (custom Lambda or AWS preset)
+	if failed, stored in S3
+
+Stores data before doing a batch write to a Destination
+	Destinations can be 3rd Party (mongoDB, ...), AWS (S3, ...), or custom (HTTP Endpoint, ...)
+		Lots of options for each of these (see slide)
+////////////////////
+
+Overview Details
+////////////////////
+Fully Managed
+Auto-Scaling, pay per usage
+Near Real-Time // Is stored until a batch-write
+////////////////////
+
+KDS vs Firehose
+////////////////////
+KDS:
+	KDS streams data in real-time, storing data, and can replay
+
+Firehose:
+	Auto-scales batching streams, and writes for near real-time, but with no storage or replay
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Amazon Kinesis Firehose - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: simulate a pipeline of data for Firehose
+
+Amazon Kinesis > Create Delivery Stream // Firehose
+	Choose a Source: KDS
+	Choose Destination: S3
+	Source Settings: Select our existing KDS
+	// Note the Data transformation (Lambda) and Reord Formart Conversion (AWS presets) options
+	Select existing S3 Bucket
+	Set Buffer Interval to 60 seconds
+	// Note the auto-created IAM Role for the KDS to write into the Firehose
+
+Use the same CommandShell commands from before to send data into the KDS
+	After 60 seconds (Buffer Interval we set) the data appears in the S3 Bucket
+//////////////////////////////////////////////////////////////////////////
+
+
+Amazon Managed Service for Apache Flink
+//////////////////////////////////////////////////////////////////////////
+Framework for processing data streams
+
+Apps created with Flink can take data from KDS or Apache Kafka // NOT Firehose
+	Data can be computed, backed-up, and more
+//////////////////////////////////////////////////////////////////////////
+
+
+SQS vs SNS vs Kinesis
+//////////////////////////////////////////////////////////////////////////
+Lots of details on the slide for this
+
+SQS
+////////////////////
+Temporarily stores data for Consumers (pipeline: store, pull, delete)
+	Auto-scales to meet capacity of received messages
+////////////////////
+
+SNS
+////////////////////
+Moves data from a Publisher to multiple Subscribers (pipeline: immediate recieve and send)
+////////////////////
+
+Kinesis
+////////////////////
+Streams real-time data to one or more Consumers, while storing it for a period
+	pipeline: receive, store and immediate send
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 20
+  __          __   __
+ /  \ |  |   /  \ /  \
+ |    |__|      / | /|
+ |    |  |     /  |/ |
+ \__/ |  |.   /__ \__/
+
+AWS Monitoring & Audit: Cloudwatch, X-Ray and CloudTrail
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+Monitoring Overview in AWS
+//////////////////////////////////////////////////////////////////////////
+Why Monitoring is Important
+////////////////////
+We care about how things were deployed, but the client only cares about the results and impacts
+To this, we need to make sure that things work as intended and look ahead for potential problems
+Monitoring allows us to both see patterns and troubleshoot
+////////////////////
+
+Monitoring in AWS
+////////////////////
+AWS CloudWatch:
+	Metrics, Logs, Events, and Alarms
+
+AWS X-Ray:
+	Troubleshooting and Tracing Microservices
+
+AWS Cloudtrail:
+	Internal Monitoring and Auditing changes to AWS Resources
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudWatch Metrics
+//////////////////////////////////////////////////////////////////////////
+AWS CloudWatch Metrics
+////////////////////
+CloudWatch has Metrics for every AWS Service
+These Metrics monitor variables, which are then displayed on the CloudWatch dashboard of metrics
+////////////////////
+
+EC2 Detailed Monitoring
+////////////////////
+EC2 Metrices have metrics every 5 min as a standard, but can get every minute
+AWS Free Tier allows for 10 detailed metrics
+Note: EC2 memory usage is not standard, and has to be pushed from inside of Instance
+////////////////////
+
+Hands On
+////////////////////
+ > CloudWatch > Metrics > EC2 > Per Instance Metric > Do a search for Credits
+	Choose one of our EC2 Instances > Choose a Custom Range of time
+	We can now see a graph with the CPU usage recorded every five minutes
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudWatch Custom Metrics
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Custom Metrics can be created for CloudWatch using the API call PutMetricData
+	This can be standard (1 minute), or higher resolution (but costs)
+		Highest resolution is 1 second
+	We are allowed to push this as two weeks in the past, or two hours in the future
+		So, this must be checked for accuracy
+////////////////////
+
+Hands On
+////////////////////
+The CloudWatch API can be called from CloudShell
+	Slide has 
+	The AWS CLI Command Reference has a list of different arguments for PutMetricData
+		has example commands as well, which can be put into CloudShell
+After entering the command into CloudShell and refreshing the CloudWatch console, we can see the custom namespace listed
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudWatch Logs
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Logs are usually created with a group for an app
+	Can have an expiration date
+	Can be sent to several different Services (see slide)
+////////////////////
+
+Sources
+////////////////////
+CloudWatch Logs can come from several sources (See slide)
+	These sources each have their own data that they report to CloudWatch
+	Ex. Route53 logs all DNS Queries made
+////////////////////
+
+Insights
+////////////////////
+Logs are accessed by queries to CloudWatch Logs Insights
+	Search and analyze data
+	Query language is purpose-built, finding fields from AWS Services, fetching desired fields, more...
+	Query multiple log groups, even from other accounts
+////////////////////
+
+S3 Export
+////////////////////
+Batch export to S3, using the API call CreateExportTask
+////////////////////
+
+Subscriptions
+////////////////////
+Real-time stream of Log events from CloudWatch Logs
+	Filter can direct logs to different Services, like KDS, Firehose, S3, more...
+////////////////////
+
+CloudWatch Logs Aggregation Multi-Account & Multi-Region
+////////////////////
+CloudWatch Subscription Filters across regions and accounts can be directed to the same KDS
+////////////////////
+
+Subscription Destinations
+////////////////////
+Can be used to send CloudWatch Logs across accounts
+	Slide has example of Subscription filter in one account sending data to a KDS in another
+		The Subscription Destinations receive the log data, and forward it to the Services in that account
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudWatch Logs - Hands On
+//////////////////////////////////////////////////////////////////////////
+ > CloudWatch > Log Groups
+	Select a Log Group
+	Select a Log Stream (stdout)
+
+Create a Filter Pattern
+	Filter Pattern: Installing
+	Log Data: Select existing log data to test
+	Fil out the Metric Details (calling everything DemoMetric-Something)
+
+Select the newly created Custom Namespace
+ > CloudWatch > Logs Insights
+	Run the query to get timestamps of data
+		Records should show up
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudWatch Logs - Live Tail - Hands On
+//////////////////////////////////////////////////////////////////////////
+ > CloudWatch Logs > Live Tail
+
+Create a new Log Group
+Select the new Log Group
+	Create a new Log Stream
+In Live Tail, Set the Filter to be from the created Log Stream and to the Created Log Group
+
+In the Log Stream, Create a Log Event: "Hello World"
+	The event shows up in Live Tail as it tracks Log Events
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudWatch Agent & CloudWatch Logs Agent
+//////////////////////////////////////////////////////////////////////////
+CloudWatch Logs for EC2
+////////////////////
+Default is no logs from EC2 Instance to CloudWatch
+	Need to: run CloudWatch agent on EC2 Instance and Set IAM Permissions
+Slide diagram shows AWS and on-premises EC2 going to CloudWatch Logs
+////////////////////
+
+CloudWatch Logs Agent & Unified Agent
+////////////////////
+Old: CloudWatch Agent, can only do logs
+New: CloudWatch Unified Agent, can do logs and more system-level metrics (RAM, processes, ...)
+	Easy to set up with SSM Parameter Store
+////////////////////
+
+CloudWatch Unified Agent - Metrics
+////////////////////
+Can collect a lot of Metrics:
+	CPU, Disk metrics, RAM, more... (see slide)
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudWatch Logs - Metric Filter
+//////////////////////////////////////////////////////////////////////////
+CloudWatch Logs can filter based on content found (IP, words), and can trigger alarms
+	ONLY works from creation of Filter
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudWatch Logs - Metric Filter Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Set up a simple CloudWatch Log w/ a Metric Filter for 400 error codes
+
+ > CloudWatch > Logs
+	-> Create Metric Filter
+	// See Metric and Filter Pattern docs for syntax
+	Filter Pattern: "400" // Very simple for this demo
+	Select the Log to filter
+		Test Pattern // Make sure that the filter works on existing data
+	-> Next
+	Name the:
+		Filter, Metric Namespace, Metric, and Metric Value
+	Set the default value: 0
+The metric is now created, but doesn't show up in the console b/c it hasn't seen anything yet
+	This is b/c it doesn't read previous data (except to test syntax)
+
+Once the app the Metric Filter is tracking reloads, it's visible, even if no 400 error have happened
+	Until a 400 error happens, it will be empty
+
+Create Alarm:
+	Select the Filter
+	-> Create Alarm
+	Select Static
+		Greater than 50
+	Set Alarm to existing SNS Topic
+	Name the Alarm
+
+We now have a CloudWatch Filter and Alarm set to look for Error 400 codes
+	The Alarm triggers if they exceed 50
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudWatch Alarms
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Alarms use a Metric to change their State
+	Metrics: data recorded over Period, breaching some established threshold
+	State: OK, INSUFFIFICIENT_DATA, ALARM
+CloudWatch Alarms on High-Resolution Custom Metrics can be triggered as often as 10 seconds
+	Or 30 seconds, or any multiple of 60 seconds
+////////////////////
+
+CloudWatch Alarms Targets
+////////////////////
+Alarm can take several actions:
+	EC2: Affect Instance (turn on, off, reboot, etc...)
+	EC2 Auto-Scaling: in/out
+	SNS: Send message to SNS // If sent to a Lambda, it then do anything we want
+////////////////////
+
+CloudWatch Alarms Composite Alarms
+////////////////////
+Alarms only track one Metric, so we track multiple Metrics w/ Composite Alarms
+	Has AND and OR logic in determining if an Alarm is triggered
+////////////////////
+
+EC2 Instance Recovery
+////////////////////
+Alarms can track Instance Status, System Status (hardware), and Attached EBS
+	With these, we determine how to recover from a failure
+////////////////////
+
+CloudWatch Alarm: Good to Know
+////////////////////
+Alarms can use CloudWatch Logs Metrics
+Alarms can be tested to make sure they will do what we require
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudWatch Alarms - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Create and test a CloudWatch Alarm for an EC2 Instance at >= 95% CPU
+
+ > CloudWatch > Create Alarm
+	Set the Metric:
+		Choose an EC2 Instance
+		Select Metric: CPU Utilization
+			Set monitoring interval
+			Set value threshold
+			Set count threshold // how many intervals we detect the threshold being breached
+	Select Action: Terminate Instance
+	Create Alarm
+
+Test the Alarm:
+ > CloudWatch > Alarms > *Alarm Name*
+	Get the needed values from AWS CLI Command Ref Docs
+	In CloudShell:
+		aws cloudwatch set-alarm-state --alarm-name *alarm name*
+					       --state-value ALARM
+					       --state-reason "Testing"
+
+We now have the Alarm in the ALARM state, and the EC2 Instance gets shut down
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudWatch Synthetics Canary
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Create scripts to simulate user/system behavior // Ex: shoppers using website
+	Lots of details on slide
+	Integration w/ CloudWatch Alarms, and other Services for full testing
+////////////////////
+
+CloudWatch Synthetics Canary Blueprints
+////////////////////
+Components of Canary Blueprints
+	Heartbeat Monitor: ???
+	API Canary: read/write functions of REST APIs
+	Broken Link Checker: Check all links
+	Visual Monitoring: compare screenshot taken by Canary w/ working-state screenshots
+	Canary Recorder: record actions on site and build script to repeat them
+	GUI Workflow Builder: test workflows on site
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Amazon EventBridge
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Detect or schedule Events, and then perform Actions
+////////////////////
+
+EventBridge Rules
+////////////////////
+Logic Flow:
+	An AWS Service has an Event (EC2 Restarts, S3 uploads object, schedulted Event, ...)
+	EventBridge detects the Event based on optional filters
+	EventBridge performs an action based on the Event
+		Compute - (Ex: Lambda)
+		Integration - (Ex: SNS)
+		Orchestration - (Ex: Code pipeline)
+		Maintenance - (Ex: Restart EC2)
+////////////////////
+
+Different EventBridges
+////////////////////
+There are different Event Bus for AWS and Third-party Services
+	AWS:         Default Event Bus
+	Third-Party: Partner Event Bus
+	Custom Apps: Custom Event Bus
+Cross-account access and replay archiving available
+////////////////////
+
+EventBridge - Schema Registry
+////////////////////
+Create code for app that dictates the structure of data in the Event Bus
+////////////////////
+
+EventBridge - Resource-based Policy
+////////////////////
+Permissions Policy for an Event Bus, can grant cross-account Permissions
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Amazon EventBridge - Hands On
+//////////////////////////////////////////////////////////////////////////
+
+// I was pretty dead tired while going through this, so it might need some rewriting
+
+ > Amazon EventBridge > Event Buses
+
+ -> Create Event Bus
+	Set Name
+	Set Archive Name
+	Enable default Schema Discovery
+ -> Create Rule
+	Set Name
+	Select the default Event Bus
+	Rule w/ an event pattern
+	-> Next
+	Event Source: AWS Services
+	Set the Sample Event as EC2 Instance State Change Notification
+		(Stopped)
+	Select: Use Pattern Form
+	Event Source: AWS Services
+	AWS Service: EC2
+	Event Type: EC2 State Change Notification
+	-> Next
+	Target Types: AWS Service
+	Target: SNS Topic
+	Topic: Select existing topic
+	-> Next -> Next -> Review and Create -> Create
+
+We now have an Event Bridge that detects when EC2 Instances are stopped
+	And will send a message into the SNS
+//////////////////////////////////////////////////////////////////////////
+
+
+Amazon EventBridge - Multi-Account Aggregation
+//////////////////////////////////////////////////////////////////////////
+Multiple accounts all send their Events to a central Event Bus
+	THat Event Bus then funnels those Events elsewhere
+//////////////////////////////////////////////////////////////////////////
+
+
+X-Ray Overview
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Visual way to see a trace of your entire app on one screen
+This is in contrast to just putting console.logs everywhere and tracing that way
+	Especially as there's different logging methods across Services
+////////////////////
+
+Visual Analysis
+////////////////////
+Slide shows a diagram of arrows starting w/ a client 
+	going to the app entry point
+		and then through the rest of the components of the app
+////////////////////
+
+AWS X-Ray Advantages
+////////////////////
+Lots of advantages, most especially that we can see the path of data and bottlenecks
+////////////////////
+
+X-Ra Compatibility
+////////////////////
+Lots of compatibility w/ Services
+	Lambda, Elastic Beanstalk, ECS, on-premise, ...
+////////////////////
+
+AWS X-Ray Leverages Tracing
+////////////////////
+End-to-end tracing the flow of a request through an app
+	Tracing is made of segments, and can be given more info by each part of the app
+	Can trace actual and simulated requests
+		Can be every request or a request every rate per minute
+////////////////////
+
+AWS X-Ray - How to Enable
+////////////////////
+1) Enable by importing the AWS-SDK, so we can capture:
+	AWS Services calls, HTTP(S) requests, db calls, SQS calls
+2) Install the X-Ray daemon or install the X-Ray AWS Integration
+	Lots of Services already run the daemon
+X-Ray daemon sends a batch every second to the X-Ray console
+Common issue is that dev machine has the daemon, but the prod machine doesn't
+////////////////////
+
+The X-Ray Magic
+////////////////////
+X-Ray creates the magical visual graph by collecting all traces from the Services sending data
+////////////////////
+
+AWS X-Ray Troubleshooting
+////////////////////
+EC2: Proper Permissions and is running the daemon
+Lambda: IAM Role w/ proper Policy, imported the code, and enabled Lambda X-Ray Active Tracing
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+X-Ray - Hands On
+//////////////////////////////////////////////////////////////////////////
+Create the CloudFormation Stack created by teacher
+	Creates very simple tic-tac-toe game
+	Already conjured with X-Ray
+	Link takes you to the visual graph
+	
+	We can see an error
+	Filter the traces by a query
+	LOTS of data here like latency, errors, and more
+//////////////////////////////////////////////////////////////////////////
+
+
+X-Ray: Instrumentation and Concepts
+//////////////////////////////////////////////////////////////////////////
+Instrumentation in code
+////////////////////
+Instrumentation: measure performance, find errors, trace data
+Slide has code snippet of using the X-Ray SDK w/ express to do this
+Can modify app code to send extra data to X-Ray using interceptors, filters, more ...
+////////////////////
+
+X-Ray Concepts
+////////////////////
+Segments: batch each app/Service sends
+Subsegments: if more detail is needed
+Trace: collected end-to-end trace of segments
+Sampling: smaller number of calls to X-Ray to reduce costs
+Annotations: additional data as key-val pairs, index traces w/ filters
+Metadata: additional data as key-val pairs, not indexed, not searching
+
+X-Ray Daemon/Agent: send traces cross-account
+	Allows for central account w/ all tracing
+////////////////////
+
+
+X-Ray Sampling Rules
+////////////////////
+Sampling Rules: control amount of data recorded
+	Modify these rules independent of code
+
+Default Sampling is first request each second, 5% of additional requests
+Reservoir: The one request per second
+Rate: The 5% of additional requests
+////////////////////
+
+
+X-Ray Custom Sampling Rules
+////////////////////
+Define custom rules for Reservoir and Rate
+
+More data coming in can become very expensive
+Changing these doesn't require changing anything with the app components/Services
+	It just seemly starts working
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+X-Ray: Sampling Rules
+//////////////////////////////////////////////////////////////////////////
+Goal: Go over the Sampling Rule parameters in the AWS console
+
+ > CloudWatch > Settings > Traces tab -> Sampling Rules View Settings -> Sampling Rules tab
+
+Editing the Sampling Rule:
+	Change the Reservoir and Rate
+	Is set to track all URLs and HTTP methods
+
+Create Sampling Rule:
+	Set name
+	Set Priority // low number is top priority
+	Set Reservoir and Rate
+	Set the Service(s) to be sampled // * for all
+	Set the HTTP Method(s) to be sampled // * for all
+
+No need to restart any apps, they will start being traced upon creation of the Rule
+//////////////////////////////////////////////////////////////////////////
+
+
+X-Ray APIs
+//////////////////////////////////////////////////////////////////////////
+This is the API for the X-Ray Daemon on the EC2 Instance to write/read to the X-Ray console
+For any of these APIs to work, the Instance MUST have the IAM Policy Permissions to the X-Ray Service
+
+Writes
+////////////////////
+PutTraceSegments: Write segments to X-Ray
+PutTelemetryRecords: Writes segments received, rejected, connection errors, ...
+GetSamplingRules: Gets all sampling rules
+GetSamplingTargets and GetSamplingStatisticsSummaries: Get targets and statistics summaries
+////////////////////
+
+Reads
+////////////////////
+LOTS of different Gets here (see slide)
+Basically, they are as their name implies
+GetServiceGraph: main graph
+BatchGetTraces: List of traces by ID, CANNOT be used w/ X-Ray
+GetTraceSummaries: IDs and annotations of tracs within time frame
+GetTraceGraph: Get a Service graph by ID
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+X-Ray w/ Beanstalk
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Can set one option in the creation of an Elastic Beanstalk to enable X-Ray
+	Or set up the .ebextensions/xray-daemon.config with:
+		////////////////////
+		option_settings:
+			aws:elasticbeanstalk:xray:
+				XRayEnabled: true
+		////////////////////
+This sets up the X-Ray Daemon w/ Permissions as well
+	The AWSElasticBeanstalkWebTier Policy has the minimum needed Permissions to read and write
+
+NOTE:
+	app code sends data using the X-Ray SDK
+	X-Ray Daemon not provided for multi-container Docker
+////////////////////
+
+Hands On
+////////////////////
+Goal: See the important options for enabling X-Ray w/ Elastic Beanstalk
+
+ > Elastic Beanstalk -> Create Application
+Set name
+Set to Nodejs
+*Skip through till security and optional configurations*
+Under Platform Software activate the X-Ray daemon
+Under Security make sure that the EC2 Instance has the aws-elasticbeanstalk-ec2-role
+	This role has the Policy w/ X-Ray Permissions
+
+Now the Stack is fully set up w/ X-Ray
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+X-Ray and ECS
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+There are three options, depending on need
+Slide has a great visual of these
+
+ECS Cluster: Each EC2 Instance has one X-Ray Daemon Container, multiple App Containers
+ECS Cluster w/ Sidecar: Each App Container has an X-Ray Sidecar (daemon) running on it
+Fargate Cluster: Each App MUST have its own X-Ray Sidecar
+////////////////////
+
+ECS + X-Ray: Example Task Definition
+////////////////////
+Three key parts of making the Task Definition work. Slide has full script
+Port Mappings: sets containerPort to 2000, protocol to udp // This is for sidecar pattern
+Environment: sets AWS_XRAY_DAEMON_ADDRESS to xray-daemon:2000
+Links: xray-daemon
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+AWS Distro for OpenTelemetry
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+AWS-supported distribution of the open-source OpenTelemetry
+	SIMILAR to X-Ray, but is open-source
+Single set of APIs to:
+	Collect traces and metrics from Apps
+	Metadata from Resources and Services
+	Auto-instrumentation Agents collect traces
+	Send data to AWS or third-party Services (X-Ray, CloudWatch, ...)
+This is to instrument Apps on AWS/on-premises
+Benefits of OpenTelemetry: open-source and can send to multiple destinations simultaneously
+////////////////////
+
+Diagram
+////////////////////
+Slide shows that OpenTelemetry can:
+	Collect traces, Collect Metrics, Collect AWS Resources/Contextual Data
+and can send that to:
+	AWS and third-party monitoring solutions (X-Ray, CloudWatch, ...)
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudTrail
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+CloudTrail is mainly used to track dev user activity in the AWS account
+
+CloudTrail is a way to track events and API calls from:
+	Console, SDK, CLI, AWS Services
+Logs stored in CloudWatch Logs or S3
+Trail can be single or all Regions
+
+Ex: resource is deleted mysteriously, check CloudTrail to see who
+////////////////////
+
+Diagram Summary
+////////////////////
+Slide Diagram shows Services going into CLoudTrail Console
+	SDK, CLI, Console, IAM User/Roles
+And then going to CloudWatch Logs and S3
+////////////////////
+
+CloudTrail Events
+////////////////////
+There are three types of CloudTrail Events
+
+Management Events: Operations on Resources (standard events anyone would do)
+	Automatically enabled, and can separate Read/Write Events
+Data Events: very frequent Service operations (Lambda exe, S3 GetObject, ...)
+	NOT on by default (high volume)
+CloudTrail Insight Events (see next section)
+////////////////////
+
+CloudTrail Insights
+////////////////////
+Detects unusual Events, based on normal management events
+	Analyzes WRITE Events for unusual Events
+Ex: inaccurate resource provisioning, burst of AWS IAM actions, ...
+Slide Diagram shows:
+Management Events analyzed by CloudTrail Insights and these are sent to:
+	CloudTrail Console / S3 / EventBridge
+////////////////////
+
+CloudTrail Events Retention
+////////////////////
+Standard TTL is 90 days
+To keep longer, these get put into S3, and then analyzed w/ Athena
+Athena: Serverless Service to query data in the S3
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudTrail - Hands On
+//////////////////////////////////////////////////////////////////////////
+ > CloudTrail > Event History
+
+In this console, we can see the list of different operations performed.
+Opening one of the operations, it shows:
+	Time of Event
+	User who performed operation
+	...
+//////////////////////////////////////////////////////////////////////////
+
+
+Amazon CloudTrail - EventBridge Integration
+//////////////////////////////////////////////////////////////////////////
+API Calls can be filtered and make specific types cause an Alert to happen
+
+Overview
+////////////////////
+API Events go to CloudTrail --> Amazon EventBridge
+There, we can create a filter and send it to SNS, which will send it out
+	This is how we can create Alerts for specific API calls
+////////////////////
+
+Diagram
+////////////////////
+Slide Diagram is just two examples:
+	User assumes an IAM Role
+	User changes the Ingress Rules for a Security Group
+These follow the same path as above, ending w/ SNS sending out Notification(s)
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CloudTrail vs CloudWatch vs X-Ray
+//////////////////////////////////////////////////////////////////////////
+Summary comparison of these three
+
+CloudTrail: Audit API calls made by Users/Services/AWS Console
+CloudWatch: Metrics, App logs, Alarms for unusual Metrics
+X-Ray: Visually trace flow through App to see latency/faults
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 21
+  __          __   
+ /  \ |  |   /  \  /|  
+ |    |__|      /   |   
+ |    |  |     /    |  
+ \__/ |  |.   /__  _|_  
+
+AWS Serverless: Lambda
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Serverless Introduction
+//////////////////////////////////////////////////////////////////////////
+What's Serverless?
+////////////////////
+Any Service that is used without provisioning a server
+////////////////////
+
+Serverless in AWS
+////////////////////
+Slide Diagram shows Users interacting w/ a Static Site on S3, logging w/ Cognito
+	and storing data through an API Gateway -> Lambda Fn -> DynamoDB
+LOTS of Services are Serverless
+	Lambda, DynamoDB, Cognito, ... // (Not yet seen)
+	SNS, SQS, Firehose, Fargate, ... // (Seen before)
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+AWS Lambda Overview
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Lambda:
+	Virtual (no server management)
+	Only limited by a 15 min execution time
+	Runs on-demand
+	Auto-Scales to need
+////////////////////
+
+Benefits of Using Lambda
+////////////////////
+Easy Pricing (very cheap price w/ generous free tier)
+AWS Service and coding languages integration (including CloudWatch monitoring)
+Can get up to 10GB RAM, which can improve CPU and network
+////////////////////
+
+AWS Lambda Language Support
+////////////////////
+LOTS of languages supported (see slide)
+	Python and Node.js are the big ones
+////////////////////
+
+AWS Lambda Integrations - Main Ones
+////////////////////
+Lots of integrations, but amins ones are:
+	API Gateway, Kinesis, DynamoDB, S3, CloudFront, CloudWatch Events EventBridge,
+	CloudWatch Logs, SNS, SQS, and Cognito
+////////////////////
+
+Example: Serverless Thumbnail Creation
+////////////////////
+S3 Bucket get an image, triggers a Lambda Fn
+Lambda turns it into a thumbnail, and stores it in a different S3
+	And it puts metadata into a DynamoDB
+////////////////////
+
+Example: Serverless CRON Job
+////////////////////
+CloudWatch Events EventBridge every hour triggers a Lambda Fn to perform a task
+	Best feature is that when not running it uses no resources
+////////////////////
+
+AWS Lambda Pricing: Example
+////////////////////
+Pricing url: https://aws.amazon.com/lambda/pricing
+
+Pricing breaks down into:
+	Pay per calls and Pay per duration
+	Very cheap and popular
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+AWS Lambda - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Create a super simple Lambda Fn w/ just default premade code
+
+ > Lambda > Functions -> Create Function
+-> Use a Blueprint -> Hello World (Python) -> Create Function
+
+Create a standard test
+
+Result: We now have a Lambda Fn that will take in eh parameters of the Test
+	And return the first one.
+
+Editing basic settings, we cold change the memory
+Logs tab shows the activity of the Fn
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Synchronous Invocations
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+This is the standard interaction w/ a Lambda Fn
+User or Service invokes the Lambda Fn, which then does something, and sends a response
+////////////////////
+
+Lambda Synchronous Invocations - Services
+////////////////////
+Two main types invoke Lambda: User and Service
+
+User Invoked:
+	Elastic Load Balancer, API Gateway, CloudFront, ...
+Service Invoked:
+	Cognito, Step Fns
+Other:
+	Alexa, Firehose, ...
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Synchronous Invocations - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Test the Lambda Fn w/ CLI (CloudShell)
+
+Go to CloudShell
+
+Put in command to exe the Lambda Fn:
+	aws lambda invoke --function-name *Fn name* 
+			  --cli-binary-format raw-in-base64-out 
+			  --payload *values to send*
+			  response.json
+
+Result: We get back the response from the Lambda Fn in json format
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda & Application Load Balancer
+//////////////////////////////////////////////////////////////////////////
+Lambda Integration w/ ALB
+////////////////////
+Invoke Lambda w/ as an HTTP(S) endpoint using ELB or API Gateway
+	Lambda must be in Target Group
+////////////////////
+
+ALB to Lambda: HTTP to JSON
+////////////////////
+Slide shows the script that these will send to the Lambda Fn
+
+Important points are:
+	ELB Info (Target group ARN)
+	HTTP Method & Path (Ex: /lambda)
+	Query String Parameters (Key/Value pairs in JSON format)
+	Headers (Key/Value pairs)
+	Body (if POST or PUT)
+////////////////////
+
+ALB to Lambda: JSON to HTTP
+////////////////////
+Slide shows the script that these will send to the Lambda Fn
+
+Important points are:
+	Status Code & Description (Ex: 200, OK)
+	Headers (Key/Value pairs)
+	Body & isBased64Encoded
+////////////////////
+
+ALB Multi-Value Headers
+////////////////////
+Supports Mutli-Value headers from the url
+and converts them into JSON array
+Ex:
+	url/path?name=foo&name=bar -> {"name":["foo", "bar"]}
+
+Slide shows the url coming from the Client to the ALB
+ALB converts the URL headers, and sends them on to the Lambda
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda & Application Load Balancer - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Place a Lambda Fn behind an ALB
+	We do this so we have a client-facing interface for the Lambda
+
+Create a new ALB:
+ > EC2 > Load Balancers -> Create Load Balancer
+	Set name
+	Set as Internet-Facing
+	Set as IPv4
+	Deploy in three AZs
+	Create New Security Group
+		Set name
+		Allow all inbound HTTP IPv4 traffic
+	Include the new Security Group
+	Create a Target Group
+		Select Lambda
+		Set name
+		Select an existing Lambda
+		-> Create Target Group
+	Select new Target Group
+	-> Create Load Balancer
+Set the Lambda to return a good response to the ALB:
+	Can find the correct response syntax in the docs
+	The Header Content-Type: "text/html"
+	This lets the receiving ALB to output the content from Lambda to the browser
+
+More can be seen from the logs in the Lambda
+Multi-Headers can also be enabled, though this requires modifying code as well
+The ALB can be found under the Configuration tab as a Trigger
+Under Permissions, the ALB has the Permissions to invoke the Lambda
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Asynchronous Invocations & DLQ
+//////////////////////////////////////////////////////////////////////////
+DLQ (Dead Letter Queue)
+Basically, use DLQ to track and retry failed Lambda executions
+
+Lambda - Asynchronous Invocations
+////////////////////
+A Lambda that has an error will retry three times w/ continual back-off:
+	Immediate, 1 min, 2 min
+Processing needs to be idempotent (result should be the same in case of retries)
+Use a DLQ if the retries don't work
+////////////////////
+
+Lambda - Asynchronous Invocations - Services
+////////////////////
+There are LOTS of Services that can asynchronously trigger a Lambda:
+	S3, SNS, CloudWatch/EventBridge, ... (see slide)
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Asynchronous Invocations - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Invoke the Lambda Asynchronously, let it fail, retry, and then post a message to a DLQ
+
+ > Lambda > *Fn name*
+
+Put in the command to run the Lambda:
+	aws lambda invoke \
+  --function-name lambda-to-dlq  \
+  --invocation-type Event \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{ "key1": "value" }' response.json
+
+We can't see the result, so we go to CloudWatch Logs
+
+Changing the Lambda code to fail looks the same in the CLI
+	(Both times getting the 202 result)
+The CloudWatch Logs do show the Error result
+
+Set up the DLQ:
+Go to the Configuration tab -> Asynchronous Invocations (left sidebar)
+-> Edit
+Set the Dead Letter Queue to SQS
+Create a new SQS:
+	 > SQS -> Create new SQS
+	Set name
+Assign the SQS as the Lambda's DLQ
+// We now get Permissions issues with the Lambda not being able to write to SQS
+Change the Permissions of the Lambda's Role:
+	 > Lambda > Functions > *Lambda name* > Configuration tab > General Configuration
+	-> Edit
+	Go to the bottom, and select the Role
+	Assign the SQS-All policy
+-> Save
+Run the Lambda in CloudShell again
+
+Result:
+AFTER A MINUTE, there is now a message in the SQS w/ the data that the Lambda received
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda & CloudWatch Events/EventBridge
+//////////////////////////////////////////////////////////////////////////
+We can create an EventBridge Rule that will trigger a Lambda Fn every interval
+Or, when there is an Event
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda & CloudWatch Events/EventBridge - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Create an interval Event in EventBridge that will trigger a Lambda Fn
+
+Create a basic Lambda Fn:
+ > Lambda > Functions -> Create Function
+	Set name
+	Set to Nodejs
+	-> Create
+Create a new EventBridge Rule:
+ > Amazon EventBridge > Rules -> Create Rule
+	Set name
+	Select Schedule
+	-> Continue to Create Rule
+	Select schedule that runs at a regular rate
+	Set to Every One Minute
+	-> Next
+	Select Target: Lambda
+	Select the new Lambda Fn
+	-> Next -> Next -> Create Rule
+// Teacher's slides showed the EventBridge appear as a trigger for the lambda, but this did not happen
+// It looked like the Lambda Fn was even being triggered, but I just manually added EventBridge as a trigger
+	
+See the Event details in the CloudWatch Logs:
+ > Lambda > Functions > *Fn name*
+Add a print line to the Fn, which prints the event it receives
+
+Result: The Scheduled Event triggers the Lambda Fn, and can be seen in the CloudWatch Logs
+	The Event also shows up, with those details
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda & S3 Event Notifications
+//////////////////////////////////////////////////////////////////////////
+S3 Events Notifications
+////////////////////
+S3 can trigger an Event based on any changes to its objects
+W/ these, the S3 can trigger:
+	SNS, SQS, Lambda, ...
+
+////////////////////
+
+Simple S3 Event Pattern - Metadata Sync
+////////////////////
+S3 Triggering a Lambda is asynchronous
+The Lambda is able to do some work on the item from the S3 bucket, and then store it in a DB
+	The DB is usually DynamoDB or RDS
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda & S3 Event Notifications - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: An S3 Bucket will trigger a Lambda Fn when an object is uploaded
+
+Create a Lambda Fn:
+ > Lambda > Functions -> Create Function
+	Set name
+	Set runtime as Python
+	Edit code to include "print(event)"
+
+Create an S3 Bucket:
+ > S3 -> Create Bucket
+	Set name
+	-> Create Bucket
+Add an Event Notification to the S3:
+	Go to the Properties tab > Event Notifications section
+	-> Create Event Notification
+		Set name
+		Event Types > Select the All Object Create Events
+		Destination > Lambda Fn
+		Select the Lambda Fn
+Now the Lambda Fn function Overview shows that the S3 oes invoke the Lambda
+
+Result: Uploading any file to the S3 will trigger the Lambda Fn, and this can be seen in CloudWatch Logs
+	Because of the print(event) line, we can see the details as well
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Event Source Mapping
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+There are three Services Lambda can Synchronously poll for data:
+	Kinesis Data Streams, SQS & SQS FIFO Queues, and DynamoDB Streams
+These Services get data, and that triggers them to call the Lambda Fn
+////////////////////
+
+Streams & Lambda (Kinesis & DynamoDB)
+////////////////////
+Event Source Mapping:
+	In-order iterator for each Shard
+	From beginning or timestamp
+	Doesn't delete items
+	Can handle multiple (up to 10) batches in parallel
+Slide diagram shows how a shard (composed of batches) is sent to a Service,
+and then then broken up to be sent across several Lambda Fns for parallel processing
+////////////////////
+
+Streams & Lambda - Error Handling
+////////////////////
+Normally, an error would disrupt Synchronous processing, but we can't allow that
+	Reprocess entire batch
+	Pause until error resolves
+////////////////////
+
+Lambda - Event Source Mapping SQS & SQS FIFO
+////////////////////
+We can set up SQS and SQS FIFO to send items to a Lambda Fn
+This stays efficient by using long polling, batch messages (of 1 to 10),
+Ensure completion w/o repeats by setting the queue visibility timeout to 6x the Lambda Fn timeout
+To stay synchronous, the Lambda's DLQ must be on the SQS or through the Lambda's Destinations
+////////////////////
+
+Queue & Lambda
+////////////////////
+W/ a standard SQS, Lambda scales up quickly to match workload
+Repeats can happen, even w/o an error, though errors are more likely to cause out of order processing
+Lambda deletes items from queues after successful processing
+////////////////////
+
+Lambda Event Mapper Scaling
+////////////////////
+Kinesis Data Streams & DynamoDB Streams:
+	One Lambda per shard, and w/ parallelization 10 batches per shard
+SQS Standard:
+	Lambda scales up 60 Instances per minute, and can process 1000 batches of messages simutaneously
+SQS FIFO:
+	Messages w/ the same GroupID are processed in-order, scales up to number of these groups
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Event Source Mapping - Hands On (SQS)
+//////////////////////////////////////////////////////////////////////////
+Goal:
+
+ > Lambda -> Create Lambda
+Create Lambda:
+	Set name
+	Set to Python
+	-> Create Function
+Create SQS:
+	Set name
+	-> Create Queue
+Allow Lambda to retrieve messages:
+	 > Lambda > Functions > *Fn name*
+	Add trigger
+	Select SQS
+	Select the queue
+	Set batch size to 10
+	Enable trigger
+	-> Add // We then get an error saying that the Lambda Fn doesn't have Permissions
+	Add Permissions:
+		 > Lambda > Functions > *Fn name* > Configurations tab > Permissions
+		-> Role name
+		-> Attach Policies -> AWSLambdaSQSQueueExecutionRole
+	-> Add
+Change Lambda code:
+	Add line: print(event)
+	Edit lines for the return to: return "success"
+Test by sending message to SQS Queue
+	> Amazon SQS > Queues > *queue name* > Send and Receive Messages
+	Enter Message Body
+	Message attributes: "foo" - - "bar"
+	-> Send Message
+	 > Lambda > Functions > *Fn name* > Monitor -> CloudWatch Logs > *Log Stream*
+Check that the queue is now empty:
+	> Amazon SQS > Queues
+	The queue now has 0 Messages
+Disable SQS:
+	 > Lambda > Functions > *Fn name* > Configuration > Triggers
+	Select queue -> Edit
+	Disable Active
+
+Important Kinesis Trigger Options:
+	Kinesis Stream: the Kinesis Stream to use
+	Consumer
+	Batch Size
+	Batch Window
+	-> Enable Trigger (Active)	
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Event & Context Objects
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+When a Service like EventBridge triggers a Lambda Fn, it sends an Event and Context as parameters
+Both of these have a lot of information (see slide)
+////////////////////
+
+Event vs Context
+////////////////////
+Events: Contains data for the Lambda Fn to process
+	JSON-formatted data, turned into a dictionary hat has input arguments
+Contexts: Contains data about the invocation and the Service that invoked the Lambda Fn
+	aws_request_id, function_name, ...
+////////////////////
+
+Event & Context Using Python
+////////////////////
+In Python, the lambda_handler has an event and context arguments:
+
+def lambda_handler(event, context):
+	// Fn body
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Destinations
+//////////////////////////////////////////////////////////////////////////
+A Lambda Fn can send results to another AWS Service:
+	SQS, SNS, Lambda, EventBridge
+The Destinations are broken into two categories, failed or success
+	So we specify where the message goes based on if was a success or failure
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Destinations - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Create two Queues, one for success, and one for failure.
+	Have the lambda do both, and make sure that they get results when they should
+The Lambda should have another Service triggering it, either S3 or SQS
+Create the Success and Failure Queues:
+ > SQS -> Create Queue // Just do this twice to get both
+	Set name
+	 -> Create
+Assign the Lambda the Queues:
+ > Lambda > Functions > *lambda function name* -> Destinations
+	Assign the failure and success queues
+Test the success event from Lambda:
+	Place a message/object into the Service
+	There is now a message in the success queue
+Test the failure event from Lamba:
+	Edit the code to replace the response fn with raise Exception("Boom!")
+	Place a message/object into the Service
+	There is now a message in the failure queue
+Result:
+	Now, no success and failure, we get the message into the correct AWS Service
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Permissions - IAM Roles & Resource Policies
+//////////////////////////////////////////////////////////////////////////
+Lambda Execution Role (IAM Role)
+////////////////////
+These grant the Lambda Fn Permissions to access other AWS Services
+There are a lot of managed policies already (see slide)
+This Role is what the Event Source Mapping uses, and there should be just one per Fn
+////////////////////
+
+Lambda Resource Based Policies
+////////////////////
+These grant other Services the Permissions to invoke Lambda Fns
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Permissions - IAM Roles & Resource Policies - Hands On
+//////////////////////////////////////////////////////////////////////////
+Going to the IAM Roles we can see the ones made for each Lambda Fn
+ > IAM > Roles
+Clicking on one of these, the attached Policies indicate what Service can invoke the Fn
+	The Policy will have the specific Service in the Conditions section
+The Policies will also have the Services that the Lambda Fn can invoke
+
+
+Going the other way, each Service must have a Policy that allows it to invoke the Lambda Fn
+	In the case of an SQS Queue, the Lambda Fn will be the one w/ Permissions to poll and delete
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Environment Variables
+//////////////////////////////////////////////////////////////////////////
+Lambda Fns can have Environment Variables
+	These can be encrypted
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Environment Variables - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Create Environment Variables for a Lambda Fn
+
+If needed, create a Lambda Fn
+Go to the Lambda Fn
+ > Lambda > Functions > *lambda Fn name*
+	Add the lines to the code bring in the Environment Variables and output them
+		import os // This for Python
+		return os.getenv("ENVIRONMENT_NAME")
+	Add the Environment Variables under Configuration tab
+		> Environment Variables -> Edit -> Add Environment Variable
+		Key: "ENVIRONMENT_NAME"
+		Value: "dev"
+		-> Save
+Test the Fn
+	We get a response w/ "dev" returned
+Goin back to the Environment Variable -> Edit, we change the Vale to "prod"
+	Testing the Fn, we now get "prod" in the response
+
+Result:
+	We now have a variable outside of the Lambda Fn that supplies data
+	These are great for things we don't want to be accessible to the public		
+//////////////////////////////////////////////////////////////////////////
+
+
+
+Lambda Monitoring & X-Ray Tracing
+//////////////////////////////////////////////////////////////////////////
+Lambda Logging & Monitoring
+////////////////////
+CloudWatch Logs:
+	Execution Logs for Lambda Fns
+CloudWatch Metrics:
+	Detailed Logs of each execution (duration, invocations, ...)
+////////////////////
+
+Lambda Tracing with X-Ray
+////////////////////
+Includes the Lambda Fn in the X-Ray diagram
+Must have X-Ray Permissions, and the Fn's code must use the X-Ray SDK
+There are three Environment Variables w/ X-Ray:
+	_X_AMZN_TRACE_ID:         tracing header
+	AWS_XRAY_CONTEXT_MISSING: default is LOG_ERROR
+	AWS_XRAY_DAEMON_ADDRESS:  the X-Ray Daemon IP_ADDRESS:PORT
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Monitoring & X-Ray Tracing - Hands On
+//////////////////////////////////////////////////////////////////////////
+ > Lambda > Functions > Configuration tab -> Monitoring and Operations Tools
+	 > Additional Monitoring Tools -> Edit
+	Enable the X-Ray traces
+	-> Save
+Going to Permissions, we now have that set for X-Ray automatically
+Test the Lambda Fn being traced
+	Make sure that the Lambda Fn will respond w/ a success
+	Upload a new file to the S3 bucket that triggers the Lambda Fn
+	Go to  > Lambda > Functions > *function name* > Monitoring
+		-> View X-Ray Traces
+		-> Traces Map now shows the flow of the Lambda Fn being executed
+			Clinet -> S3 -> Lambda Fn
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda@Edge & CloudFront Functions
+//////////////////////////////////////////////////////////////////////////
+Customization At the Edge
+////////////////////
+Lambda Fns can be deployed at CloudFront Edge Locations for super-fast responses
+There are two types
+	CloudFront Functions, Lambda@Edge
+They are serverless, pay per use, and deployed globally
+////////////////////
+
+CloudFront Functions & Lambda@Edge Use Cases
+////////////////////
+There are a LOT of use cases for these (see slide)
+Some are security, SEO, and bot mitigation at the Edge
+////////////////////
+
+The next two sections both show a diagram where:
+	Client makes request to CloudFront
+	CloudFront makes request to Origin
+	Origin sends response to CloudFront
+	CloudFront sends response to Client
+
+CloudFront Functions
+////////////////////
+Super lightweight Fn that lives at the Edge Location
+	Used to change the requests and responses of the viewer to/from CloudFront
+	Used for high-scale, latency-sensitive apps
+	Written in javascript
+////////////////////
+
+Lambda@Edge
+////////////////////
+Lightweight Fn that can change any of the requests/responses in the diagram:
+	Client request/response to/from CloudFront
+	CloudFront request/response to/from Origin
+Not as fast as CloudFront Fns
+Create in Region, auto-created in all Regions
+Written in NodeJS or Python
+////////////////////
+
+CloudFront Functions vs Lambda@Edge
+////////////////////
+See slide for details
+Big differences are:
+	Speed: CloudFront Fns < 1ms, Lambda@Edge 5-10s
+	Memory: CloudFront 2MB, Lambda@Edge up to 10GB
+	Access to Origin files/Request Body: CloudFront Fn no, Lambda@Edge yes
+////////////////////
+
+CloudFront Functions vs Lambda@Edge Use Cases
+////////////////////
+Lots of uses for both of these (see slide)
+CloudFront Fns:
+	Caching data, Header manipulation, URL rewrite/redirect, auth
+Lambda@Edge:
+	Longer execution time, more memory, access to Origin files, 3rd party libraries
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda in VPC
+//////////////////////////////////////////////////////////////////////////
+Lambda by Default
+////////////////////
+By default:
+	Lambda is deployed in AWS Cloud, outside of the VPC
+	It can access other Services in the AWS Cloud, but not ones in a VPC
+////////////////////
+
+Lambda n VPC
+////////////////////
+Lambda can be deployed in a VPC:
+	Define VPC ID, Subnets and Security Groups
+	The Lambda creates an ENI(Elastic Network Interface), which accesses the Services in the VPC
+	Use AWSLambdaVPCAccessExecutionRole
+////////////////////
+
+Lambda in VPC - Internet Access
+////////////////////
+Just as we've seen before with EC2 Instances in private Subnets, 
+Lambdas, even deployed in public Subnets require:
+	A NAT in the public Subnet, to connect to the Gateway
+	Communicating w/ other Services as URLs, or creating a VPC Endpoint
+CloudWatch Logs will still work w/o any of these
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda in VPC - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Create a Lambda Fn inside of the VPC, and give it Internet access
+ > Lambda > Functions -> Create Function
+	Set name
+	-> Create Function
+Create Security Group
+	 >EC2 > Security Groups -> Create Security Group
+	Set name
+	Set Description
+Edit Lambda Fn to have VPC
+ > Lambda > Function > Configuration tab -> VPC
+Select default VPC
+Choose a few Subnets
+Select the Security Group
+-> Save
+// We get an error that the Role does not have needed Permissions (CreateNetworkInterface)
+Give the Lambda Fn Permissions
+Lambda > Functions > "VPC Lambda name" -> Configuration tab -> Permissions
+	-> *Lambda Role*
+	-> Add Permissions
+	Search for "eni"
+	Select the AWSLambdaENIManagementAccess
+	// This has all of the Permissions needed to create an Internet connection
+-> Save
+Run the test // Might take a few minutes b/c things are being updated
+Verify that a network interface has been created for each AZ the Lambda is deployed in
+ > EC2 > Network Interfaces on sidebar
+
+Result:
+	We now have a Lambda Fn deployed within the public/private VPC, and still access the Internet
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Function Performance
+//////////////////////////////////////////////////////////////////////////
+Lambda Fn Configuration
+////////////////////
+Lambda can scale up to 10GB of RAM, and run for up to 15 minutes
+The RAM is allocated in vCPUs of 1,792MB
+	For each of these, multi-threading will be needed to benefit from the RAM
+	This uses the /tmp directory
+////////////////////
+
+Lambda Execution Context
+////////////////////
+The Execution Context is a re-used context that is executed outside of the handler function
+	This is how we can establish a DB connection, and save it for future calls!
+////////////////////
+
+Initialize Outside the Handler
+////////////////////
+Ex in slide shows the DB connection inside of the handler Fn - this is bad!
+Fix: Put the DB connection outside of the handler, and if the connection exists, return it
+////////////////////
+
+Lambda Fns /tmp Space
+////////////////////
+We can use the /tmp space to write temporary files, up to 10GB
+	For any bigger or more persistent data, use S3
+	For Encryption in /tmp, use KMS
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Function Performance - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: See the execution of a Fn outside of the handler Fn be sow the first time, and fast after
+
+Edit the Lambda Fn to have a delay Fn outside of the handler Fn
+ > Lambda > Configuration tab
+Check out the Memory section
+	The more memory, the more expense
+	This is how to get more cores too
+Edit the code to simulate some work
+	Import the time library (Python)
+		import time
+		Run the test
+	Add the line
+		time.sleep(2)
+	// We see the Duration result be about 2 seconds
+	Change the time to 5
+		time.sleep(5)
+		// The Lambda Fn failed out, b/c it exceeded the timeout
+	Chang the timeout to 6
+	 > Lambda > Configuration tab > General Configuration -> Edit
+		Change the timeout to 6 seconds
+		-> Save
+	Run the test again
+		Succeeds after about 5 seconds
+Move work outside of the handler Fn6
+	Go back to code
+	Move the sleep line above the handler Fn // must be above
+		Put it into a Fn, and place a call to that Fn below it
+		///////
+			def connection-work():
+				sleep(5)
+			connection-work()
+		///////
+The first time takes the duration, but the following ones don't
+//////////////////////////////////////////////////////////////////////////
+
+
+
+Lambda Layers
+//////////////////////////////////////////////////////////////////////////
+A Lambda Layer is a place where we store dependencies that our Lambda Fn(s) rely on
+	Reuse across versions of the Lambda Fn, and across different Lambda Fns
+Lambda Layers can create custom runtimes (other coding languages)
+//////////////////////////////////////////////////////////////////////////
+
+
+
+Lambda Layers
+//////////////////////////////////////////////////////////////////////////
+Goal: Add and use a Lambda Layer to a Lambda Fn
+
+ > Lambda > Functions
+Create a Lambda Fn w/ Python
+-> *Fn name*
+Add the following code to the Lambda Fn:
+///////
+import pandas as pd
+
+def lambda_handler(event, context):
+	data = {
+		"Name":["Alice", "Bob"],
+		"Age": [20, 21]
+	}
+	df = pd.DataFrame(data)
+	filtered_df = df[df["Age"] > 20]
+	result = filtered_df.to_dict(orient="records")
+	return result
+///////
+Run the test on the Lambda Fn
+	// We get an error saying it is unable to import a module named pandas
+Add the pandas Layer to the Lambda Fn:
+	Click on the Layers box beneath the Lambda in the Function Overview window
+	-> Add a Layer
+	Select the Pandas from the dropdown
+	-> Add
+Run the test again
+	It now succeeds, bringing back the requested data
+Result: By adding the pandas Layer to the Lambda Fn, we imported that library
+//////////////////////////////////////////////////////////////////////////
+
+
+
+Lambda Files Systems Mounting
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Lambda Fns can connect to an EFS
+	Just make sure that the EFS isn't having its connection limits hit
+////////////////////
+
+Lambda - Storage Options
+////////////////////
+/tmp:
+	Ephemeral storage for Lambda Fn while it runs, fastest retrieval
+Lambda Layers:
+	Additional runtimes or libraries
+S3:
+	Persistent storage, fast
+EFS:
+	Persistent storage, faster
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Concurrency
+//////////////////////////////////////////////////////////////////////////
+Lambda Concurrency and Throttling
+////////////////////
+Lambda Fns can scale up to 1000 concurrent executions, but we should limit this
+	A Throttle is any execution over the limit
+	Throttle behavior:
+		synchronous: return ThrottleError - 429
+		asynchronous: auto-retry and then DLQ
+We can actually open a support ticket w/ Amazon for a higher limit
+////////////////////
+
+Lambda Concurrency Issue
+////////////////////
+B/c concurrency is counted against by all functions in the Account, one Service can have them all
+	This means the at the other Services downstream in the workflow can't reserve any
+	But as those fail, the upstream Services keep taking up the limit...
+By limiting the concurrency of each Service, we solve this
+////////////////////
+
+Concurrency and Asynchronous Invocations
+////////////////////
+Throttling events just mean that they are auto-retried until they work
+	Or till the time limit is reached
+	Attempts are made, up until 6 hours
+	Retry interval increases from 1 second to 5 minutes
+////////////////////
+
+Cold Starts & Provisioned Concurrency
+////////////////////
+Cold Start: the Lambda Fn has to run initializations on first run
+Provisioned Concurrency: Allocate instances of the Lambda Fn before its invoked
+Note:
+	See slide for AWS blog post about reducing Cold Start latency
+////////////////////
+
+Reserved and Provisioned Concurrency
+////////////////////
+See slide for graphs comparing Concurrency with and without Reserved Concurrency
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Concurrency - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Explore the different Concurrency settings for Lambda Fns
+
+ > Lambda > Functions > *Fn name* > Configuration tab -> Concurrency sidebar
+-> Edit
+Set Reserved Concurrency: 0
+-> Save
+Try running a Test on the Fn
+	This fails, saying that Rate Exceeded
+Set the Concurrency back to use the default Concurrency
+
+Add Provisioned Concurrency
+In the Provisioned Concurrency Configurations section
+	-> Add
+	Set the Qualifier type
+	Set the number of Concurrencies to provision // This is not free
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda External Dependencies
+//////////////////////////////////////////////////////////////////////////
+Lambda Dependencies (external libraries) can be zipped together w/ the Fn, and then uploaded
+	Files larger than 50MB need to be uploaded to S3 first
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda External Dependencies - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Create a Lambda F from CloudShell, zip it, and upload it to the Lambda Fn of the Account
+
+Open up the CloudShell console
+ > CloudShell
+create a folder called lambda
+	mkdir lambda
+Navigate inside
+	cd lambda
+Install nano
+	sudo yum install-y nano
+Paste in the code:
+///////
+const AWSXRay = require('aws-xray-sdk-core')
+const AWS  = AWSXRay.captureAWS(require('aws-sdk'))
+const s3 = new AWS.S3()
+
+exports.handler = async function(event){
+        return s3.listBuckets().promise()
+}
+///////
+Verify that index.js has the code
+	cat index.js
+Install dependencies (x-ray, s3, aws)
+	npm install aws-xray-sdk
+	npm install aws-s3-sdk
+	npm install aws-sdk
+Change the Permissions of these files
+	chmod a+r *
+Zip the files
+	zip -r function.zip .
+Create a Role for the Lambda Fn
+ > IAM > Roles -> Create Role
+	Select AWS Service
+	Select Lambda from the Dropdown
+	-> Next
+	Search with "lambdabasic" and select the AWSLambdaBasicExecutionRole
+	-> Next
+	Set a name
+	-> Create Role
+Back in CloudShell, create the Lambda Fn
+	aws lambda create-function 
+	--zip-file fileb://function.zip 
+	--function-name lambda-x-ray-with-dependencies
+	--runtime nodejs16.x // This may be out of date, just look up what the current version is
+	--handler index.handler
+	--role *arn of the new Role*
+
+Ex:
+aws lambda create-function --zip-file fileb://function.zip --function-name lambda-x-ray-with-dependencies --runtime nodejs18.x --handler index.handler --role arn:aws:iam::160579864932:role/AquinDemoWithDependencies
+
+We now have a new Fn
+ > Lambda > Functions -> lambda-x-ray-with-dependencies
+
+Running a basic test will result in an access-denied error due to not having the S3 and X-Ray Permissions
+Give the Lambda Role X-Ray Permissions:
+ > Lambda > Functions > *Fn Name* > Configuration -> Monitoring and Operations Tools sidebar
+	> Additional Tools section -> Edit
+	 > CloudWatch Application Signals and AWS X-Ray section
+		Enable: Lambda Service Traces
+Add the needed Permissions to the Lambda Role
+ > Lambda > Functions > *Fn Name* > Configuration -> Permissions sidebar
+-> *Role Name*
+	// We see the X-Ray Permissions are there b/c enabling X-Ray brought those in
+	-> Add Policies
+		Search for "S3Read" and select AmazonS3ReadOnlyAccess
+		-> Add Permissions
+Run the Lambda test again
+It succeeds!
+
+Check the X-Ray:
+ > X-Ray > Traces sidebar
+	Select the Lambda Fn and run a query
+ > X-Ray > Trace Map sidebar
+	// We should now see the diagram of the Lambda Fn Service
+
+Result:
+	We now have a Lambda Fn created from the CloudShell CLI
+	It can read from S3, and it has traces in X-Ray
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda and CloudFormation
+//////////////////////////////////////////////////////////////////////////
+Lambda and CloudFormation - Inline
+////////////////////
+We can create simple Lambda Fns w/o Dependencies using zipped code files
+////////////////////
+
+Lambda and CloudFormation  through S3
+////////////////////
+We can store the Lambda zip in S3, using three attributes:
+	S3Bucket - Where the Lambda is stored
+	S3Key - Full path to zip
+	S3ObjectVersion - If Bucket has versioning (highly recommended)
+To update the Lambda, we must update all three attributes or CloudFormation won't update
+////////////////////
+
+Lambda and CloudFormation through S3 Multiple Accounts
+////////////////////
+To deploy a Lambda Fn from an S3 Bucket in Account1 using a Bucket Policy
+	These Accounts do need an Execution Role in place that the Bucket Policy grants access
+	This allows other Accounts to access the Lambda Fn and deploy it to their CloudFormation
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda and CloudFormation - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Create a Lambda Fn for CloudFormation
+
+Download the lambda-xray-template.yaml file
+	Go to the code for the course, and download the code folder
+Create the S3 Bucket to store the Lambda Fn
+ > S3 -> Create Bucket
+	Set name
+	Enable Bucket Versioning
+Download the function.zip from the tutorial creating a Lambda through CloudShell
+ > CloudShell
+Get the full path to function.zip
+	pwd
+	Copy the result
+	-> Actions
+	-> Download file
+	Paste in the path and add "/function.zip"
+	-> Download
+Upload function.zip to the S3
+Create a Stack on CloudFormation
+ > CloudFormation -> Create Stack (with new resources)
+	Select: Upload Template
+	-> Choose File
+	Upload the lambda-cloudformation.yaml file from the course code files
+	Set name
+	-> Next
+	S3: the Bucket name
+	Key: "function.zip"
+	Version: > S3 > Buckets > *bucket name* > Objects > *function zip file* > Versions tab
+		 Copy the version
+	Acknowledge that CloudFormation will create things
+	-> Next
+	-> Submit
+// CloudFormation needs a few minutes to create itself
+Check the Lambda Fn made by CloudFormation
+Run a basic test
+Check the Trace in X-Ray
+
+Result:
+	We now have a Lambda Fn created by CloudFormation
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Container Images
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+We can deploy a Lambda Fn as a Docker Container
+	Can be big, up to 10GB, with dependencies, lots of languages
+	Test Containers locally w/ Lambda Runtime Interface Emulator
+Slide has example that specifies an:
+	image, app code, dependencies, and Lambda handler Fn to run
+////////////////////
+
+Lambda Container Images - Best Practices
+////////////////////
+Best Practices:
+	Use AWS-provided Base Images
+	Use Multi-Stage Builds
+	Build from Stable to Frequently Changing
+	Use a single Repo for Fns w/ Large Layers
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Versions and Aliases
+//////////////////////////////////////////////////////////////////////////
+AWS Lambda Versions
+////////////////////
+Versions are  way to update the Lambda Fn
+	Lambda Fns can be change, but published Versions can't, they can only be replaced
+	Immutable: Can't be changed
+	Each Version has its own ARN
+////////////////////
+
+AWS Lambda Aliases
+////////////////////
+Aliases are pointers to Lambda Fn Versions
+	Aliases are of course mutable
+	To test a new Version, we can direct % of traffic to the new Version (Canary Deployment)
+	Aliases can't reference other Aliases
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Versions and Aliases - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Create a Lambda Fn w/ multiple Versions, and weight them to simulate Canary Testing
+
+Create the Lambda Fn:
+ > Lambda > Functions -> Create Function
+	Select: Author from Scratch
+	Set name
+	Set Runtime to Python
+	-> Create Function
+Change the Lambda code to return "This is Version 1"
+	Deploy and test
+Author the Fn as Version 1
+	-> Actions dropdown -> Publish New Version
+		-> Publish
+Edit the code to return "This is Version 2"
+ > Lambda > Functions > *Fn name* // After publishing we are one level too deep, at the Version 1
+Edit the code
+Deploy and Test
+Author the Fn as Version 2
+	-> Actions dropdown -> Publish
+Change the weight of traffic using Aliases
+Go back to the Lambda Fn
+ > Lambda > Functions > *Fn name*
+	Under the Versions tab, we can see our Versions
+Create an Alias for each Version
+-> Aliases tab -> Create Alias
+	Set name: prod/dev
+	Set the Version
+	-> Create
+Test out the code
+Add weights to the Aliases in a 50/50 split
+ > Lambda > Functions > *Fn name* > Aliases tab -> *Alias name* -> Edit
+Select the other Version
+Set the weight to 50%
+-> Save
+Go to the Alias
+ > Lambda > Functions > *Fn name* > Aliases tab -> *Alias name* -> Test
+Running the test will eventually show the other Version of the Lambda Fn
+
+Result:
+	The Alias will direct traffic to each of the Versions
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda - CodeGuru Integration
+//////////////////////////////////////////////////////////////////////////
+Lambda and CodeGuru Profiling
+////////////////////
+We can set up Lambda w/ CodeGuru profiling
+	Profiles runtime performance
+	Supports Java, Python
+	Must have Permissions: AmazonCodeGuruProfilerAgntAccess Policy
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Limits
+//////////////////////////////////////////////////////////////////////////
+Lambda is limited by:
+	Execution: Memory, Execution Time, Concurrent Fns, ...
+	Deployment: Deployment size, Env Variables size, ...
+Anything beyond these limits is not a use case for Lambda Fns
+See slide for details
+//////////////////////////////////////////////////////////////////////////
+
+
+Lambda Best Practices
+//////////////////////////////////////////////////////////////////////////
+(See slide for details)
+Perform one-time work outside of the Handler Fn
+	DB connections, initializations, ...
+Env Variables
+	Usernames/passwords, connection URLs, ...
+Minimize deployment packages to runtime necessities
+	Use layers, Keep within limits, ...
+NEVER use code that calls itself
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 22
+  __          __   __
+ /  \ |  |   /  \ /  \
+ |    |__|      /    /
+ |    |  |     /    /
+ \__/ |  |.   /__  /__
+
+AWS Serverless: DynamoDB
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB Overview
+//////////////////////////////////////////////////////////////////////////
+
+Traditional Architecture
+////////////////////
+Rigidly predefined tables in an RDBMS DB that can only scale vertically
+////////////////////
+
+Not Only SQL Databases (NoSQL DB) // Terrible shortened name...
+////////////////////
+DynamoDB is a NoSQL DB
+NoSQL:
+	Better for horizontal scaling (SQL DBs need vertical scaling)
+	Unstructured data (More like JSON, SQL DBs require pre-defined tables)
+	Limited support for query JOINs and no aggregations like SUM
+////////////////////
+
+
+Amazon DynamoDB
+////////////////////
+NoSQL DB with auto-scaling, able to scale to 1000s of TB of storage
+Highly available, Fast performance, and able to handle millions of request per second
+Storage Tiers: Standard and Infrequent Access
+////////////////////
+
+DynamoDB - Basics
+////////////////////
+DB is made of Tables
+	Each Table needs a Primary Key (decided at runtime)
+	Unlimited number of rows
+	Max Item size is 400KB
+////////////////////
+
+DynamoDB - Primary Keys
+////////////////////
+Key that is unique for each item
+	Just use something like *item description*_ID
+	Why use anything else?
+////////////////////
+
+DynamoDB - Partition Keys
+////////////////////
+(This is the second option)
+Partition Key + Sort Key (HASH + RANGE)
+We can use multiple keys to get more specific data:
+	User_ID + Game_ID - Get that player's score from that specific game
+////////////////////
+
+DynamoDB - Partition Keys (Exercise)
+////////////////////
+Oh my, which of these is the best, most specific key (sarcasm)
+	movie_id, producer_name, lead_actor_name, movie_language
+The answer is of course the movie_id
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB Basics - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Create a table and fill it with data
+
+> DynamoDB > Tables -> Create Table
+	Set name: Users
+	Set Partition Key: User_ID
+	-> Customize Settings // For learning purposes
+	Select Provisioned
+	Disable Auto-scaling for Read/Write
+	Set Read/Write Provisioned Capacity Units: 2
+	// The cost per month only happens if we exceed the free tier
+	-> Create Table
+> DynamoDB > Tables -> *Table name*
+Lots of info here:
+	Partition Key, Sort Key, ...
+Create an item:
+> DynamoDB > Tables > *Table name* -> Explore Table Items -> Create Item
+	Set UserID // I dislike that we can set this...
+	Create Attribute (String): first_name
+		Set first_name
+	Create Attribute (String): last_name
+		Set last_name
+	-> Create Item
+Create a second item:
+	// Setting User_ID to the same value fails
+	Set User_ID (unique)
+	Create Attribute (String): first_name
+		Set first_name
+	-> Create Item
+	// The action completes, even w/o a last_name
+Create Table:
+	Set name: UsersPosts
+	Partition Key: User_ID
+	Sort Key: Post_TS
+	-> Customize Settings
+	Select Provisioned
+	Disable Auto-scaling for Read/Write
+	-> Create Table
+Put an Item into UsersPosts:
+> DynamoDB > Tables > *Table name* -> Explore Table Items -> Create Item
+	Set User_ID to an id from the Users Table
+	Sort Key: some timestamp (2021-10-09T12:23:34Z)
+	Add Attribute: "Content"
+		Set Content: Hello World!
+	-> Create Item
+Put another Item into UsersPosts:
+	Set User_ID to the same id from the Users Table
+	Sort Key: some timestamp (2021-11-09T04:04:04Z)
+	Add Attribute: "Content"
+		Set Content: Second post!
+	-> Create Item
+// This works b/c there's a difference b/t the User_ID and/or Post_TS
+
+Result: We now have two tables, one storing Users and one Posts
+	These aren't linked...yet
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB WCU & RCU - Throughput
+//////////////////////////////////////////////////////////////////////////
+DynamoDB - Read/Write Capacity Modes
+////////////////////
+We can provision or use on-demand
+Provisioned Mode:
+	Provision capacity before use, pay for that capacity
+On-Demand Mode:
+	Only pay for what gets used
+	More expensive for the same capacity provisioned
+Can switch b/t these every 24 hours
+////////////////////
+
+R/W Capacity Modes - Provisioned
+////////////////////
+Preset the capacity:
+	Read Capacity Units (RCU)
+	Write Capacity Units (WCU)
+Theses can be exceeded w/ Burst Capacity
+	Gives error if Burst Capacity exceeded
+		Exponential backoff kicks in
+////////////////////
+
+DynamoDB - Write Capacity Units (WCU)
+////////////////////
+Formula to determine WCU:
+	(items per second) * (item size) = (# of WCUs)
+Ex 1:
+	10 items per second w/ item size of 2KB
+	10 * (2KB/1KB) = 20 WCUs
+Ex 2:
+	6 items per second w/ item size of 4.5KB
+	6 * (5KB/1KB) = 30 WCUs // KB always rounded up
+Ex 3:
+	120 items per minute w/ item size of 2KB
+	2 * (2KB/1KB) = 4 WCUs
+////////////////////
+
+Strongly Consistent Read vs Eventually Consistent Read
+////////////////////
+Much like before with replication across Regions
+Eventually Consistent Read:
+	Default mode
+	May get stale data if too fast
+Strongly Consistent Read
+	More expensive
+	Possible latency
+	Will be correct w/ data
+////////////////////
+
+DynamoDB - Write Capacity Units (WCU)
+////////////////////
+There are two formulas, eventually and strongly consistent
+Round up to multiple of 4, and then divide by 4
+Eventually Consistent:
+	(1 read per second / 2) * (item size rounded up to 4, divided by 4) = RCUs
+Strongly Consistent:
+	(1 read per second) * (item size rounded up to 4, divided by 4) = RCUs
+Ex 1:
+	10 strongly items per second w/ item size of 4KB
+	10 * (4KB/4KB) = 10 WCUs
+Ex 2:
+	16 eventually items per second w/ item size of 12KB
+	(16/2) * (12KB/4KB) = 24 WCUs
+Ex 3:
+	10 strongly items per second w/ item size of 6KB
+	10 * (8KB/4KB) = 20 WCUs
+////////////////////
+
+DynamoDB - Partitions Internal
+////////////////////
+Data is broken up by Partition Key
+Determined by formulas we don't need to know (see slide)
+Important:
+	WCUs and RCUs are spread evenly across partitions
+////////////////////
+
+DynamoDB - Throttling
+////////////////////
+Overloading provisioned RCUs or WCUs can get error:
+	ProvisionedThroughputExceededException
+Reasons:
+	Can be one Partition Key read too may times (called a Hot Key)
+	Items are large
+Solutions:
+	Exponential Backoff
+	Distribute keys better
+	For RCU, use DynamoDB Accelerator (DAX)
+////////////////////
+
+R/W Capacity Modes - On-Demand
+////////////////////
+Scales w/ workload
+Charged per read/write
+About 2.5x more expensive than same provisioned units
+
+Best for unknown/unpredictable workloads
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB WCU & RCU - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: Check out and edit the RCUs and WCUs of a table
+
+> DynamoDB > Tables > *Table name* > Additional Settings tab (farthest right)
+Read/Write Capacity section -> Edit
+	On-Demand bills per use, but is more expensive
+	Provisioned is predefined, but cheaper
+		RCUs are precomputed based on capacities
+		Estimated costs are shown as well
+		Can set up capacity auto-scaling b/t limits
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB - Basic Operations
+//////////////////////////////////////////////////////////////////////////
+DynamoDB - Writing Data
+////////////////////
+PutItem - new item
+UpdateItem - update or create
+Conditional Writes - Puts conditions on writes, puts, and delete
+////////////////////
+
+DynamoDB - Reading Data
+////////////////////
+GetItem
+	Based on Primary Key
+	Eventually or Consistent
+	... (see slide)
+////////////////////
+
+DynamoDB - Reading Data (Query)
+////////////////////
+KeyConditionExpression
+	Partition Key and Sort Key
+FilterExpression
+	Filters items based on non-key attributes
+Returns
+	list of Items up to limit or 1MB
+Can paginate results
+////////////////////
+
+DynamoDB - Reading Data (Scan)
+////////////////////
+Brings back all Items in Table
+Up to 1MB, can use pagination
+Parallel Scan - faster performance
+////////////////////
+
+DynamoDB - Deleting Data
+////////////////////
+DeleteItem
+	Deletes one Item
+DeleteTable
+	Deletes entire Table
+////////////////////
+
+DynamoDB - Batch Operations
+////////////////////
+Saves latency by reducing API calls
+Done in parallel
+Retries failed parts
+	Exponential Backoff on failures
+BatchWriteItem
+	Up to 25 PutItem, and or DeleteItem
+	Up to 16MB write, 100KB per Item
+	No updates
+BatchGetItem
+	Up to 100 Items, 16MB of data, one or more Tables
+////////////////////
+
+DynamoDB - PartiQL
+////////////////////
+Can use SQL-like language for doing all API calls
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB Basic APIs - Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal: See how actions in the AWS console translate to the APIs
+
+Create Item is PutItem
+Editing an Item is UpdateItem
+Selecting an Item is GetItem
+Selecting one Item and deleting is DeleteItem
+	Selecting multiple Items and deleting is a batch DeleteItem
+Selecting the Table and deleting that is DeleteTable
+
+Can filter based on Primary Key and then optionally Sort Key and other Attributes
+
+Result: Each action in the console maps to some API call
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB - Conditional Writes
+//////////////////////////////////////////////////////////////////////////
+DynamoDB - Conditional Writes
+////////////////////
+Specify which Items should be affected, using Conditions
+	Write APIs (PutItem, UpdateItem, DeleteItem, BatchWriteItem)
+	Conditions (attribute_exists, attribute_type, contains, ...) // See slide for more
+////////////////////
+
+Conditional Writes - Example on Update Item
+////////////////////
+Ex: UpdateItem on Items to give DISCOUNT if price greater than LIMIT
+	DISCOUNT and LIMIT specified in separate file
+
+Slide has code
+////////////////////
+
+Conditional Writes - Example on Delete Item
+////////////////////
+Ex: DeleteItem if attribute_not_exists is true (price)
+Ex: DeleteItem if attribute_exists (ProductReviews.OneStar) // Delete one-star reviews
+
+Slide has code
+////////////////////
+
+Conditional Writes - Do Not Overwrite Elements
+////////////////////
+By using attribute_not_exists, we can check if an Attribute exists w/o creating it
+
+Slide has code
+////////////////////
+
+Conditional Writes - Example Complex Condition
+////////////////////
+Conditions can specify ranges and target multiple values in an Attribute
+	Attribute is between 500 and 600
+	Attribute can be "Sports" or "Comics"
+
+Slide has code
+////////////////////
+
+Conditional Writes - Example of String Comparisons
+////////////////////
+Strings have special comparisons:
+	begins_with // check the start of a String
+	contains // String contains a value
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB Indexes (GSI + LSI)
+//////////////////////////////////////////////////////////////////////////
+DynamoDB - Local Secondary Index (LSI)
+////////////////////
+LSIs are alternative Sort Keys
+So we can have our Primary and Sort Keys, and then we can predefine an LSI
+	Using this, we can query based on the LSI instead of the Sort Key
+	We can have up to 5 LSIs (predefined at Table creation)
+////////////////////
+
+DynamoDB - Global Secondary Index (GSI)
+////////////////////
+Can use a GSI to query a non-key Attribute like a Primary and/or Sort Key
+	Can be created/modified after Table creation
+	Uses its own RCUs and WCUs
+////////////////////
+
+DynamoDB - Indexes and Throttling
+////////////////////
+GSI: Throttling on GSI throttles the Table
+LSI: Uses the RCUs and WCUs of the Table
+	No special throttling behavior
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB PartiQL
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+SQL-like query language that allows for
+	INSERT, UDATE, SELECT, DELETE
+////////////////////
+
+Hands On
+////////////////////
+> DynamoDB > PartiQL editor
+We can choose the actions on the left-hand side to create SQL statements,
+	and then modify them from there
+Scan Table:
+	SELECT * FROM "demo_indexes"
+Scan Table w/ Conditions:
+	SELECT * FROM "demo_indexes" WHERE "user_id" = '123' AND "game_ts" = 'sortKeyValue'
+Lots more we can do
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB Optimistic Locking
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+This is where the Item is locked against changes that are requested on an old version
+
+So, if the version is 1, and two Users try to make a change at the same time,
+	Both send a change request, directed at the Item, Version 1
+	One of them has their change go through, changing the version
+	The other change fails b/c the version is now 2
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB DAX
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+This is a cache that saves the most recent queries and returns them when requested again
+	Major speed up and protects against throttling
+TTL is 5 minutes
+10 nodes in Cluster
+////////////////////
+
+DynamoDB Accelerator (DAX) vs ElastiCache
+////////////////////
+DAX:
+	Used when querying directly against DynamoDB
+ElastiCache:
+	Used when querying data that has been modified (summed, aggregated, ...)
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB Streams
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Streams of Create/Update/Delete
+	Sent to Kinesis Data Streams
+	Read by AWS Lambda, Kinesis Client Library apps
+Retain data up to 24 hours
+Used for:
+	Real-time changes
+	Inserts
+	Analytics
+	Cross-Region replication
+////////////////////
+
+Architecture Diagram
+////////////////////
+Slide diagram shows that changes are made to DynamoDB Table
+	Triggers Stream output to KDS -> Firehose
+	Goes to another AWS Service depending on intention (analytics, indexing, ...)
+////////////////////
+
+Data Sent
+////////////////////
+Data sent can be specified by:
+	KEYS_ONLY - Items key Attributes
+	NEW_IMAGE - full Item post-modification
+	OLD_IMAGE - full Item, pre-modification
+	NEW_AND_OLD_IMAGES - full Item, pre and post modification
+Shards:
+	Streams use Shards
+	Created by AWS, and do NOT get created retroactively
+////////////////////
+
+DynamoDB Streams & Lambda
+////////////////////
+To make Lambda read from DynamoDB Streams:
+	Event Source Mapping
+	Permissions
+	Synchronously invoke Lambda
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB TTL
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+We can set a TTL for Items in DynamoDB
+	Doesn't consume WCUs to Delete
+	Items Deleted from LSIs and GCIs w/i 24 hours
+	Item pending Deletion ae sill visible
+////////////////////
+
+Hands On
+////////////////////
+After creating a Table, add an Item w/ a numeric Attribute
+	This Attribute will a number set to a time in seconds, since the epoch
+		(epoch being time in seconds since Linux was created)
+	So the number will be (time since epoch) + (seconds till Item expires)
+	We can use an epoch converter to find this
+We also have to enable TTL in the Table settings
+	This is where we specify the Attribute name that will be checked against the expiration time
+In the TTL section of the Table, we can also see how many Items have been deleted from expiration
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB CLI
+//////////////////////////////////////////////////////////////////////////
+DynamoDB CLI - Good to Know
+////////////////////
+--projection-expression: Attribute(s) to retrieve
+--filter-expression: filter returned Items
+
+General AWS CLI Pagination Options
+	--page-size, --max-items, --starting-token (details on slide)
+////////////////////
+
+Hands On
+////////////////////
+Code can be found in the cli-examples.sh file
+
+we can perform the API commands from the CLI, just like from the console
+So, we can call the scan API and --projection-expression (from above) w/ variables to retrieve
+	Scan w/ --filter-expression and data structured under --expression-attribute-values
+	Scan an entire Table, and specify the page to return w/ --page-size
+		Or return a specific number of Items w/ --max-items
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB Transactions
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+A series of all-or-nothing read/write operations // Either they all work, or they all fail
+	ACID: Atomicity, Consistency, Isolation, and Durability
+	Consumes 2x the WCUs and RCUs // This adds a prepare to executing the action
+Use Cases:
+	Online games, Financial software, and other real-time pivotal information....
+////////////////////
+
+DynamoDB Transactions - Example
+////////////////////
+Given the case of a bank account system
+	We can see how the bank record Item and the transaction history MUST match
+	We cannot have a modified account w/o the history of the latest transaction
+	And we cannot have a full history w/o the correct amount in the bank
+	This is an all-or-nothing scenario
+////////////////////
+
+DynamoDB Transactions - Capacity Computations
+////////////////////
+We use the same RCU and WCU formulas, but just double the cost
+
+So, 3 Transactional writes per second, size of 5KB:
+	(3 per second) * (5KB / 1KB) * (2, transaction cost) = 30 WCUs
+5 Transactional reads per second, size of 5KB:
+	(5 per second) * (8KB / 4KB) * (2, transaction cost) = 20 RCUs
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB Session State
+//////////////////////////////////////////////////////////////////////////
+DynamoDB as Session State Cache
+////////////////////
+DynamoDB can utilize being Serverless and highly available to store session state
+This makes it one of the best choices, along w/ ElastiCache, and  maybe EFS
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB Partitioning Strategies
+//////////////////////////////////////////////////////////////////////////
+DynamoDB Write Sharding
+////////////////////
+To prevent a Hot Partition by repeated reads/writes using that key,
+	We can instead use a suffix that attaches to the end of the key's value
+So for a key of Candidate_ID, we could have candidateA-11, candidateB-13, candidateA-77, ...
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB Conditional Writes, Concurrent Writes & Atomic Writes
+//////////////////////////////////////////////////////////////////////////
+DynamoDB - Write Types
+////////////////////
+Concurrent Writes:
+	Two Users both writing to the same Item can overwrite each other's changes
+Conditional Writes:
+	The two Users will only do a write operation if the value of the Item is still the same
+	So the first User's write will execute successfully, but the second User's won't
+	This is also called Optimistic Locking (we already covered this though...)
+
+Atomic Writes:
+	The writes happen quickly and so can't overwrite each other
+	They also have an additive effect rather than a direct edit
+		So, it's adding 5 to the Item rather than rewriting it to 5
+
+Batch Writes:
+	Write/Update many Items at once
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB Patterns w/ S3
+//////////////////////////////////////////////////////////////////////////
+DynamoDB - Large Objects Pattern
+////////////////////
+This pattern is utilizing DynamoDB and S3 for what they're best at:
+	DynamoDB: Lots of small objects w/ easy search functions
+	S3: Lots of large objects
+Here, DynamoDB just has a link to the S3 Bucket where the Item's value is stored
+////////////////////
+
+DynamoDB - Indexing S3 Objects Metadata
+////////////////////
+To create this pattern:
+	S3 Bucket sends invokes a Lambda Fn when an object gets uploaded
+	Lambda Fn creates an entry into the DynamoDB Table
+	Outside apps access the DynamoDB Table to access that Item
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB Operations
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Table Cleanup:
+	Scan and Delete Item by Item // Slow, WCU expensive
+	Drop the Table: Fast, cheap
+Copying a DynamoDB Table:
+	AWS Data Pipeline: Specialized, only mention in this course
+	Backup and restore into new Table: Takes time
+	Scan + (PutItem or BatchWriteItem): Have to write own code, not recommended
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+DynamoDB Security & Other
+//////////////////////////////////////////////////////////////////////////
+DynamoDB - Security & Other Features
+////////////////////
+Security:
+	VPC Endpoints w/o going across Internet
+	IAM access
+	Encryption at Rest w/ KMS, In-Transit SSL/TLS
+Backup and Restore feature available:
+	Point-in-time Recovery
+	No performance impact
+Global Tables:
+	Highly available and performant Tables w/ Streams enabled
+DynamoDB Local:
+	Develop and test locally
+Other:
+	Migrate w/ AWS DMS from other DBs (DynamoDB and others)
+////////////////////
+
+DynamoDB - Users Interact w/ DynamoDB Directly
+////////////////////
+Have Users access an auth service, and get TEMPORARY IAM credentials
+	These credentials allow access directly to the DynamoDB Table
+////////////////////
+
+DynamoDB - Fine-Grained Access Control
+////////////////////
+When Users get assigned the IAM Role, a Condition is put in place to limit access to DynamoDB
+The IAM Role's Permissions has a Condition line that only allows access to that User's data
+	But the User can do anything else that we allow (GetItem, PutItem, ...)
+This line uses the dynamodb:LeadingKeys list to limit row-level access for Users on the Primary Key
+Attributes can be limited, so Users can't operate on these
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 23
+  __          __    __
+ /  \ |  |   /  \  /  \
+ |    |__|      /    _/
+ |    |  |     /      \
+ \__/ |  |.   /__  \__/
+
+AWS Serverless: API Gateway
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+API Gateway Overview
+//////////////////////////////////////////////////////////////////////////
+Example: Building a Serverless API
+////////////////////
+By placing an API Gateway as the entry-point to our app, we get a lot of features:
+	Auth, Usage Plans, Dev stages, more...
+////////////////////
+
+AWS API Gateway
+////////////////////
+API Gateway and Lambda means fully serverless
+
+Lots of features for API, auth, and cache
+See slide for details
+////////////////////
+
+API Gateway - Integrations High Level
+////////////////////
+Place an API Gateway in front of other Services to use rate limiting, caching, etc
+	Lambda Fn, HTTP, Other AWS Service
+////////////////////
+
+API Gateway - AWS Service Integration Kinesis Data Streams Example
+////////////////////
+Place an API Gateway in front of a KDS to provide auth, and not expose the KDS
+////////////////////
+
+API Gateway - Endpoint Types
+////////////////////
+Edge-Optimized (default):
+	API Gateway in one Region has requests routed through CloudFront Edge Locations
+Regional:
+	Clients in same Region
+Private:
+	Accessed from VPC sing VPC Endpoint (ENI)
+////////////////////
+
+API Gateway - Security
+////////////////////
+User Authentication through:
+	IAM Roles, Cognito, Custom Auth
+Custom Domain Name HTTPS
+	Uses the AWS Certificate Manager (ACM)
+	Edge-Optimized, certificate must be in us-east-1
+	Regional, certificate must be in API Gateway Region
+	MUST have a CNAME of A-alias in Route 53
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+API Gateways Stages and Deployment
+//////////////////////////////////////////////////////////////////////////
+API Gateway - Deployment Stages
+////////////////////
+Deploy the API Gateway in stages for:
+	Making sure changes are pushed
+	Rollback is easy
+	Configuration at each stage
+	Keep version history
+////////////////////
+
+API Gateway - Stages v1 and v2 API Breaking Change
+////////////////////
+In case of deploying a breaking change, like changing the invoked Lambda Fn,
+	A new version is put up w/ a new URL, which we gradually migrate Users to
+	Once no Users are going to the old URL, it is shut down
+////////////////////
+
+API Gateway - Stage Variables
+////////////////////
+Format: ${stageVariables.variableName}
+Like Environment Variables for the Stages of AI Gateway deployment
+Passed to the Context object in AWS Lambda
+
+These are used for:
+	Lambda Fn ARN, HTTP Endpoint, ...
+As the different Stages of the deployment execute, these can change
+
+////////////////////
+
+API Gateway Stage Variables & Lambda Aliases
+////////////////////
+Each Stage of the deployment can be pointing to a different Lambda Alias
+	An Alias can point to a different Lambda Fn, or distribute across multiple Lambda Fns
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+API Gateway Canary Deployments
+//////////////////////////////////////////////////////////////////////////
+Basic Canary Deployment, but w/AWS Lambda and API Gateway
+
+We use the different Stages to be our versions of the app
+	Test by sending some amount of traffic to the new version
+	When confident the new version is good, move over all traffic
+//////////////////////////////////////////////////////////////////////////
+
+
+API Gateway Integration Types & Mappings
+//////////////////////////////////////////////////////////////////////////
+API Gateway - Integration Types
+////////////////////
+MOCK:
+	API Gateway send response w/o sending request to backend
+HTTP/AWS (Lambda & AWS Services):
+	Set up Mapping Templates for request and response
+	Allows for changing data before it goes to the backend
+AWS_PROXY (Lambda Proxy):
+	Is a proxy, so requests are sent to Lambda as-is
+HTTP_PROXY:
+	Sent to HTTP Endpoint, and can add HTTP Header API Key
+////////////////////
+
+Mapping Templates (AWS & HTTP Integration)
+////////////////////
+Allows for editing a request to conform to what the Lambda expects
+	Or add to the request
+	Uses VTL (Velocity Template Language) for scripts
+	Content-Type MUST be application/json OR application/xml
+////////////////////
+
+Mapping Example: JSON to XML with SOAP
+////////////////////
+Use Mapping Template to:
+	Convert JSON request into SOAP message for XML
+	Handle request as XML
+	Convert XML response to JSON 
+////////////////////
+
+Mapping Example: Query String Parameters
+////////////////////
+Use Mapping Template to rename variable in query string to be what Lambda Fn needs
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+API Gateway Open API
+//////////////////////////////////////////////////////////////////////////
+API Gateway - Open API Spec
+////////////////////
+A spec that doubles as the actual code
+Can import OpenAPI to API Gateway
+////////////////////
+
+REST API - Request Validation
+////////////////////
+Validates that the request is in the correct format for eh backend
+	Checks the request against the configured JSON Schema
+	Failures result in a 400-Error response
+////////////////////
+
+REST API - Request Validation - OpenAPI
+////////////////////
+Validations are checked against a JSON OpenAPI file
+	Can check parameters only or all validators
+Slide has code
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+API Gateway Caching
+//////////////////////////////////////////////////////////////////////////
+Caching API Responses
+////////////////////
+Default TTL is 300 seconds
+	Min is 0, Max is 3600 seconds
+Cache settings can be overridden per stage
+Cache size range: .5GB to 237GB
+Cache is expensive, so not for Dev, only Prod
+////////////////////
+
+API Gateway Cache Invalidation
+////////////////////
+Cache can be flushed immediately
+Can invalidate cache w/ header CacheControl: max-age:0
+Must impose an invalidation policy or anyone can invalidate
+////////////////////
+
+Hands On
+////////////////////
+Go to the Prod Stage and Edit the Stage Details section
+We can also choose specific method (Get, Push, etc) and specify the Cache for that
+
+Remember to disable the Cache to stop incurring costs
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+API Gateway Usage Plans & API Keys
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Lets our customers access and use the API Gateway
+
+Usage Plan:
+	Access one or more Stage of the API Gateway
+	Settings for customers speeds, throttling limits, and more
+	API Keys identify customers
+API Keys:
+	Large strings that identify customers
+////////////////////
+
+API Gateway - Correct Order for API Keys
+////////////////////
+Steps to configure a usage plan:
+1.
+	Create API, methods, Stages, and require API Keys
+2.
+	Generate or import API Keys
+3.
+	Create usage plan w/ throttle and quota limits
+4.
+	Associate API Stages and API Keys
+
+Customers supply requests w/ API Key in x-api-key header
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+API Gateway Monitoring, Logging, and Tracing
+//////////////////////////////////////////////////////////////////////////
+API Gateway - Logging & Tracing
+////////////////////
+CloudWatch:
+	CloudWatch stores the request going through the API Gateway
+	And then it stores the response from the backend
+X-Ray:
+	Can enable traces so API Gateway and Lambda gives full picture
+////////////////////
+
+API Gateway - CloudWatch Metrics
+////////////////////
+Metrics: by Stage
+CacheHitCount & CacheMissCount: efficiency of Cache
+Count: Total API requests
+IntegrationLatency: Time of request to backend and response
+Latency: Time of request to API Gateway and response back to Client, max is 29 seconds
+4XXError: Client-side, 5XXError: Server-side
+////////////////////
+
+API Gateway Throttling
+////////////////////
+We need to keep usage in check b/c API Gateways throttle requests at 10,000 rps across ALL APIs
+	Error is 429 Too Many Requests
+	Must have limits to prevent bad actors from attacking the API Gateway
+		At Stage and Method limits
+		OR
+		In Usage Plans per customer
+////////////////////
+
+API Gateway - Errors
+////////////////////
+Common errors for Client and Server sides
+
+4XX, Client-side:
+	400 (Bad request), 403 (Access Denied), 429 (Quota exceeded)
+5XX, Server-side:
+	502 (Incompatible response), 503 (Service Unavailable), 504 (API Gateway Timeout)
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+API Gateway CORS
+//////////////////////////////////////////////////////////////////////////
+AWS API Gateway - CORS
+////////////////////
+CORS MUST be enabled for API calls from another domain
+Request MUST have Access-Control-Allow-...
+	Methods, Headers, and Origin
+////////////////////
+
+CORS - Enabled on the API Gateway
+////////////////////
+Example:
+	S3 Bucket website makes URL calls to API Gateway
+1.
+	S3 Site sends Preflight Request, checked by the API Gateway CORS
+2.
+	API Gateway sends Preflight Response back to Client
+3.
+	On success, API Gateway and S3 Site communicate
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+API Gateway Authentication and Authorization
+//////////////////////////////////////////////////////////////////////////
+API Gateway - Security, IAM Permissions
+////////////////////
+Auth through AIM:
+	Authentication w/ IAM, Authorization w/ IAM Policy
+	Best for access w/i AWS (EC2, Lambda, ...)
+
+////////////////////
+
+API Gateway - Resource Policies
+////////////////////
+Just like Lambda Resource Policies
+	Cross-account access w/ IAM Security
+	Specific IP
+	VPC Endpoint
+Silde shows a script that looks like all other Resource Policies
+////////////////////
+
+API Gateway - Security, Cognito User Pools
+////////////////////
+Cognito: a DB of Users
+
+Auth through Cognito:
+	Authentication w/ Cognito User Pools, Authorization w/ API Gateway Methods
+	Client authenticates w/ Cognito, Cognito sends back Token, Client sends Token to API Gateway
+////////////////////
+
+API Gateway - Security, Lambda Authorizer (formerly Custom Authorizers)
+////////////////////
+Client authorizes w/ a Lambda Authorizer
+	Lambda returns an IAM Policy for the User
+	Authentication w/ External, Authorization w/ Lambda Fn
+	Client authenticates w/ 3rd Party auth sys, gets Token, sends Token to API Gateway,
+		API Gateway uses Lambda Authorizer to verify Token w/ 3rd Party auth sys,
+		Lambda Authorizer gives API Gateway an IAM Policy for the Client,
+		API Gateway puts Policy into Policy Cache
+////////////////////
+
+API Gateway - Security - Summary
+////////////////////
+IAM: Best for access w/i AWS
+Custom Authorizer: Best for 3rd Party Authorizers, returns IAM Policy
+Cognito Pool: Auth through Cognito
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+API Gateway REST API vs HTTP API
+//////////////////////////////////////////////////////////////////////////
+High Level:
+	HTTP APIs are cheaper, but have less features
+
+HTTP APIs:
+	Fast, cheap, Lambda proxy, OIDC and OAuth 2.0, and built-in CORS
+	No usage plans or API Keys
+REST APIs:
+	All features, except Native OpenID Connect / OAuth 2.0
+//////////////////////////////////////////////////////////////////////////
+
+
+API Gateway Websocket API
+//////////////////////////////////////////////////////////////////////////
+API Gateway - WebSocket API - Overview
+////////////////////
+WebSocket:
+	A connectiong b/t CLient and Server, where Server can push messages to the Client w/o a request
+WebSocket APIs are used in real-time apps, such as multiplayer games
+Works w/ AWS Services (Lambda, DynamoDB) or HTTP Endpoints
+////////////////////
+
+Connecting to the API
+////////////////////
+The Client connects to the API Gateway over a wss connection (rather than https)
+The API Gateway invokes a Lambda Fn w/ a connectionID that persists while the connection does
+////////////////////
+
+Client to Server Messaging, connectionID is re-used
+////////////////////
+The Client continues using the wss URL to send frames to the API Gateway
+	Messages from the Client are called Frames here
+The Client uses the sme URL to invoke a new Lambda Fn
+	The Server uses the connectionID to identify the Client and return the correct data
+////////////////////
+
+Server to Client Messaging
+////////////////////
+The Lambda Fn will use a Connection URL Callback Fn to send Messages back to the Client
+////////////////////
+
+Connection URL Operations
+////////////////////
+The POST, GET, and DELETE operations have specific purposes here:
+POST: Send Message
+GET: Get connection status
+DELETE: End the connection
+////////////////////
+
+API Gateway - WebSocket API - Routing
+////////////////////
+When a Client connects to the API Gateway, the Connection can be routed to part of the backend
+	The Client will have some parameter in the Frame that determines the routing
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+API Gateway - Architecture
+//////////////////////////////////////////////////////////////////////////
+The slide shows how an API Gateway can be placed as the entry-point for an entire company
+The API Gateway just routes the Clients to the correct Endpoint
+//////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 24
+  __          __    
+ /  \ |  |   /  \  |  |
+ |    |__|      /  |__|
+ |    |  |     /      |
+ \__/ |  |.   /__     |
+
+AWS CICD: Code Commit, Code Pipeline, CodeBuild, CodeDeploy
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 
 
