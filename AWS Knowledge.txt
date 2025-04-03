@@ -11431,6 +11431,256 @@ AWS CICD: Code Commit, Code Pipeline, CodeBuild, CodeDeploy
 //////////////////////////////////////////////////////////////////////////
 
 
+Introduction to CICD in AWS
+//////////////////////////////////////////////////////////////////////////
+CICD - Introduction
+////////////////////
+We can deploy/update Services manually, but this can be clunky and error-prone
+	CICD allows us to do CICD straight from Git, w/ testing and rollback
+Tools we'll use for this:
+	GitHub       - Versioning
+	CodePipeline - Deploy to Elastic Beanstalk
+	CodeBuild    - Build and test
+	CodeDeploy    - Deploy to EC2 Instances
+	CodeStar     - Manage software development
+	CodeArtifact - Store and publish software
+	CodeGuru     - AI Code Reviews
+////////////////////
+
+Continuous Integration (CI)
+////////////////////
+Pushing code to Git
+	Automatic testing, build, and feedback to the developer
+////////////////////
+
+Continuous Delivery (CD)
+////////////////////
+Code that passes the tests:
+	Code gets a build
+	Code is sent to deployment server
+	Code is deployed into production
+	Lots of small frequent updates, rather than large infrequent ones
+////////////////////
+
+Tech Stack for CICD (Pipeline)
+////////////////////
+Git           - Versioning
+Jenkins CI    - Build and Test
+CodeDeploy    - Deployment
+AWS Endpoints - The backend where the code is in production
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CodeCommit Overview
+//////////////////////////////////////////////////////////////////////////
+CodeCommit has since been discontinued
+	Use Git
+//////////////////////////////////////////////////////////////////////////
+
+
+AWS CodePipeline Overview
+//////////////////////////////////////////////////////////////////////////
+AWS CodePipeline
+////////////////////
+Pipeline:
+	Visual Workflow of CICD
+	Source - Git
+	Build  - CodeBuild
+	Test   - CodeBuild
+	Deploy - CodeDeploy
+	Invoke - Lambda
+Stages
+	Each Stage has sequential or parallel actions
+	Build -> Test -> Deploy -> Load Testing -> ...
+	Manual approval at any Stage
+////////////////////
+
+Tech Stack for CICD (Pipeline) // Repeated from CICD Intro
+////////////////////
+Git           - Versioning
+Jenkins CI    - Build and Test
+CodeDeploy    - Deployment
+AWS Endpoints - The backend where the code is in production
+////////////////////
+
+CodePipeline - Artifacts
+////////////////////
+Artifacts are the results of each step that is then passed on to the next step in the Pipeline
+	Artifacts are stored in S3, and then passed to the next step
+Code Push -> Git -> CodeBuild -> CodeDeploy -> backend
+////////////////////
+
+CodePipeline - Troubleshooting
+////////////////////
+CloudWatch Events: Events for failed/cancelled Stages
+Console: will have info from errors/failures
+Permissions: Each step MUST have the correct Permissions
+CloudTrail: audit AWS PI calls
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CodeBuild Overview
+//////////////////////////////////////////////////////////////////////////
+AWS CodeBuild
+////////////////////
+Source - GitHub
+Build Instructions - buildspec.yml
+Output Logs - S3 and CloudWatch
+	CloudWatch Metrics for builds
+	EventBridge for failures
+	CloudWatch Alarms for thresholds
+Build Projects definition - CodePipeline or CodeBuild
+////////////////////
+
+CodeBuild - Supported Environments
+////////////////////
+CodeBuild can test:
+	Java, Ruby, Python, Go, Node.js, Android, .Net Core, PHP
+	Anything else, using Docker containers
+////////////////////
+
+CodeBuild - How it Works
+////////////////////
+Diagram shows:
+	Code repo stores versions
+	Code Repo outputs to CodeBuild
+		And pulls in Docker and S3 (Cache)
+	CodeBuild outputs to S3 and sends logs to S3/CloudWatch
+////////////////////
+
+CodeBuild - buildspec.yml
+////////////////////
+Slide has example buildspec.yml file
+
+buildspec.yml - MUST be at root
+env - Environment Variables listed under "variables", "parameter-store", and "secrets-manager"
+phases - Actions that need to be taken at each phase of the build
+	Phases: install, pre_build, Build, post_build
+artifacts - Output stored in S3
+cache - files saved to S3 to speed up future builds
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CodeBuild Hands On Part 1
+//////////////////////////////////////////////////////////////////////////
+Goal: Test that we can set up CodeBuild to deploy our Elastic Beanstalk project
+
+Create a new CodeBuild project and select GitHub as the source
+	Authorize GitHub access and select the repo
+	Make sure to enable rebuilds on PUSH to GitHub
+//////////////////////////////////////////////////////////////////////////
+
+
+
+CodeBuild Hands On Part 2
+//////////////////////////////////////////////////////////////////////////
+Goal: build CodeBuild based on CodePipeline changes
+
+Create the buildspec.yml file and put it at the root of the project on GitHub
+	The code for this is at Code > codebuild > buildspec.yml
+	Push to GitHub and it builds successfully
+
+Change the CodeBuild source from GitHub to CodePipeline
+//////////////////////////////////////////////////////////////////////////
+
+
+CodeDeploy Overview
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Deployment Services that automates deployment
+	Across EC2 Instances, On-premises Servers, Lambda Fns, and ECS Services
+Automates rollback on failure or CloudWatch Alarms
+Variable deployment speeds
+Controlled w/ file: appspec.yml
+////////////////////
+
+CodeDeploy - EC2/On-premises Platform
+////////////////////
+Deployments Types: In-place, blue/green
+Instances MUST run CodeDeploy Agent
+Update Speeds: AllAtOnce, HalfAtATime, OneAtATime, Custom
+////////////////////
+
+CodeDeploy - In-Place Deployment
+////////////////////
+Shut some instances down, update them, restart them, repeat with the rest
+////////////////////
+
+CodeDeploy - Blue-Green Deployment
+////////////////////
+Copy all instances in Auto Scaling Group, Update copy, Move traffic, Shut down originals
+////////////////////
+
+CodeDeploy Agent
+////////////////////
+CodeDeploy is put on the Instances, and MUST have Permissions to access S3 to get deployment bundles
+////////////////////
+
+CodeDeploy - Lambda Platform
+////////////////////
+This is integrated w/ SAM (Serverless Application Model) framework
+Three options:
+	Linear: Grow traffic every N minutes
+	Canary: Small amount of traffic as a test, and then all traffic
+	AllAtOnce: Immediate change
+////////////////////
+
+CodeDeploy - ECS Platform
+////////////////////
+Can only have Blue/Green deployments
+Same three options:
+	Linear: Grow traffic every N minutes
+	Canary: Small amount of traffic as a test, and then all traffic
+	AllAtOnce: Immediate change
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CodeDeploy Hands On
+//////////////////////////////////////////////////////////////////////////
+Goal:
+
+Create Role for CodeDeploy and an EC2 Instance
+	Add S3 read Permissions
+
+Create S3 Bucket to store the application
+	Create folder w/ zipped file at CODE > codedeploy > SampleApp_Linux > SampleApp_Linux.zip
+
+Create the EC2 Instance and add apply the Role
+Use CloudShell to install CodeDeploy on the Instance
+	Follow instructions at CODE > codedeploy > commands.sh
+Create the Deployment Group in the CodeDeploy console
+	Use tags to differ b/t "Dev" and "Prod"
+	Select the S3 Bucket w/ the application under Revision Location
+	Apply the Role
+//////////////////////////////////////////////////////////////////////////
+
+
+CodeDeploy for EC2 and ASG
+//////////////////////////////////////////////////////////////////////////
+CodeDeploy - Deployment to EC2
+////////////////////
+Standard deployment of previous sections:
+	Configure w/ appspec.yml, set deployment option
+Can configure hooks to verify success
+////////////////////
+
+CodeDeploy - Deploy to an ASG
+////////////////////
+////////////////////
+
+CodeDeploy - Redeploy & Rollbacks
+////////////////////
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+
+
 
 
 
