@@ -4042,7 +4042,7 @@ Archive Access tier (optional): configurable from 90 to 700+ days
 Deep Archive Access tier (optional): configurable from 180 to 700+ days
 ///////////////////
 //////////////////////////////////////////////////////////////////////////
-reviewreviewreviewreview
+
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -4083,7 +4083,6 @@ IMDSv1 vs IMDSv2
 
 AWS CLI Profiles
 //////////////////////////////////////////////////////////////////////////
-
 We can switch between AWS Profiles using the AWS CLI
 
 We just need to set the name
@@ -4104,7 +4103,6 @@ From here, we can execute commands from either the default or other accounts
 
 Using MFA on the CLI
 //////////////////////////////////////////////////////////////////////////
-
 To use MFA on the CLI, we use a temporary session
 We run STS GetSessionToken
 	aws sts get-session-token --serial-number arn-of-the-mfa-device --token-code code-from-token --duration-seconds 3600
@@ -4128,12 +4126,10 @@ Create an MFA profile in the CLI
 Now when the user needs to execute commands that require MFA:
 	They will need to provide the MFA token
 	This gives them a token for a temporary session used by the CLI
-
 //////////////////////////////////////////////////////////////////////////
 
 AWS SDK Overview
 //////////////////////////////////////////////////////////////////////////
-
 Used when coding against AWS services like DynamoDB
 
 Trivia: The AWS CLI uses Python SDK (boto3)
@@ -4141,12 +4137,10 @@ Exam expects takers to know when to use an SDK
 We'll get to practice this in using the Lamba Fns
 
 Important: If we don't specify, or configure, a region, it will default to us-east-1
-
 //////////////////////////////////////////////////////////////////////////
 
 AWS Limits
 //////////////////////////////////////////////////////////////////////////
-
 API Rate Limits
 	DescribeInstances API for EC2 has a limit of 100 calls per second
 	GetObject on S3 has a limit of 5500 GET calls per second per prefix
@@ -4165,7 +4159,7 @@ Exponential Backoff
 	Retry mechanism already included in AWS SDK API calls
 	Must implement yourself if using the AWS API as-is, or in specific cases
 		Only use this for 5xx server errors and throttling
-		Do not use on 4xx errors, because these are client errors, no throttling errors
+		Do not use on 4xx errors, because these are client errors, not throttling errors
 
 How Exponential Backoff works
 	1st attempt: try after 1 second
@@ -4176,7 +4170,6 @@ How Exponential Backoff works
 	And so on...
 
 By having all, or many, clients doing this, the server or resource gets less and less hammered by requests
-
 //////////////////////////////////////////////////////////////////////////
 
 AWS Credentials Provider and Chain
@@ -4241,8 +4234,6 @@ AWS Credentials Best Practices
 		Lambda Roles for Lambda functions
 	Outside of AWS, use environment variables / named profiles
 		So for an outside app/resource, use environment variables/named profiles
-			Why??? What makes these more secure???
-
 //////////////////////////////////////////////////////////////////////////
 
 Signing AWS API Requests
@@ -4274,7 +4265,6 @@ X-Amz-SignedHeaders=host&response-content-disposition=inline
 ///////////////
 //////////////////////////////////////////////////////////////////////////
 
-
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -4286,6 +4276,7 @@ Ch 13
  |    |  |   |      \
  \__/ |  |. _|_  \__/
 
+Slide 255
 Advanced Amazon S3
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -4342,7 +4333,6 @@ Set a Lifecycle Rule, After 60 days: Photos will move to Glacier Flexible Retrie
 
 Ex Scenario 2
 //////////////
-
 S3 objects can be recovered from deletion immediately for 30 days.
 	Rarely happens.
 After 30 days, and up to 365 days, deleted objects can be recovered within 48 hours.
@@ -4357,23 +4347,20 @@ Set a Lifecycle Rule: delete noncurrent versions of objects after 365 days.
 
 S3 Analytics - Storage Class Analysis
 //////////////
-
 These are analytics to help decide when to transition objects, and which storage class to go to.
 
 Recommendations for Standard and Standard IA
 	Does NOT work for One-Zone IA or Glacier
 
 Report is updated daily
-	Start seeing data analysis after 24 to 48
+	Start seeing data analysis after 24 to 48 hours
 
 The analytics are a good first step to put together Lifecycle Rules, or improve them.
 //////////////
-
 //////////////////////////////////////////////////////////////////////////
 
 S3 Event Notifications
 //////////////////////////////////////////////////////////////////////////
-
 We can create rules around object events, like an object being created, deleted, restored, etc
 	ObjectCreated, ObjectRemoved, ObjectRestore, etc...
 
@@ -4399,15 +4386,12 @@ S3 Event Notifications w/ Amazon EventBridge
 	Advanced filtering options w/ JSON rules
 	Multiple Destinations - Step Fns, Kinesis Streams/Firehose, etc...
 	EventBridge Capabilities - Archive, Replay Events, Reliable delivery
-
 //////////////////////////////////////////////////////////////////////////
 
 S3 Performance
 //////////////////////////////////////////////////////////////////////////
-
 S3 Baseline Performance
 //////////////
-
 S3 automatically scales to high request rates, latency 100-200 ms
 
 An App can achieve at least 3,500 PUT/COPY/POST/DELETE or 5,500 GET/HEAD requests per second per prefix in an S3 bucket
@@ -4424,7 +4408,6 @@ Per Second Per Prefix
 		
 S3 Performance - Uploads
 //////////////
-
 Multi-Part Uploads
 	Recommended for big files (> 100MB)
 	Must use for BIG files (> 5GB)
@@ -4434,25 +4417,19 @@ S3 Transfer Acceleration
 	Increase transfer speed by moving file to edge location, and then the target S3 bucket
 	Compatible with Multi-Part uploads
 	Ex: File in USA -> Edge Location in USA -> S3 in Australia
-
 //////////////
 
 S3 Byte-Range Fetches
 //////////////
-
 Parallelize GETs by requesting specific byte ranges
 Better resilience in case of failures
 Can be used to speed up downloads
 Can be used to retrieve only partial data (Ex: head of a file)
-
 //////////////
-
-
 //////////////////////////////////////////////////////////////////////////
 
 S3 Object Tags and Metadata
 //////////////////////////////////////////////////////////////////////////
-
 S3 User-Defined Object Metadata
 	When uploading an object, you can also assign metadata
 	Name-value (key: value) pairs
@@ -4466,6 +4443,7 @@ S3 Object Tags
 
 CANNOT search the object metadata or object tags directly
 	Instead, use an external DB as a search index such as DynamoDB
+//////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -4478,6 +4456,7 @@ Ch 14
  |    |  |   |      |
  \__/ |  |. _|_     |
 
+Slide 268
 Amazon S3 Security
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -4508,7 +4487,6 @@ It is important to know which one to use where, for the exam
 
 Server-Side Encryption (SSE)
 //////////////
-
 Encryption using keys handled, managed, and owned by AWS
 Objects are encrypted server-side
 Encryption type is AES-256
@@ -4524,7 +4502,6 @@ User-> File uploaded w/ (HTTP(S) + Header) --> |                          |
 
 AWS Key Management Service (SSE-KMS)
 //////////////
-
 Encryption keys are handled and managed by AWS KMS
 KMS Advantages: user control + audit key usage using CloudTrail
 Object is encrypted server-side
@@ -4549,7 +4526,6 @@ A quota increase can be requested with the Service Quotas Console
 
 Customer-Provided Keys (SSE-C)
 //////////////
-
 Server-Side Encryption using keys that are managed client-side
 S3 does NOT store the encryption key, which is provided by the client
 HTTPS must be used
@@ -4564,7 +4540,6 @@ User->File uploaded w/(HTTPS only) Key in Header)->                       |
 
 Client-Side Encryption
 //////////////
-
 Use client libraries such as S3 Client-Side Encryption Library
 Clients must encrypt data themselves before sending to Amazon S3
 Clients must decrypt data themselves when retrieving from Amazon S3
@@ -4579,7 +4554,6 @@ User->File encrypted w/ Client Key -> Uploaded -> |                       |
 
 Encryption in Transit (SSL/TLS)
 //////////////
-
 Encryption in flight exposes two endpoints:
 	HTTP Endpoint - not encrypted
 	HTTPS Endpoint - encryption in flight
@@ -4592,7 +4566,6 @@ Most clients use the HTTPS endpoint by default
 
 Force Encryption in Transit (aws: Secure Transport)
 //////////////
-
 To force using HTTPS, we can create a Deny bucket policy
 
 ...
@@ -4605,12 +4578,10 @@ To force using HTTPS, we can create a Deny bucket policy
 	}
 }
 ...
-
 //////////////
 
 About DSSE-KMS
 //////////////
-
 A new type of encryption has come out, called DSSE-KMS
 	This is just "Double-Encryption based on KMS"
 	This shouldn't show up in the exam
@@ -4620,22 +4591,18 @@ A new type of encryption has come out, called DSSE-KMS
 
 S3 Default Encryption
 //////////////////////////////////////////////////////////////////////////
-
 S3 Default Encryption vs Bucket Policies
 	All new buckets have SSE-S3 enabled by default
 	Optionally, can "force encryption" using a bucket policy
 		 Can refuse any API call that tries a PUT without encryption headers (SSE-KMS or SSE-C)
 
 Note that bucket policies are always evaluated before default encryption settings
-
 //////////////////////////////////////////////////////////////////////////
 
 CORS
 //////////////////////////////////////////////////////////////////////////
-
 CORS: Cross-Origin Resource Sharing
 //////////////
-
 Origin: scheme (protocol) + host (domain) + port
 	Ex: http://www.example.com (implied port is 443 for HTTPS, 80 for HTTP)
 Web Browser based mechanism to allow requests to other origins from main origin
@@ -4653,7 +4620,6 @@ Web Server <-->|Web Browser|                     |   Server     |
 
 Amazon S3 - CORS
 //////////////
-
 A client making a cross-origin request on our S3 bucket
 	Need to enable correct CORS headers (specific site or *)
 
@@ -4668,13 +4634,11 @@ CORS:       |--->GET/index.html----->|  mainBucket.html   |
 |Web Browser|                         ______________________
 |           |                         |  imageBucket.html  |
             |->GET/images/coffee.jpg->|____________________|
-
 //////////////
 //////////////////////////////////////////////////////////////////////////
 
 S3 - MFA Delete
 //////////////////////////////////////////////////////////////////////////
-
 (Multi-Factor Authentication Delete)
 
 MFA - force users to generate a code on a device (usually mobile or USB MFA Device), before doing important operations on S3
@@ -4693,13 +4657,10 @@ Only the bucket owner (root account) can enable/disable MFA Delete
 	This is one of the few things the root account will be used for
 
 To enable/disable MFA Delete, it must be done on the AWS CLI, AWS SDK, or the Amazon S3 REST API
-
-
 //////////////////////////////////////////////////////////////////////////
 
 S3 Access Logs: Warning
 //////////////////////////////////////////////////////////////////////////
-
 S3 Access Logs
 //////////////
 For audit purposes, may want to log all access to S3 buckets
@@ -4726,7 +4687,6 @@ WARNING:
 
 S3 Logging - Hands On
 //////////////////////////////////////////////////////////////////////////
-
 Create Log-Storage Bucket // Logging-storage bucket
 
 Create Activity Bucket // Bucket to have activity logged
@@ -4736,12 +4696,10 @@ Go to Properties of Activity Bucket, and enable Server Access Logging
 		Permissions to do this are automatically written into the bucket's Bucket Policy
 
 It can take several hours for logs to start being written to the Logging-Storage Bucket
-
 //////////////////////////////////////////////////////////////////////////
 
 S3 - Pre-Signed URLs
 //////////////////////////////////////////////////////////////////////////
-
 Overview:
 	A User will create a pre-signed URL that allows a non-authorized user to access private S3
 		This access is equal to the permissions of the user that pre-signed the URL
@@ -4760,12 +4718,10 @@ Examples:
 	Allow only logged-in users to download a premium video from the S3 bucket
 	Allow an ever-changing list of users to download files by generating URLs dynamically
 	Allow temp access to a user for uploading a file to a specific location in the S3 Bucket
-
 //////////////////////////////////////////////////////////////////////////
 
 S3 - Pre-Signed URLs - Hands On
 //////////////////////////////////////////////////////////////////////////
-
 Select object in private bucket
 
 Confirm that it is private by copying the URL and attempting to view it in a new tab
@@ -4777,12 +4733,10 @@ Go to the object in the S3 Console
 	Select the number of minutes that the URL will be active
 	Copy the URL and go there in a new tab
 		The object should now be accessible
-
 //////////////////////////////////////////////////////////////////////////
 
 S3 - Access Points
 //////////////////////////////////////////////////////////////////////////
-
 Overview:
 	Create Access Points so users of the system can get specific permissions (READ/WRITE) into S3
 	These Access Points have permissions through a policy, and the S3 Bucket's Policy must allow the access from that Access Point
@@ -4811,12 +4765,10 @@ VPC:______________________________
 |             (w/Endpoint Policy)| (w/ Access Point Policy)      (w/ Bucket Policy)
 |________________________________|
 /////////////
-
 //////////////////////////////////////////////////////////////////////////
 
 S3 Object Lambda
 //////////////////////////////////////////////////////////////////////////
-
 Use AWS Lambda Fns to change an object before sending it to a calling application
 
 Only one S3 Bucket is needed, then create S3 Access Points and S3 Object Lambda Access Points
@@ -4858,6 +4810,7 @@ Ch 15
  |    |  |   |      |
  \__/ |  |. _|_  ___|
 
+Slide 288
 Amazon CloudFront
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -4866,7 +4819,6 @@ Amazon CloudFront
 
 CloudFront Overview
 //////////////////////////////////////////////////////////////////////////
-
 AWS CloudFront
 ///////////////////
 Content Delivery Network (CDN)
@@ -4927,7 +4879,6 @@ S3 Cross Region Replication
 
 CloudFront - Hands On
 //////////////////////////////////////////////////////////////////////////
-
 Go to CloudFront in AWS Console
 
 Create a Distribution
@@ -4939,13 +4890,10 @@ Create a Distribution
 	No need to enable security protections (WAF) for a demo
 	Once the Distribution is deployed, we can access the resource
 		And further requests pull from the faster cache, rather than the resource
-	
-
 //////////////////////////////////////////////////////////////////////////
 
 CloudFront - Caching and Caching Policies
 //////////////////////////////////////////////////////////////////////////
-
 CloudFront Caching
 ///////////////////
 Each CloudFront Edge Location has its own cache
@@ -5074,17 +5022,14 @@ In this example, the Request is received and then enhanced before being sent to 
 
 CloudFront - Cache Invalidations
 //////////////////////////////////////////////////////////////////////////
-
 When data is cached, it is given a TTL, but we may update the backend data prior to the TTL expiring
 	TTL: time to live
 When this happens, we can send a command to invalidate a specific file (file.fileType), or the content of an entire folder (folder/*) saved in the cache, or all files (*)
 	This of means that the cache will consider any request for that data a cache miss, and make a request to the Origin
-
 //////////////////////////////////////////////////////////////////////////
 
 CloudFront - Cache Behaviors
 //////////////////////////////////////////////////////////////////////////
-
 Overview
 ///////////////////
 Configure different setting for a given URL path pattern
@@ -5123,7 +5068,6 @@ Users|                  |   |Distribution|                  |         |         
                                           |_________________|         |______________________________|
 ///////////////////
 
-
 CloudFront - Maximize Cache Hits by Separating Static and Dynamic Distributions
 ///////////////////
 In this example, we are requiring users to log in
@@ -5145,7 +5089,6 @@ Users|                  |              |
 
 CloudFront - Caching & Caching Invalidations - Hands On
 //////////////////////////////////////////////////////////////////////////
-
 Distribution
 ///////////////////
 Go to: CloudFront > Distributions > *Distribution Name* > Edit Behavior
@@ -5184,7 +5127,6 @@ This is done at CloudFront > Distributions > *Distribution Name* > Invalidations
 
 CloudFront - ALB or EC2 as an Origin
 //////////////////////////////////////////////////////////////////////////
-
 This is the layout of how an EC2 instance or an ALB can be the Origin for a CloudFront Distribution
 
 EC2 Instance:
@@ -5213,12 +5155,10 @@ Application Load Balancer (ALB):
 Users <->|_|<--------------------->|________________|<-------------->EC2 Instances(can be private) |
                                   (ALB MUST be public)              |______________________________|
 ////////////////////
-
 //////////////////////////////////////////////////////////////////////////
 
 CloudFront - Geo Restriction
 //////////////////////////////////////////////////////////////////////////
-
 CloudFront Distributions can restrict based on the location of the user
 
 - These can be:
@@ -5232,12 +5172,10 @@ CloudFront Distributions can restrict based on the location of the user
 	CloudFront > Distributions > *Distribution* > Security
 		Under CloudFront geographic restrictions
 			Next to Countries, select Edit
-
 //////////////////////////////////////////////////////////////////////////
 
 CloudFront - Signed URL / Cookies
 //////////////////////////////////////////////////////////////////////////
-
 The Goal: Distribute paid shared content to premium users all over the world
 Solution: Use CloudFront Signed URL / Cookie. Attach policy with:
 	Includes URL expiration
@@ -5300,7 +5238,6 @@ Client <------------------> S3 Bucket
 
 CloudFront - Signed URL - Key Groups + Hands On
 //////////////////////////////////////////////////////////////////////////
-
 Two types of signers:
 	1. Trusted Key Group (recommended)
 		Can leverage APIs to create and rotate keys, using IAM for API security
@@ -5325,7 +5262,6 @@ Go to CloudFront > Key Groups > Create Key Group
 
 Create Key Group, Hands On - Old Way (NOT Recommended)
 ////////////////////
-
 // MUST be logged in as root account
 Go to AWS Management Console > My Account (dropdown) > My Security Credentials > CloudFront Key Pairs
 	Select Create New Key Pair
@@ -5346,7 +5282,6 @@ Go to AWS Management Console > My Account (dropdown) > My Security Credentials >
 
 CloudFront - Advanced Concepts
 //////////////////////////////////////////////////////////////////////////
-
 CloudFront - Pricing
 ////////////////////
 Pricing differs by geographic region, and by amount of data transferred.
@@ -5408,7 +5343,6 @@ S3 Buckets:
 |_________________| |                 |<---------->Origin B                |
                     |_________________|2.(Retry|___________________________|
                                           Request)
-
 ////////////////////
 
 CloudFront - Field Level Encryption
@@ -5445,7 +5379,6 @@ CloudFront - Real Time Logs
 //////////////////////////////////////////////////////////////////////////
 Get real-time logs sent to Kinesis Data Streams
 Content delivery performance used for events or analysis
-
 //////////////////////////////////////////////////////////////////////////
 
 
@@ -5460,6 +5393,7 @@ Ch 16
  |    |  |   |   |   |
  \__/ |  |. _|_  |___|
 
+Slide 318
 Amazon ECS, ECR, and Fargate - Docker in AWS
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -5584,7 +5518,7 @@ Amazon Elastic Kubernetes Service (EKS)
 	Amazon's Kubernetes (open source)
 
 AWS Fargate
-	Amazon's Severless container platform
+	Amazon's Serverless container platform
 	Works with ECS and EKS
 
 AWS Elastic Container Registry (ECR)
@@ -5594,7 +5528,6 @@ AWS Elastic Container Registry (ECR)
 
 Amazon Elastic Container Service (ECS)
 //////////////////////////////////////////////////////////////////////////
-
 ECS - EC2 Launch Type
 ////////////////////
 Launch Docker containers on AWS = Launch ECS Tasks on ECS Clusters
@@ -5643,10 +5576,8 @@ Don't need to provision infrastructure (no EC2 Instances to manage)
 All serverless!
 Create task definitions
 AWS runs ECS Tasks based on CPU/RAM needed
-To scale, just increases the of tasks.
+To scale, just increases the number of tasks.
 	No more EC2 Instances
-
- 
           _                      
          |_|New Docker Container   // Docker Container gets pulled from repository
        ___|_________              
@@ -5713,7 +5644,6 @@ Network Load Balancer
 
 Classic Load Balancer
 	Deprecated, not recommended
-
  __________________
 |Amazon ECS Cluster|
 |   _____________  |
@@ -5803,7 +5733,6 @@ Under Amazon Elastic Container Service > Clusters > *Cluster Name* > Infrastruct
 
 ECS - Hands On Part 2
 //////////////////////////////////////////////////////////////////////////
-
 The Docker container used is on Docker Hub: nginxdemos/hello
 Go to Amazon Elastic Container Service
 Create a new Task Definition
@@ -5861,7 +5790,6 @@ Finish the demo by setting Desired Tasks back to 0
 
 ECS - Auto Scaling
 //////////////////////////////////////////////////////////////////////////
-
 Automatically increase/decrease desired number of ECS Tasks
 ECS Auto Scaling uses AWS Application Auto Scaling // Triggers for auto-scaling
 	ECS Service Average CPU Utilization
@@ -5931,7 +5859,6 @@ This diagram shows the flow of overloaded Tasks being auto-scaled using CloudWat
 
 Amazon ECS - Solutions Architectures
 //////////////////////////////////////////////////////////////////////////
-
 Diagram: ECS Tasks Invoked by Event Bridge
 ////////////////////
 In this diagram, it shows the flow of a client uploading files to an S3 Bucket
@@ -6035,11 +5962,10 @@ This service then emails the Admin
 
 Amazon ECS Task Definitions - Deep Dive
 //////////////////////////////////////////////////////////////////////////
-
 Amazon ECS - Task Definitions
 ////////////////////
 - Task definitions are metadata in JSON form to tell ECS how to run a Docker container
-	This can be one or multiple containers
+	This can be one or more containers
 - It contains crucial info:
 	Image Name
 	Port Binding for Container and Host (Host is for EC2)
@@ -6250,7 +6176,6 @@ Use Cases:
 
 ECS Task Definitions - Hands On
 //////////////////////////////////////////////////////////////////////////
-
 Goal:
 
 > Amazon Elastic Container Service > Task Definitions
@@ -6296,11 +6221,11 @@ U: Monitoring
 
 //////////////////////////////////////////////////////////////////////////
 
-ECS  - Task Placements
+ECS  - Task Placement
 //////////////////////////////////////////////////////////////////////////
 These are the placement strategies for balancing/distributing ECS Tasks on EC2 Instances.
 These are:
-	Binpack - pack as many Containers into as few EC2 Instances as possible (cost savings)
+	Binpack - Pack as many Containers into as few EC2 Instances as possible (cost savings)
 	Random - Place Tasks randomly into EC2 Instances
 	Spread - Spread Containers among EC2 Instances as evenly as possible (high availability)
 Requirements on what EC2 Instances qualify can be set:
@@ -6315,8 +6240,8 @@ ECS Tasks Placement
 ////////////////////
 - When a Task of type EC2 is launched, the Placement Strategy determines which EC2 takes it
 	This is determined by Strategy and Constraints
-	Strategies - (Binpack, )
-	Constraints - 
+	Strategies - (Binpack, Random, Spread)
+	Constraints - (distinctInstance, memberOf)
 	Task Definition Requirements (CPU, Memory, Available Port)
 - When a Service scales in (reduces horizontally), the strategy determines which Tasks to stop
 - This is only for ECS w/ EC2, not Fargate
@@ -6539,7 +6464,7 @@ AWS Copilot - Overview
 AWS Copilot is a service which can provision all of the standard services needed for an app
 This is a pre-written set of instructions that will put in place things like DB, ALB, etc
 
-- CLI Tool to build, release, and operate production-ready containerize apps
+- CLI Tool to build, release, and operate production-ready containerized apps
 - Run apps on AppRunner, ECS, and Fargate
 - Helps to focus on building apps, rather than setting up infrastructure
 - Provisions all required infrastructure for containerized apps (ECS, VPC, ALB, ECR, ...)
@@ -6567,9 +6492,8 @@ the architecture of apps)             |             ____________________  |   | 
 
 AWS Copilot - Hands On
 //////////////////////////////////////////////////////////////////////////
-
 Goal: use the CLI to create an app w/ Copilot
-	This app will be a simple loa-balanced website
+	This app will be a simple load-balanced website
 	We will:
 		install Copilot, 
 		download a pre-made app-creation script, 
@@ -6618,7 +6542,6 @@ Goal: use the CLI to create an app w/ Copilot
 
 // The other is copilot/front-end/manifest.yml
 // This has the majority of the settings
-
 //////////////////////////////////////////////////////////////////////////
 
 Amazon EKS
@@ -6629,7 +6552,7 @@ Amazon EKS Overview
 ////////////////////
 - EKS: Elastic Kubernetes Service
 - Launch managed Kubernetes clusters on AWS
-- Kubernetes is an open-source system for automatic deployment, scaling, and management of containerize (usually Docker) applications
+- Kubernetes is an open-source system for automatic deployment, scaling, and management of containerized (usually Docker) applications
 - An alternative to the closed-source ECS, similar goal, different API
 - EKS support E2 and Fargate
 - Use case: If already using Kubernetes, and want to migrate to AWS
@@ -6638,12 +6561,9 @@ Amazon EKS Overview
 
 Diagram
 ////////////////////
-
 Shows EKS Nodes deployed in multiple AZs
 The Nodes are managed by the ASG
 The EKS Pods are like ECS Tasks
-
-
  _________________________________________________________________________________
 |AWS Cloud                                                                        |
 |          _____________________                       ______________________     |
@@ -6657,7 +6577,7 @@ The EKS Pods are like ECS Tasks
 | |       |   ________________  |                     |   ________________   |   ||
 | |       |  |Private Subnet 1| |                     |  |Private Subnet 2|  |   ||
 | |       | _|________________|_|_____________________|__|________________|_ |   ||
-| |       || |  EKS Node      | | Auto Scaling Group  |  |    EKS Node    | ||   ||
+| |       || |  EKS Node (EC2)| | Auto Scaling Group  |  |  EKS Node (EC2)| ||   ||
 | |       || |   _   _   _    | |                     |  |   _   _   _    | ||   ||
 | |       || |  |_| |_| |_|   | |                     |  |  |_| |_| |_|   | ||   ||
 | |       || |                | |                     |  |                | ||   ||
@@ -6670,7 +6590,6 @@ The EKS Pods are like ECS Tasks
 |_________________________________________________________________________________|
 
 ////////////////////
-
 
 EKS - Node Types
 ////////////////////
@@ -6701,11 +6620,10 @@ Amazon EKS - Data Volumes
 
 // Lustre is a parallel distributed file system generally used for Clusters
 // ONTAP is NetApp's internal OS specially optimized for storage functions
-
 ////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-
+reviewreviewreviewreview
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -6725,7 +6643,6 @@ AWS Elastic Beanstalk
 
 AWS Elastic Beanstalk Overview (High Level)
 //////////////////////////////////////////////////////////////////////////
-
 Developer Problems
 ////////////////////
 - Managing infrastructure
@@ -11664,24 +11581,1318 @@ CodeDeploy for EC2 and ASG
 //////////////////////////////////////////////////////////////////////////
 CodeDeploy - Deployment to EC2
 ////////////////////
-Standard deployment of previous sections:
-	Configure w/ appspec.yml, set deployment option
+Standard In-place or blue/green deployment of previous sections:
+	Configure w/ appspec.yml, set deployment strategy
 Can configure hooks to verify success
 ////////////////////
 
-CodeDeploy - Deploy to an ASG
+CodeDeploy - Deploy to an ASG (Auto-Scaling Group)
 ////////////////////
+In-place Deployment:
+	Update current or create new EC2 Instances
+Blue/Green Deployment:
+	MUST be using an ELB
 ////////////////////
 
 CodeDeploy - Redeploy & Rollbacks
 ////////////////////
+Rollback:
+	Can be automatic or manual, or set to not rollback at all
+	Rollbacks are handled as a new deployment (not a restored version)
 ////////////////////
 //////////////////////////////////////////////////////////////////////////
 
 
+CodeArtifact - Overview
+//////////////////////////////////////////////////////////////////////////
+AWS CodeArtifact
+////////////////////
+Storing and retrieving Code Dependencies (package dependencies) is called Artifact Management
+Works w/ common dependency tools such as npm, pip, ... (see slide for more)
+Developers and CodeBuid can work directly w/ CodeArtifact
+////////////////////
+
+CodeArtifact - Diagram
+////////////////////
+Diagram shows:
+	CodeArtifact inside the VPC
+	Domain inside of CodeArtifact
+	Repos inside of the Domain
+	Requests to CodeArtifact are proxied to the Public Artifact Repos, like npm
+		These packages are then cached in CodeArtifact's repos
+		Admins determine which repo the packages sould be stored in
+			Different package managers can store packages in the same repo
+////////////////////
+
+CodeArtifact - EventBridge Integration
+////////////////////
+CodeArtifact can trigger an Event in EventBridge whenever a package changes
+EventBridge can use that Event to invoke a Lambda Fn, send a message to SQS, ....
+	OR, can even have CodePipeline rebuild and redeploy the project
+////////////////////
+
+CodeArtifact - Resource Policy
+////////////////////
+When a User is given access to a CodeArtifact repo, they need an IAM Policy
+When another account is given access to a CodeArtifact repo, they need a Resource Policy
+
+Both of these are an all-or-nothing Policy (we can't specify specific packages in the repo)
+////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 
+CodeArtifact - Hands On
+//////////////////////////////////////////////////////////////////////////
+Create the CodeArtifact repo and specify the Public Artifact Repo (Ex: pypi-store for Python)
+	Create the Domain and select it for the CodeArtifact repo
+In CloudShell get a temporary (12 hours) authorization token from the Public Artifact Repo
+	// W/ pypi-store, it needs to use pip3 (NOT pip)
+	Execute the authorization command
+We can now use pip3 to install packages
+	The packages can be seen in the Console
+//////////////////////////////////////////////////////////////////////////
 
+
+CodeGuru - Overview
+//////////////////////////////////////////////////////////////////////////
+Amazon CodeGuru
+////////////////////
+CodeGuru is an ML-powered code reviewer that can look for errors and judge performance
+CodeGuru Reviewer: Looks for errors and leaks in code
+CodeGuru Profiler: Judges performance of code before and after deployment
+////////////////////
+
+Amazon CodeGuru Reviewer
+////////////////////
+Supports Java and Python
+Looks for errors, security gaps, input validations, and other common problems
+Integrates w/ GitHub and others
+////////////////////
+
+Amazon CodeGuru Profiler
+////////////////////
+Supports apps on AWS or on-premises
+Examines runtime performance problems, looking for:
+	code inefficiencies, CPU efficiencies, anomaly detection, and can provide a Heap summary
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CodeGuru - Agent Configuration
+//////////////////////////////////////////////////////////////////////////
+Amazon CodeGuru - Agent Configuration
+////////////////////
+There are several parameters that control how much information CodeGuru takes in: 
+MaxStackDepth - number of stacks (Ex: method calls) that is profiled
+MemoryUsageLimitPercent - memory percent used
+MinimumTimeForReportingInMilliseconds - minimum time b/t reports
+ReportingIntervalInMilliseconds - profile report intervals
+SamplingIntervalInMilliseconds - profile sampling interval
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 25
+  __          __    ___
+ /  \ |  |   /  \  |
+ |    |__|      /  |__
+ |    |  |     /      |
+ \__/ |  |.   /__  ___|
+
+AWS Serverless: SAM - Serverless Application Model
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+SAM Overview
+//////////////////////////////////////////////////////////////////////////
+AWS SAM
+////////////////////
+SAM is a Framework for quicly creating and deploying serverless apps
+	Configured w/ a YAML file
+	Supports anything from CloudFormation
+	Can run Lambda, API Gateways, and DynamoDB locally
+////////////////////
+
+AWS SAM - Recipe
+////////////////////
+SAM Template Header is: Transform: 'AWS::Serverless-2016-10-31'
+	// Just guessing that the date can vary
+The constructing file consists of lines w/ "AWS::Serverless::..."
+	Function, Api, and SimpleTable
+Package and deploy w/ "sam deploy"
+Sync changes w/ "sam sync --watch"
+////////////////////
+
+Deep Dive into SAM Deployment
+////////////////////
+Slide diagram shows:
+	User creates a SAM Template in YAML
+		This is transformed into a CloudFormation Template in YAML
+	File is uploaded as a CloudFormation Template to S3
+		As a zip file
+	The S3 Bucket sends the file onto CloudFormation, which creates the Services for it
+////////////////////
+
+SAM Accelerate (sam sync)
+////////////////////
+SAM Accerlerate is features that allows for making a SAM app deploy or change very fast
+sam sync specifically allows for specifying what to update
+////////////////////
+
+SAM Accelerate (sam sync) - Examples
+////////////////////
+sam sync
+	Syncs code and infrastructure
+sam sync --code
+	Syncs code olny, no infrastructure change
+sam sync --code -- resource AWS::Serverless::Function
+	Syncs only Lambda Fns and their dependencies
+sam sync --code --resource-id HelloWorldLmbdaFn
+	Sync only the specified resource, by id
+sam sync --watch
+	Monitors for file changes and automatically chooses b/t
+		sam sync --code for code changes only
+		sam syc for code and infrastructure
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Installing the SAM CLI - Hands On
+//////////////////////////////////////////////////////////////////////////
+Get instructions by Googling the SAM CLI, and bring up the AWS docs
+
+Just use whatever it tells and confirm the install w/ sam --version
+//////////////////////////////////////////////////////////////////////////
+
+
+Creating First SAM Project (Hands On)
+//////////////////////////////////////////////////////////////////////////
+Start off w/ sam init on the CLI
+
+Create the YAML template.yaml file and commands.sh
+Under the src folder, put app.py (Ex is in Python)
+The template file is a list of keys and values, in the yaml format
+Keys are:
+	AWSTemplateFormatVersion // Tells that this is a CloudFormation template
+	Transform // Tells that this is a SAM template
+	Description // app description
+	Resources // Resources to be created, such as a Python Lambda Fn
+		Type: of the Resource, like Serverless Fn
+		Properties: // of the Resource
+			Handler: // Resource name and entry method
+			Runtime // Language and version
+			CodeUri: // Location of the Fn
+			Description // Fn description
+			MemorySize: // memory
+			TimeOut: time to give the Fn
+//////////////////////////////////////////////////////////////////////////
+
+
+Deploying SAM Project (Hands On)
+//////////////////////////////////////////////////////////////////////////
+Step-by-step specifics are in video 382
+
+Create the Bucket:
+	aws mb s3://*bucket name*
+Package the app
+Deploy the app
+
+There is now an S3 Bucket and Lambda Fn on the AWS Console, and we can test the Fn
+//////////////////////////////////////////////////////////////////////////
+
+
+SAM API Gateway (Hands On)
+//////////////////////////////////////////////////////////////////////////
+Find the template for an API Gateway on the awslabs GitHub
+
+Paste the template into the app.py
+	Modify it to just return "Hello World", and leave the respond method as is
+Add an event to template.yaml for the Gateway API
+
+Run the sam package command again
+Run the sam deploy command again
+
+In the Console, we can see the Stack has been updated to include:
+	Permissions, ApiGateway::RestApi, ApiGateway::Deployment, ApiGateway::Stage
+We can also see that in Amazon API Gateway:
+	There is a GET created for the Serverless app as well
+	Test the GET to see it returns correctly
+//////////////////////////////////////////////////////////////////////////
+
+
+SAM DynamoDB (Hands On)
+//////////////////////////////////////////////////////////////////////////
+To get DynamoDB into the app, add the creation lines into app.py
+	import boto3
+	import os
+	region_name = os.environ['REGION_NAME']
+	dynamo = boto3.client('dynamodb', region_name=region_nme)
+	table_name = os.environ['TABLE_NAME']
+
+Add a Table to the list of Resources to create in he template.yaml
+	Create environment variables for the Table and Region
+Limiting the provisioned throughputs makes it cheaper
+
+Build and Deploy the application
+//////////////////////////////////////////////////////////////////////////
+
+
+SAM Policy Templates
+//////////////////////////////////////////////////////////////////////////
+LOTS of templates for Policies at link on slide
+
+Ex Templates: (Pretty self-explanatory)
+	S3ReadPolicy - Read Permissions to S3
+	SQSPollerPolicy - Poll Permisssions to SQS
+	DynamoDBCrudPolicy - CRUD Permissions for DynamoDB
+
+In a SAM Template, under a Lambda Fn creation, we have a Policies entry where we can list these
+	See Ex in Slide
+//////////////////////////////////////////////////////////////////////////
+
+
+SAM with CodeDeploy
+//////////////////////////////////////////////////////////////////////////
+SAM and CodeDeploy
+////////////////////
+SAM framework uses CodeDeploy to update Lambda Fns
+
+This features:
+	Traffic shifting
+	Pre and Post Hooks // Optional
+	Rollback and CloudWatch Alarms
+
+Diagram shows CodeDeploy in a CICD pipeline
+	The app uses V1 of a Lambda Fn
+	New update creates V2 of Lambda Fn
+	Lambda Pre-Traffic Hook tests the V2
+	Traffic is shifted to the V2
+	Post-Traffic Hook checks the V2
+	CloudWatch Alarm monitors the CodeDeploy during this
+	Alias for the Fn is fully moved to V2
+	Final step is to remove the V1
+////////////////////
+
+SAM Template and CodeDeploy Ex
+////////////////////
+Slide has the code
+
+SAM Template has variables for the process of updating the Lambda Fn
+AutoPublishAlias - Updates the Lambda Fn: change detected -> publish Fn -> redirect Alias
+DeploymentPreference - Canary, Linear, AllAtOnce
+Alarms - Trigger a rollback if needed
+Hooks - Tests for Pre and post traffic shifts
+////////////////////
+
+Hands On
+////////////////////
+Init a new SAM application in a directory
+Run: sam build
+To start, the Fn just puts out "Hello World"
+Add to the SAM Template Properties field of the Lambda Fn:
+	AutoPublishAlias: live
+
+	DeploymentPreference:
+		Type: Canary10Percent10Minutes
+		// This will move 10 percent of the traffic to the new version for 10 minutes
+		// After that, it will move all traffic to the new version
+Run: sam build
+Run: sam deploy --guided // This makes the terminal ask questions about the deployment
+
+Update Fn to output "Hello World V2"
+Run the build and deploy commands
+
+CodeDeploy in the AWS Console shows the deployment happening
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+SAM - Local Capabilities
+//////////////////////////////////////////////////////////////////////////
+Locally Start AWS Lambda:
+	sam local start-lambda
+	Starts local endpoint that emulates AWS Lambda w/ optional tests
+Locally Invoke Lambda Fn:
+	sam local invoke
+	Invoke Lambda Fn w/payload to generate tests
+	For API calls to AWS, use --profile
+Locally Start an API Gateway Endpoint:
+	sam local start-api
+	Start local HTTP server for Fns w/ auto-reloaded changes to the Fns
+Generate AWS Events for Lambda Fns:
+	sam local generate-event
+	Generate sample payloads for S3, API Gateway, SNS, ...
+//////////////////////////////////////////////////////////////////////////
+
+
+SAM - Multiple Environments
+//////////////////////////////////////////////////////////////////////////
+We can define multiple Environments by creating a samconfig.toml file
+
+This file has parameters like:
+	s3_bucket, s3_prefix, region, ...
+
+There are four sections
+	dev.deploy.parameters: Defines the Stack for dev
+	prod.deploy.parameters: Defines the Stack for prod
+	dev.sync.parameters: Defines the sync for the Stack, defined same as deploy
+	prod.sync.parameters:
+
+With this file, we can then run "sam deploy --config-env dev"
+	This will go to the samconfig.toml file and run the deploy parameters for dev
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 26
+  __          __    ___
+ /  \ |  |   /  \  |
+ |    |__|      /  |___
+ |    |  |     /   |   |
+ \__/ |  |.   /__  |___|
+
+Slide 757
+Cloud Development Kit
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CDK Overview
+//////////////////////////////////////////////////////////////////////////
+AWS Cloud Development Kit (CDK)
+////////////////////
+CDK is a way to write scripts that provision and define resources, like a CloudFormation Template
+	The CDK is available in multiple programming languages: js/ts, Python, .NET, ...
+
+Components are called Constructs
+Code is compiled into a CloudFormation Template (JSON or YAML)
+Great for Lambda Fns and Docker Containers
+////////////////////
+
+CDK in Diagram
+////////////////////
+Diagram just shows how an AWS Service is written as a Construct,
+	in a programming language,
+	turned into a CloudFormation Template,
+	and finally sent to CloudFormation for Stack creation
+////////////////////
+
+CDK vs SAM
+////////////////////
+SAM:
+	Serverless focus
+	Only JSON or YAML
+	Great for Lambda
+CDK:
+	All AWS Services
+	Many languages
+Both:
+	Leverages CloudFormation
+////////////////////
+
+CDK + SAM
+////////////////////
+We can use these together by having CDK create the CloudFormation Template that SAM uses
+This also means we can use the SAM CLI to run the CDK results locally
+
+This is done using the command: cdk synth
+////////////////////
+
+CDK Hands-On
+////////////////////
+Slide has a diagram showing what we will accomplish in the Hands-On section:
+	Send image to S3 Bucket, which triggers a Lambda Fn
+	Lambda Fn analyzes image w/ Rekognition
+	Lambda Fn saves the results to DynamoDB
+	
+All of this will be written into a CDK script, and then deployed
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CDK - Hands On
+//////////////////////////////////////////////////////////////////////////
+Go to CloudShell
+Install the cdk onto the command line: sudo npm install -g aws-cdk-lib
+
+Create and enter a directory, then init the cdk:
+	cdk init app --language javascript
+
+Replace the file content of lib/cdk-app-stack.js with CODE > cdk > lib > cdk-app-sack.js
+
+In the file, we are:
+	Creating an S3 Bucket
+	Create a Role for AWS Lambda
+		Adding a Policy to the Role for Rekognition
+	Create a DynamoDB Table
+	Create a Lambda Fn
+		Has the script to put items into DynamoDB when an item is added to S3
+		Gets Permissions for S3 Read access and DynamoDB Full access
+
+Create and enter a directory for the Lambda Fn, and create index.py
+	Copy into it the contents of CODE > cdk > lambda > index.py
+
+In the file, we are:
+	Taking a file from S3
+	Sending that to Rekognition
+	Putting the results into DynamoDB
+
+Bootstrap the project:
+	Needed to be done once per Region per Account
+	In the directory w/ cdk.json
+	cdk bootstrap
+
+We can see the Stack in the CloudFormation Console
+	CloudFormation > Stacks > CDKToolkit
+
+(Optional) Synthesize the app: cdk synth
+	This creates a CloudFormation Template of the app
+
+Deploy the app: cdk deploy
+
+Test the app by uploading an image to the S3 Bucket
+	The Lambda will send the image to Rekognition, and store the result into DynamoDB
+
+Cleanup:
+	Manually empty the S3 Bucket
+	Destroy the app: cdk destroy
+//////////////////////////////////////////////////////////////////////////
+
+
+CDK - Constructs
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+A Construct is an AWS Service that will be created for the Stack
+	// If multiple AWS Services are in one Construct, they should be related
+The CDK has a library of every AWS Services, and comes in three levels (L1, l2, L3)
+There is also an open-source community that makes custom Constructs for 3rd Party Services
+////////////////////
+
+CDK Constructs - Layer 1 Constructs (L1)
+////////////////////
+These Constructs are direct imports from CloudFormation, and start with "Cfn"
+Ex: new s3.CfnBucket...
+////////////////////
+
+CDK Constructs - Layer 2 Constructs (L2)
+////////////////////
+AWS Resources with intent-based API
+Has defaults and boilerplate, so not needing to define as many properties
+Methods can be called on the Construct after creation
+	Ex: const bucket = new s3.Bucket...
+	    const objectUrl = bucket.urlForObject('MyBucket/MyObject');
+////////////////////
+
+CDK Constructs - Layer 3 Constructs (L3)
+////////////////////
+These Constructs are also called Patterns, as they are multiple related Services
+	Ex: A Lambda Fn w/ an ALB and an API Gateway
+The slide shows the code for a Lambda Fn that w/ an ALB and API Gateway
+	We can easily define the GET, POST, and DELETE methods
+	These are automatically configured as needed w/ Permissions
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CDK - Commands & Bootstrapping
+//////////////////////////////////////////////////////////////////////////
+CDK - Important Commands to Know
+////////////////////
+npm install -g aws-cdk-lib: Install CDK
+cdk init app: Create CDK project
+cdk synth: Synthesize and print CloudFormation Template
+cdk bootstrap: Creates S3 an IAM Role for Stack
+cdk deploy: Deploy Stack
+cdk diff: View local/deployed Stack differences
+cdk destroy: Destroy Stack(s)
+////////////////////
+
+CDK - Bootstrapping
+////////////////////
+Creates a Stack in an S3 w/ an IAM Role
+	After bootstrapping, the Stack is ready for deploy
+	Bootstrapping MUST be done for each new Environment (Account, Region)
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+CDK - Unit Testing
+//////////////////////////////////////////////////////////////////////////
+Test the syntax of a cdk script w/ that language's test framework
+	javascript: Jest, python: Pytest
+There are two types of tests:
+	Fine-grained Assertions: CloudFormation Template syntax is correct
+	Snapshot Tests: Test synthesized result against stored baseline
+Templates can be:
+	From CDK: Template.fromStack(MyStack)
+	From outside CDK: Template.fromString(MyString)
+Slide has code Exs
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 27
+  __          __    ___
+ /  \ |  |   /  \      |
+ |    |__|      /      |
+ |    |  |     /       |
+ \__/ |  |.   /__      |
+
+Slide 
+Cognito: Cognito User Pools, Cognito Identity & Cognito Sync
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Cognito Overview
+//////////////////////////////////////////////////////////////////////////
+Gives Users outside of AWS an identity to use our apps
+Cognito User Pools:
+	Integrates w/ API Gateway & ALB
+Cognito Identity Pools (Federated Identity): 
+	Integrates w/ Cognito User Pools
+//////////////////////////////////////////////////////////////////////////
+
+
+Cognito User Pools
+//////////////////////////////////////////////////////////////////////////
+Cognito User Pools (CUP) - User Features
+////////////////////
+Serverless DB for Users
+Simple login w/ Username/password
+	Can validate Email, Phone Number, and have MFA
+	Can use Federated Identities (Facebook, Google, ...)
+Login sends back a JSON Web Token (JWT)
+////////////////////
+
+Cognito User Pools (CUP) - Diagram
+////////////////////
+Diagram shows choice of logging in w/ mobile/web apps OR Federated Identities
+////////////////////
+
+Cognito User Pools (CUP) - Integrations
+////////////////////
+There are two paths:
+	Get Token and use it at API Gateway
+	Auth through ALB, and be forwarded after auth
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Cognito User Pools Hands On
+//////////////////////////////////////////////////////////////////////////
+Create the User Pool
+
+Cognito Console has lots of window w/ info on User, Auth methods, ...
+
+Go to Managed Login and set up the login page
+
+Create a temp email w/ mailinator.com
+	Verify the email address w/ the code
+//////////////////////////////////////////////////////////////////////////
+
+
+Cognito User Pools - Others
+//////////////////////////////////////////////////////////////////////////
+Cognito User Pools - Lambda Triggers
+////////////////////
+LOTS of information on slide
+Broken up into:
+	Auth Events - pre/post auth, pre token generation
+	Sign-Up - pre sign-up, post confirm, migrate User
+	Messages - custom Lambda trigger
+	Token Creation - pre token generation
+////////////////////
+
+Cognito User Pools - Hosted Authentication UI
+////////////////////
+Cognito has hosted authentication UI which can be customized to match our site
+////////////////////
+
+CUP - Hosted UI Custom Domain
+////////////////////
+Custom domain MUST have an ACM cert in us-east-1, no other choice
+	And be in App Configuration section
+////////////////////
+
+CUP - Adaptive Authentication
+////////////////////
+Login attempts are given a risk score, and Cognito determines what action (if any) to take
+Risk Score -  (low, med, high) familiar device, location, compromised account, ... 
+Integrated w/ CloudWatch Logs
+////////////////////
+
+Decoding a ID Token; JWT - JSON Web Token
+////////////////////
+CUP issues JWT Tokens, which have
+	Header, Payload, Signature
+JWT Tokens are verified by a signature, and deliver a payload of user info
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Application Load Balancer - User Authentication
+//////////////////////////////////////////////////////////////////////////
+Application Load Balancer - Authenticate Users
+////////////////////
+ALB can auth Users by:
+	Identity Provider (IdP)
+	Cognito User Pools
+////////////////////
+
+Application Load Balancer - Cognito Auth
+////////////////////
+Diagram shows:
+1. GET /api/data User GET to ALB's api
+2. authenticate w/ Cognito
+3. GET /api/data to ECS
+////////////////////
+
+ALB - Auth through Cognito User Pools
+////////////////////
+ALB has a User Pool that authenticates the User, and a callback sends back a Token
+	That tells the ALB to send the User to the application
+////////////////////
+
+Application Load Balancer - OIDC Auth
+////////////////////
+Instead of using Cognito, we can any other auth provider
+
+Diagram showing:
+1. HTTPS Request
+2. ALB redirects User for auth, to 3rd Party's auth endpoint
+3. Auth endpoint sends User a Code
+4. ALB checks code against 3rd Party Token endpoint
+5. ALB verifies Code, and gets an Access Token for the User
+6. ALB sends Access Token to 3rd Party's User Info Endpoint
+7. 3rd Party sends back a User Claims, which is user info for this session
+8. ALB sends User's request to the AWS Services
+
+9. AWS Service(s) send response to ALB
+10. ALB sends response to User
+////////////////////
+
+ALB - Auth Through an Identity Provider (IDP)
+That is OpenID Connect (OIDC) Compliant
+////////////////////
+To make the above work, we need to set up:
+	Identity Provider
+	Issuer
+	Auth Endpoint
+	Token Endpoint
+	User Info Endpoint
+	Client ID
+	Client Secret
+
+Although, I imagine that any 3rd party auth provider has much as this set and laid out already
+	We do have to configure our system to use it though
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Cognito Identity Pools // Not the same as Cognito User Pools
+//////////////////////////////////////////////////////////////////////////
+Cognito Identity Pools (Federated Identities)
+////////////////////
+We can't give every User their own IAM Role
+
+We use an Identity Pools instead:
+	Public Providers (Google, Facebook, ...)
+	Users in Cognito Pool
+	OpenID Connect and SAML Identity (Providers)
+	Devs w/ authorization
+	Guest Access
+Access to the AWS Services/API Gateway is controlled though IAM Policies defined in Cognito
+	They can be further customized based on user_id
+////////////////////
+
+Cognito Identity Pools - Diagram
+////////////////////
+Users want access to AWS Services like S3 and DynamoDB
+They go to a login and get a token from a provider, (AWS Cognito User Pools OR 3rd Party)
+Users send the Token to Cognito Identity Pools, and get back temp credentials (if validated)
+	These temp credentials have an IAM Policy that defines what they can do
+////////////////////
+
+Cognito Identity Pools - Diagram w/ CUP
+////////////////////
+If exclusively using Cognito User Pools, we have an Internal DB of Users
+There area few changes:
+Users want access to AWS Services like S3 and DynamoDB
+They go to a login and get a token from Cognito User Pools, can auth through 3rd Party
+	All Users have an entry in Cognito User Pools. Token comes from CUP
+Users send the Token to Cognito Identity Pools, and get back temp credentials (if validated)
+	These temp credentials have an IAM Policy that defines what they can do
+////////////////////
+
+Cognito Identity Pools - IAM Roles
+////////////////////
+- Best to have an IAM Role for Guests, and another for authenticated Users
+- IAM Credentials come from Cognito Identity Pools through STS (Security Token Service)
+- These Roles must have a "trust" Policy of Cognito Identity Pools
+////////////////////
+
+Cognito Identity Pools - Guest User Example
+////////////////////
+Policy that gives Guest the Guest profile image
+////////////////////
+
+Cognito Identity Pools - Policy Variable on S3 (Authenticated Users)
+////////////////////
+Policy that only gives User access to data that has the User's id as a prefix
+////////////////////
+
+Cognito Identity Pools - DynamoDB (Authenticated Users)
+////////////////////
+Policy that only gives User access to values in DynamoDB that has the User's id as a prefix
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Cognito Identity Pools Hands On
+//////////////////////////////////////////////////////////////////////////
+Choose Authenticated And/or Guest Users
+	For Authenticated, we must choose an auth provider as well
+Create an IAM Role Policy for Authenticated and Guest
+Set the specifics of the chosen Authentication Service
+	Set the specifics of what Users can access
+To demo this, we need to follow the workflow as seen in the diagrams above
+Two Cognito Roles can be found in the IAM Console (Authentication and Guest)
+	And thus, we can edit them as well
+//////////////////////////////////////////////////////////////////////////
+
+
+Cognito User Pools vs Cognito Identity Pools
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+Cognito User Pools just have a DB of Users and the login to authenticate
+	Customize login page
+	Pre/Post login Lambda triggers
+	Can pull from User lists in 3rd Parties like Google, Facebook, ...
+
+Cognito Identity Pools
+	Validates Users by exchanging authentication Tokens for temp credentials
+	Can be used w/ Cognito User Pools and/or 3rd party User lists
+	Users get mapped to IAM Roles to define their Persmissions
+////////////////////
+
+Cognito Identity Pools - Diagram w/ CUP
+////////////////////
+Same as above diagram:
+
+If exclusively using Cognito User Pools, we have an Internal DB of Users
+There area few changes:
+Users want access to AWS Services like S3 and DynamoDB
+They go to a login and get a token from Cognito User Pools, can auth through 3rd Party
+	All Users have an entry in Cognito User Pools. Token comes from CUP
+Users send the Token to Cognito Identity Pools, and get back temp credentials (if validated)
+	These temp credentials have an IAM Policy that defines what they can do
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 28
+  __         __    ___
+ /  \ |  |  /  \  /   \   
+ |    |__|     /  \___/
+ |    |  |    /   /   \
+ \__/ |  |.  /__  \___/
+
+Other Serverless: Step Functions & AppSync
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+Step Functions Overview
+//////////////////////////////////////////////////////////////////////////
+AWS Step Functions
+////////////////////
+Visualization of app workflows as state machines(nodes, paths)
+	Written in JSON format
+////////////////////
+
+Step Functions - Task States
+////////////////////
+Task States are some work done by a step in the workflow
+These have about as many possibilities as there are Services
+	Invoke Lambda, run AWS Batch job, run ECS task, insert into DynamoDB, ...
+////////////////////
+
+Example - Invoke Lambda Function
+////////////////////
+Writing the JSON script, we can invoke a Lambda Fn w/ parameters
+	Slide has code
+////////////////////
+
+Step Functions - States
+////////////////////
+States determine the path of the app through the workflow
+
+Choice State: Test for condition
+Fail or Succeed State: Stop execution after fail/success
+Pass State: Pass input data to output w/ no work, optional manipulation
+Wait State: Delay a time
+Map State: Dynamically iterate steps ???
+Parallel State: Begin parallel branches of execution
+////////////////////
+
+Visual Workflow in Step Functions
+////////////////////
+The visual is dynamic, so as the app executes the workflow, the steps change color
+Green: Success
+Red: Failed
+White: Cancelled/Skipped
+Blue: In Progress
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Step Functions - Hands On
+//////////////////////////////////////////////////////////////////////////
+Design:
+	Actions: Actions done by Services
+	Flow: Path from Node to Node
+	Patterns: Premade branches (Ex: Process CSV file in S3)
+Code:
+	Write JSON style code to create Workflows
+
+After creation, we can run the Workflow
+For these runs we can:
+	Change Input variables
+	See output
+//////////////////////////////////////////////////////////////////////////
+
+
+Step Functions - Invoke Lambda - Hands On
+//////////////////////////////////////////////////////////////////////////
+Workflow structure:
+	Invoke Lambda as entry-point
+	Choice State - go to left or right branch depending on Lambda result
+	Action Node for each branch
+	End Node
+
+We create the Lambda to be invoked
+Set the Node Actions
+Test the Workflow
+//////////////////////////////////////////////////////////////////////////
+
+
+Step Functions - Error Handling
+//////////////////////////////////////////////////////////////////////////
+Error Handling in Step Functions
+////////////////////
+Any State can return an Error, for a variety of reasons
+	Definition issue, Task failure, Transient issue, ...
+Resolve with:
+	Retry and Catch
+Predefined Error codes:
+	States.ALL - (any error)
+	States.TimeOut - (Task took too long)
+	States.TaskFailed  (task failed)
+	State.Permissions - (Insufficient Permissions)
+State itself can also return Errors
+////////////////////
+
+Step Functions - Retry (Task or Parallel State)
+////////////////////
+What happens and how many times to retry
+
+Syntax is much like a try-catch block w/ a few parameters:
+	ErrorEquals - Each Catch looks for one of the "States." error codes
+	IntervalSeconds - intial delay b/f retry
+	MaxAttempts - times to retry
+	BackoffRate - delay to multiply to each retry
+If still failing, Catch kicks in
+////////////////////
+
+Step Functions - Catch (Task or Parallel State)
+////////////////////
+Syntax is much like a try-catch block w/ a few parameters:
+	ErrorEquals - Each Catch looks for one of the "States." error codes
+	Next - State or Node to go to
+	ResultPath - Adds data in an "error" variable for next State/Node
+////////////////////
+
+Step Functions - ResultPath
+////////////////////
+ResultPath adds a variable to the data that will be sent to the next State/Node
+Ex:
+{
+	"error": "error found"
+}
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Step Functions - Error Handling Hands On
+//////////////////////////////////////////////////////////////////////////
+Create new Step Function
+	Choose Blueprint and get the error step-function
+Create a Lambda Fn
+	Code written to throw an error
+Set the Retry Nodes (All, TaskFailed, ...)
+Checking the output, we can track the retries and eventual sending of Error to endpoint
+Changing the error a bit gets caught by a different State. handler
+//////////////////////////////////////////////////////////////////////////
+
+
+Step Functions - Wait for Task Token
+//////////////////////////////////////////////////////////////////////////
+Step Functions - Wait for Task Token
+////////////////////
+.waitForTaskToken is how we pause the execution of a function. This can be for:
+	User sign-off
+	AWS Service execution
+This needs to get back a Task Token:
+	SendTaskSuccess
+	SendTaskFailure
+////////////////////
+
+Diagram
+////////////////////
+Diagram shows how the Step Function Workflow send a call to an AWS Service w/ a Task Token to sign
+The Service does its work, and then sends back the Task Token with a succeed or fail result
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Step Functions - Activity Tasks
+//////////////////////////////////////////////////////////////////////////
+Activity Tasks pull from a Task queue, looking for work
+	This is in contrast to what we've seen b/f, which had Tasks pushed to it
+	Can be on EC2 , Lambda, ...
+	Send success/failure w/ SendTaskSuccess/SendTaskFailure
+	Keep track of Task w/ SendTaskHeartBeat and HeartBeatSeconds
+//////////////////////////////////////////////////////////////////////////
+
+
+Step Functions - Standard vs Express
+//////////////////////////////////////////////////////////////////////////
+The Standard and Express Step Fns have a number of differences (see Slide)
+	Slide also has helpful diagram
+	CloudWatch can create/store logs
+
+Standard:
+	Standard (Exactly-Once-Execution)
+	Can see results in Console
+	Useful for Workflows that need a result
+	
+Express:
+	Synchronous (At-Least-Once)
+	Asynchronous (At-Most-Once)
+	Can't see results in Console
+	Useful for Workflows that don't need to return a result or wait for the main program
+//////////////////////////////////////////////////////////////////////////
+
+
+AppSync Overview
+//////////////////////////////////////////////////////////////////////////
+Overview
+////////////////////
+AppSync: Service that uses GraphQL
+GraphQL: A Service that is able to make graph with many different sources, like DynamoDB and an API, at the same time
+	Integrated w/ AWS Services, and can use Lambda Fns
+Resolvers: Tells how to fetch the wanted data
+Real-time w/ WebSocket
+Just needs a  GraphQL Schema
+////////////////////
+
+GraphQL Example
+////////////////////
+Slide has details about the GraphQL flow and example code
+	Client makes request to GraphQL
+	GraphQL uses its template to get the data from its different sources
+////////////////////
+
+AppSync Diagram
+////////////////////
+Slide has diagram showing:
+	Sources like Web/Mobile apps, real-time dashboards, and offline syncs query the GraphQL, which then gets data from other Services
+		Can be used w/ CloudWatch Logs and Metrics
+////////////////////
+
+AppSync - Security
+////////////////////
+Four ways to authorize Users to use GraphQL:
+	API_KEY: Generate keys like for an API Gateway
+	AWS_IAM: IAM Roles
+	OPENID_CONNECT: OpenID provider / JSON Web Token
+	AMAZON_COGNITO_USER_POOLS: same
+
+For HTTPS: Use CloudFront in front of AppSync
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+AppSync Hands On
+//////////////////////////////////////////////////////////////////////////
+Choose GraphQL, as the Merged is a combo of multiple GraphQL
+Choose backed by DynamoDB
+Create a Table and some Fields for it
+We now have an AppSync and a DynamoDB Table we can look at
+In AppSync:
+	We can run queries to the GraphQL (create or list)
+	We can create API keys, and choose how access is done
+//////////////////////////////////////////////////////////////////////////
+
+
+AWS Amplify
+//////////////////////////////////////////////////////////////////////////
+AWS Amplify - Create Mobile and Web Apps
+////////////////////
+Amplify is a set of tools to quickly make mobile and web apps
+Amplify Studio: Visual app builder
+Amplify CLI: Create backend w/ guided CLI workflow
+Amplify Libraries: Connect to AWS Services
+Amplify Hosting: Host apps on AWS content delivery network
+////////////////////
+
+AWS Amplify
+////////////////////
+Features like storage, auth, machine-learning (AWS Services)
+Front-ends: React, Vue, ...
+Build and deploy w/ Studio or CLI
+////////////////////
+
+AWS Amplify - Important Features
+////////////////////
+Auth:
+	Leverages Cognito
+	Has User registration, account recovery, ...
+	Pre-built UI components
+
+Datastore:
+	APIs to DynamoDB, AppSync
+	Powered by GraphQL
+	Offline and real-time
+	Visual data modeling w/ Amplify Studio
+////////////////////
+
+AWS Amplify Hosting
+////////////////////
+Hosting w/ lots of features (see slide)
+Overview: Online hosting for a CICD app
+Deploys front-end to CloudFront, and back-end to Amplify
+////////////////////
+
+AWS Amplify - End-to-End (E2E) Testing
+////////////////////
+Use a amplify.yml file to test for regression errors in app at testing phase of CICD Pipeline
+Diagram:
+	Build -----> Test (E2E) -----> Deploy
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+AWS Amplify - Hands On
+//////////////////////////////////////////////////////////////////////////
+Docs show how to get started quickly, and gives code on GitHub to copy (To-Do app)
+Create new repo and paste the code
+Amplify Console -> Create new app
+App URL is now working, and we can check it out
+Amplify > *app name* > main > Deployments
+	Data Manager (DynamoDB back-end)
+	Create auth w/ Cognito
+	Create Fns
+	Create UI Library
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+Ch 29
+  __         __    ___
+ /  \ |  |  /  \  |   |   
+ |    |__|     /  |___|
+ |    |  |    /       |
+ \__/ |  |.  /__      |
+
+Advanced Identity
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+STS Overview
+//////////////////////////////////////////////////////////////////////////
+AWS STS - Security Token Service
+////////////////////
+Gives temp auth access (1 hour max) w/ a Security Token
+
+Most Important:
+////
+AssumeRole: Assume IAM Role
+GetSessionToken: MFA from User or Account
+GetCallerIdentity: Returns details about IAM User or Role from API call
+DecodeAuthorizationMessage: Decode error message when AWS API is denied
+////
+
+Others:
+////
+AssumeRoleWithSAML: Get credentials for SAML Users
+AssumeRoleWithWebIdentity:
+	old: gets credentials for 3rd party Service (Google, Facebook, ...)
+	new: Cognito Identity Pools
+GetFederationToken: Get temp creds for federated User
+////
+////////////////////
+
+Using STS to Assume a Role
+////////////////////
+Steps to Assume a Role:
+	Define IAM Role
+	Define accessible Services for Role
+	User goes to STS to get credentials of IAM Role
+	Temp credentials last from 15min to 1 hour
+////////////////////
+
+Cross-Account Access with STS
+////////////////////
+Diagram shows steps of assuming Role
+1. Admin creates Role
+2. Admin gives Role to group
+3. User requests Role
+4. STS gives temp creds
+5. User uses temp Role
+////////////////////
+
+STS with MFA
+////////////////////
+In the case of an IAM Policy that requires MFA, we can use GetSessionToken
+
+Use GetSessionToken from STS
+Requires IAM Policy w/ variable set:
+	aws:MultiFactorAuthPresent:true
+The GetSessionToken returns:
+	Access ID, Secret Key, Secret Token, Expiration Date
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Advanced IAM
+//////////////////////////////////////////////////////////////////////////
+Advanced IAM - Authorization Model - Evaluation of Policies, simplified
+////////////////////
+Slide has diagram of the evaluation process to check if a User can access a Service
+
+Starts w/ default DENY
+	Checks Policies
+		If explicit deny -> DENY
+		else evaluates if it should allow or deny
+////////////////////
+
+IAM Policies & S3 Bucket Policies
+////////////////////
+IAM - Attached to Users, Roles, Groups
+S3 - Attached to S3 Buckets
+
+Evaluation considers the UNION of these two Policies
+////////////////////
+
+Ex 1
+////////////////////
+IAM Role w/ EC2 Instance, Policy allows RW to S3
+S3 w/ no Policy
+
+Can the EC2 Instance Read/Write to Bucket?
+	YES, b/c the UNION allows for it
+////////////////////
+
+Ex 2
+////////////////////
+IAM Role w/ EC2 Instance, Policy allows RW to S3
+S3 w/ explicit DENY to IAM Role
+
+Can the EC2 Instance Read/Write to Bucket?
+	NO, b/c the explicit DENY is evaluated first
+////////////////////
+
+Ex 3
+////////////////////
+IAM Role w/ EC2 Instance, no Policy for S3
+S3 w/ Policy allows RW to IAM Role
+
+Can the EC2 Instance Read/Write to Bucket?
+	YES, b/c the UNION allows for it
+////////////////////
+
+Ex 4
+////////////////////
+IAM Role w/ EC2 Instance, Policy has explicit DENY
+S3 w/ explicit RW Allow to IAM Role
+
+Can the EC2 Instance Read/Write to Bucket?
+	NO, b/c the explicit DENY is evaluated first
+////////////////////
+
+Dynamic Policies with IAM
+////////////////////
+Assign each User their own folder structure in an S3 Bucket
+Options:
+	Create IAM Policy allowing *user name* to access /home/*user name* in Bucket
+		Requires IAM Policy per User! Not ideal!
+	Dynamic Policy, allows using a variable
+		${aws:username}
+////////////////////
+
+Dynamic Policy Example
+////////////////////
+The Policy code will have the Resource specifying the username variable"
+	"Resource": ["*arn prefix*.../home/${aws:username}/*"]
+////////////////////
+
+Inline vs Managed Policies
+////////////////////
+Managed:
+	Default AWS Policies for admins, devs
+Customer Managed:
+	Custom Policies for our custom Services
+Inline:
+	Just for one-to-one b/t Policy and Principle
+	Is deleted if the IAM Principle is deleted
+////////////////////
+
+Hands On
+////////////////////
+In the IAM Console, we can:
+	Search for the default AWS Managed Policies
+	Search for custom Policies, and what uses it
+	Quicly create an Inline Policy, but not be able to duplicate it beyond its assigned Principle
+////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Granting a User Permissions to Pass a Role to an AWS Service
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+AWS Directory Services
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 
 
